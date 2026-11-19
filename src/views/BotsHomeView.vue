@@ -1,12 +1,5 @@
 <template>
   <div class="landing">
-    <div class="ambient" aria-hidden="true">
-      <span class="blob blob-a" />
-      <span class="blob blob-b" />
-      <span class="blob blob-c" />
-      <span class="grid-fade" />
-    </div>
-
     <section class="hero">
       <div class="hero-inner">
         <div class="hero-copy reveal">
@@ -16,11 +9,10 @@
           </div>
           <h1 class="hero-title">
             Chăm khách tự động.
-            <span class="hero-gradient">Chốt đơn dễ dàng.</span>
+            <span class="hero-highlight">Chốt đơn dễ dàng.</span>
           </h1>
           <p class="hero-lede">
-            Botty kết nối Page với AI để phản hồi dựa trên tài liệu, kho hàng và cách bán của shop —
-            từ câu hỏi đầu tiên đến lúc ghi nhận đơn.
+            Botty tự động trả lời tin nhắn, tra cứu sản phẩm và hỗ trợ ghi nhận đơn hàng cho shop.
           </p>
           <div class="hero-actions">
             <RouterLink
@@ -61,37 +53,10 @@
       </div>
     </section>
 
-    <section class="marquee-wrap" aria-label="Ảnh minh họa">
-      <div class="marquee">
-        <div class="marquee-track">
-          <img
-            v-for="(src, i) in marqueeSlides"
-            :key="'a-' + i"
-            :src="src"
-            alt=""
-            loading="lazy"
-            width="300"
-            height="190"
-          />
-        </div>
-        <div class="marquee-track" aria-hidden="true">
-          <img
-            v-for="(src, i) in marqueeSlides"
-            :key="'b-' + i"
-            :src="src"
-            alt=""
-            loading="lazy"
-            width="300"
-            height="190"
-          />
-        </div>
-      </div>
-    </section>
-
     <div class="page-container">
       <section class="section features reveal">
         <p class="b-kicker">Tính năng</p>
-        <h2 class="b-section-title section-head">Mọi thứ shop cần trong một bảng điều khiển</h2>
+        <h2 class="b-section-title section-head">Tính năng chính</h2>
         <div class="bento">
           <article
             v-for="(feat, idx) in features"
@@ -115,35 +80,10 @@
         </div>
       </section>
 
-      <section class="section showcase reveal">
-        <div class="showcase-head">
-          <div>
-            <p class="b-kicker">Thực tế</p>
-            <h2 class="b-section-title">Bot đọc kho — trả lời đúng giá & tồn</h2>
-            <p class="b-muted showcase-lede">
-              Minh họa với catalog demo: hình ảnh sản phẩm đồng bộ vào ngữ cảnh AI.
-            </p>
-          </div>
-          <img class="showcase-brand" src="/logo.png" alt="Botty" width="52" height="52" />
-        </div>
-        <div class="product-grid">
-          <figure
-            v-for="item in products"
-            :key="item.src"
-            class="product-card"
-          >
-            <div class="product-img-wrap">
-              <img :src="item.src" :alt="item.alt" loading="lazy" />
-            </div>
-            <figcaption>{{ item.caption }}</figcaption>
-          </figure>
-        </div>
-      </section>
-
       <section class="section start-steps reveal">
         <p class="b-kicker">Bắt đầu</p>
-        <h2 class="b-section-title section-head">Năm bước đưa bot lên Page</h2>
-        <p class="steps-hint b-muted">Vuốt ngang trên điện thoại để xem đủ bước.</p>
+        <h2 class="b-section-title section-head">Bắt đầu trong vài bước</h2>
+        <p class="steps-hint b-muted">Vuốt ngang để xem các bước tiếp theo.</p>
         <ol class="steps-rail">
           <li v-for="step in steps" :key="step.n" class="steps-item">
             <div class="steps-thumb">
@@ -160,13 +100,10 @@
       </section>
 
       <section class="cta reveal">
-        <div class="cta-glow" aria-hidden="true" />
         <div class="cta-card">
           <div class="cta-copy">
             <h2 class="b-section-title">Sẵn sàng nhận tin nhắn thay bạn?</h2>
-            <p class="b-muted">
-              Vào Cấu hình để xem bot hiện có hoặc mở wizard tạo bot mới trong vài phút.
-            </p>
+            <p class="b-muted">Tạo bot và bắt đầu trả lời khách tự động.</p>
           </div>
           <div class="cta-actions">
             <RouterLink class="b-btn b-btn--primary btn-glow" :to="auth.isLoggedIn ? '/config?create=1' : '/login'">
@@ -189,64 +126,42 @@ import { useAuthStore } from '@/stores/auth'
 const auth = useAuthStore()
 
 const stats = [
-  { value: '1 token', label: 'Webhook / bot' },
-  { value: 'QR + CK', label: 'Chốt đơn tự động' },
-  { value: 'Gemini', label: 'Key của bạn' },
+  { value: 'Tự động', label: 'Trả lời tin nhắn' },
+  { value: 'Chính xác', label: 'Tra cứu sản phẩm' },
+  { value: 'Dễ quản lý', label: 'Theo dõi đơn hàng' },
 ]
-
-const heroSlides = [
-  '/images/hero/slide-1.png',
-  '/images/hero/slide-2.png',
-  '/images/hero/slide-3.png',
-  '/images/hero/slide-4.png',
-]
-
-const marqueeSlides = [...heroSlides, ...heroSlides]
 
 const features = [
   {
     icon: Webhook,
-    title: 'Webhook Meta',
-    text: 'URL riêng, token bảo mật — dán vào Developer là chạy.',
+    title: 'Kết nối Facebook',
+    text: 'Kết nối Page để Botty trả lời tin nhắn.',
   },
   {
     icon: Sparkles,
-    title: 'Gemini / Botty AI',
-    text: 'Dùng key riêng hoặc gói hosting — kiểm soát chi phí.',
+    title: 'Trả lời tự động',
+    text: 'Câu trả lời dựa trên thông tin shop cung cấp.',
   },
   {
     icon: ShoppingBag,
-    title: 'Chốt đơn + thanh toán',
-    text: 'Thu SĐT, địa chỉ, QR Pay2S và đối soát CK.',
-    img: '/images/products/lotus-1.png',
+    title: 'Hỗ trợ chốt đơn',
+    text: 'Ghi nhận thông tin khách và đơn hàng.',
   },
   {
     icon: FileText,
-    title: 'Tài liệu & kho',
-    text: 'Instruction, PDF, sản phẩm có biến thể và tồn.',
+    title: 'Quản lý sản phẩm',
+    text: 'Thêm tài liệu, sản phẩm và tồn kho.',
   },
   {
     icon: MessageCircle,
-    title: 'Thử phản hồi',
-    text: 'Tab thử trước khi bật live trên Page.',
+    title: 'Dùng thử trước',
+    text: 'Kiểm tra câu trả lời trước khi bật bot.',
   },
   {
     icon: Zap,
-    title: 'Nhắc hóa đơn',
-    text: 'Một hóa đơn / phiên — AI hiểu thanh toán hay hủy.',
-    img: '/images/products/rose-1.png',
+    title: 'Theo dõi đơn hàng',
+    text: 'Xem trạng thái đơn và thông tin thanh toán.',
   },
-]
-
-const products = [
-  { src: '/images/products/lotus-1.png', alt: 'Áo Lotus', caption: 'Lotus — tồn kho & size' },
-  { src: '/images/products/lotus-2.png', alt: 'Lotus chi tiết', caption: 'Trả lời giá theo SKU' },
-  { src: '/images/products/rose-1.png', alt: 'Rose collection', caption: 'Gợi ý combo' },
-  { src: '/images/products/rose-2.png', alt: 'Rose', caption: 'Hình ảnh trong kho' },
-  { src: '/images/products/morning-1.png', alt: 'Morning', caption: 'Tone sáng, copy tự nhiên' },
-  { src: '/images/products/morning-2.png', alt: 'Morning 2', caption: 'Nhiều ảnh mỗi SP' },
-  { src: '/images/products/night-1.png', alt: 'Night', caption: 'Catalog tối' },
-  { src: '/images/products/night-2.png', alt: 'Night 2', caption: 'Đồng bộ Messenger' },
 ]
 
 const steps = [
@@ -289,65 +204,6 @@ const steps = [
   overflow: hidden;
   isolation: isolate;
   background: #fff;
-}
-
-.ambient {
-  position: absolute;
-  inset: 0 0 auto;
-  height: 850px;
-  pointer-events: none;
-  overflow: hidden;
-  z-index: -1;
-}
-
-.grid-fade {
-  position: absolute;
-  inset: 0;
-  background-image:
-    linear-gradient(rgba(21, 128, 61, 0.045) 1px, transparent 1px),
-    linear-gradient(90deg, rgba(21, 128, 61, 0.045) 1px, transparent 1px);
-  background-size: 54px 54px;
-  mask-image: linear-gradient(180deg, #000 0%, transparent 80%);
-}
-
-.blob {
-  position: absolute;
-  border-radius: 50%;
-  filter: blur(78px);
-  opacity: 0.48;
-  animation: blob-drift 18s ease-in-out infinite alternate;
-}
-
-.blob-a {
-  width: 520px;
-  height: 520px;
-  top: -210px;
-  left: -170px;
-  background: radial-gradient(circle, #bbf7d0 0%, transparent 70%);
-}
-
-.blob-b {
-  width: 480px;
-  height: 480px;
-  top: -30px;
-  right: -100px;
-  background: radial-gradient(circle, #ccfbf1 0%, transparent 70%);
-  animation-delay: -6s;
-}
-
-.blob-c {
-  width: 300px;
-  height: 300px;
-  top: 360px;
-  left: 44%;
-  background: radial-gradient(circle, #fef3c7 0%, transparent 72%);
-  opacity: 0.32;
-  animation-delay: -10s;
-}
-
-@keyframes blob-drift {
-  0% { transform: translate(0, 0) scale(1); }
-  100% { transform: translate(24px, 18px) scale(1.08); }
 }
 
 .hero {
@@ -412,22 +268,19 @@ const steps = [
 }
 
 .hero-title {
-  max-width: 11.5ch;
+  max-width: 15ch;
   margin: 0;
-  font-size: clamp(2.75rem, 5.4vw, 4.65rem);
+  font-size: clamp(2.55rem, 4vw, 3.15rem);
   font-weight: 750;
-  letter-spacing: -0.065em;
-  line-height: 1.02;
+  letter-spacing: -0.045em;
+  line-height: 1.12;
   color: #0b1b13;
 }
 
-.hero-gradient {
+.hero-highlight {
   display: block;
   padding-bottom: 0.06em;
-  background: linear-gradient(115deg, #15803d 0%, #16a34a 52%, #0f766e 100%);
-  -webkit-background-clip: text;
-  background-clip: text;
-  color: transparent;
+  color: #15803d;
 }
 
 .hero-lede {
@@ -435,7 +288,7 @@ const steps = [
   max-width: 49ch;
   font-size: clamp(1rem, 1.4vw, 1.1rem);
   line-height: 1.75;
-  color: #526258;
+  color: #475569;
 }
 
 .hero-actions {
@@ -500,27 +353,6 @@ const steps = [
   padding: 0 1rem 2.2rem 0;
 }
 
-.visual-frame::before {
-  content: "";
-  position: absolute;
-  inset: 5% 0 0 9%;
-  border-radius: 34px;
-  background: linear-gradient(145deg, #123b2a, #166534 55%, #0f766e);
-  box-shadow: 0 32px 80px -34px rgba(15, 80, 48, 0.56);
-  transform: rotate(2deg);
-}
-
-.visual-frame::after {
-  content: "";
-  position: absolute;
-  inset: 5% 0 0 9%;
-  border-radius: 34px;
-  background-image: radial-gradient(rgba(255, 255, 255, 0.18) 1px, transparent 1px);
-  background-size: 20px 20px;
-  opacity: 0.38;
-  pointer-events: none;
-}
-
 .visual-shot {
   position: relative;
   width: 100%;
@@ -564,47 +396,8 @@ const steps = [
   .hero-stats { gap: 1rem 1.25rem; }
   .hero-stats li { min-width: 27%; }
   .visual-frame { padding: 0 0.35rem 1.2rem 0; }
-  .visual-frame::before, .visual-frame::after { inset: 4% 0 0 5%; border-radius: 24px; }
   .visual-shot { border-width: 5px; border-radius: 20px; }
   .visual-float { position: relative; right: auto; bottom: auto; width: 100%; margin-top: -1.5rem; }
-}
-
-.marquee-wrap {
-  margin: 0;
-  padding: 1.1rem 0;
-  border-block: 1px solid #edf1ee;
-  background: rgba(248, 251, 249, 0.9);
-  mask-image: linear-gradient(90deg, transparent, #000 6%, #000 94%, transparent);
-}
-
-.marquee {
-  display: flex;
-  width: max-content;
-  animation: marquee 48s linear infinite;
-}
-
-.marquee-track {
-  display: flex;
-  gap: 14px;
-  padding: 0 7px;
-}
-
-.marquee-track img {
-  width: 250px;
-  height: 154px;
-  object-fit: cover;
-  border-radius: 16px;
-  border: 1px solid #e3eae5;
-  box-shadow: 0 10px 26px -18px rgba(15, 23, 42, 0.25);
-  transition: transform 0.35s ease;
-}
-
-.marquee:hover { animation-play-state: paused; }
-.marquee-track img:hover { transform: translateY(-3px); }
-
-@keyframes marquee {
-  0% { transform: translateX(0); }
-  100% { transform: translateX(-50%); }
 }
 
 .page-container {
@@ -612,7 +405,7 @@ const steps = [
   margin: 0 auto;
   padding: clamp(3.5rem, 7vw, 6rem) clamp(1.25rem, 4vw, 2.5rem) 4rem;
   display: grid;
-  gap: clamp(4rem, 8vw, 6.5rem);
+  gap: clamp(3rem, 6vw, 4.5rem);
 }
 
 .section-head {
@@ -655,7 +448,7 @@ const steps = [
   padding: 1.45rem 1.5rem 1.55rem;
   border-radius: 22px;
   border: 1px solid #e7ede9;
-  background: linear-gradient(145deg, #fff 0%, #fbfdfb 100%);
+  background: #fff;
   overflow: hidden;
   box-shadow: 0 8px 24px -22px rgba(15, 23, 42, 0.3);
   transition: transform 0.25s ease, box-shadow 0.25s ease, border-color 0.25s ease;
@@ -913,16 +706,6 @@ const steps = [
   padding: 4px;
 }
 
-.cta-glow {
-  position: absolute;
-  inset: 0;
-  border-radius: 22px;
-  background: linear-gradient(120deg, #22c55e, #0d9488, #15803d);
-  opacity: 0.55;
-  filter: blur(20px);
-  z-index: 0;
-}
-
 .cta-card {
   position: relative;
   z-index: 1;
@@ -934,7 +717,7 @@ const steps = [
   padding: clamp(1.5rem, 3vw, 2rem) clamp(1.25rem, 3vw, 2rem);
   border-radius: 20px;
   border: 1px solid #bbf7d0;
-  background: linear-gradient(145deg, #ffffff 0%, #f0fdf4 100%);
+  background: #fff;
 }
 
 .cta-actions {
@@ -972,9 +755,7 @@ const steps = [
     transition-duration: 0.01ms !important;
   }
 
-  .blob,
   .visual-float,
-  .marquee,
   .reveal,
   .reveal-delay {
     animation: none;

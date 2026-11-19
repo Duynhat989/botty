@@ -31,6 +31,7 @@ export default defineConfig(({ mode }) => {
     },
     server: {
       port: 1111,
+      allowedHosts: ['sb-79sharlrcxac.vercel.run'],
     },
   }
 })
