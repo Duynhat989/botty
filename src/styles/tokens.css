@@ -1,0 +1,134 @@
+/**
+ * Design tokens — đổi theme tại đây.
+ * Dark: <html data-theme="dark"> hoặc class .theme-dark trên html.
+ */
+:root,
+:root[data-theme='light'] {
+  color-scheme: light;
+
+  /* Brand */
+  --color-accent: #22c55e;
+  --color-accent-hover: #16a34a;
+  --color-accent-muted: #ecfdf5;
+  --color-accent-border: #bbf7d0;
+  --color-accent-deep: #15803d;
+  --color-accent-dark: #14532d;
+  --color-accent-rgb: 34, 197, 94;
+
+  /* Text */
+  --color-ink: #0f172a;
+  --color-ink-secondary: #334155;
+  --color-ink-tertiary: #1e293b;
+  --color-muted: #64748b;
+
+  /* Surfaces */
+  --color-bg: #ffffff;
+  --color-bg-muted: #f6f8f7;
+  --color-bg-subtle: #f1f5f9;
+  --color-surface: #ffffff;
+  --color-surface-2: #f8faf9;
+  --color-card: #ffffff;
+  --color-glass: rgba(255, 255, 255, 0.88);
+
+  /* Borders */
+  --color-border: #e2e8f0;
+  --color-border-strong: #cbd5e1;
+  --color-border-soft: #e6ebe8;
+  --color-border-bot: #cfd8d3;
+
+  /* Status */
+  --color-ok: var(--color-accent);
+  --color-danger: #b42318;
+  --color-danger-soft: #fef3f2;
+  --color-bad: #dc2626;
+  --color-warn-soft: #fffaeb;
+  --color-warn-ink: #854d0e;
+
+  /* Misc */
+  --color-highlight: #86efac;
+  --color-highlight-soft: #ecfdf5;
+  --color-focus-ring: 0 0 0 3px rgba(var(--color-accent-rgb), 0.22);
+  --color-shadow: 15, 23, 42;
+
+  /* ---- Legacy (ClipStory / global.css) ---- */
+  --bg: var(--color-bg);
+  --bg-2: color-mix(in srgb, var(--color-bg) 69%, transparent);
+  --bg-subtle: var(--color-bg-subtle);
+  --ink: var(--color-ink);
+  --ink-secondary: var(--color-ink-secondary);
+  --muted: var(--color-muted);
+  --line: var(--color-border);
+  --line-strong: var(--color-border-strong);
+  --card: var(--color-card);
+  --glass: var(--color-glass);
+  --accent: var(--color-accent);
+  --accent-hover: var(--color-accent-hover);
+  --accent-light: var(--color-accent-muted);
+  --accent-border: var(--color-accent-border);
+  --accent-deep: var(--color-accent-deep);
+  --accent-dark: var(--color-accent-dark);
+  --accent-rgb: var(--color-accent-rgb);
+  --ok: var(--color-ok);
+  --bad: var(--color-bad);
+  --gold: var(--color-highlight);
+  --gold-light: var(--color-highlight-soft);
+
+  /* ---- Botty UI aliases ---- */
+  --b-bg: var(--color-bg-muted);
+  --b-surface: var(--color-surface);
+  --b-surface-2: var(--color-surface-2);
+  --b-border: var(--color-border-soft);
+  --b-border-strong: var(--color-border-bot);
+  --b-ink: var(--color-ink);
+  --b-ink-secondary: var(--color-ink-tertiary);
+  --b-muted: var(--color-muted);
+  --b-accent: var(--color-accent);
+  --b-accent-hover: var(--color-accent-hover);
+  --b-accent-soft: var(--color-accent-muted);
+  --b-danger: var(--color-danger);
+  --b-danger-soft: var(--color-danger-soft);
+  --b-warn-soft: var(--color-warn-soft);
+  --b-warn-ink: var(--color-warn-ink);
+  --b-ring: var(--color-focus-ring);
+  --b-shadow: 0 4px 16px rgba(var(--color-shadow), 0.04);
+}
+
+:root[data-theme='dark'] {
+  color-scheme: dark;
+
+  --color-accent: #4ade80;
+  --color-accent-hover: #22c55e;
+  --color-accent-muted: #052e16;
+  --color-accent-border: #166534;
+  --color-accent-deep: #86efac;
+  --color-accent-dark: #bbf7d0;
+  --color-accent-rgb: 74, 222, 128;
+
+  --color-ink: #f1f5f9;
+  --color-ink-secondary: #cbd5e1;
+  --color-ink-tertiary: #e2e8f0;
+  --color-muted: #94a3b8;
+
+  --color-bg: #0b1220;
+  --color-bg-muted: #0f172a;
+  --color-bg-subtle: #1e293b;
+  --color-surface: #1e293b;
+  --color-surface-2: #334155;
+  --color-card: #1e293b;
+  --color-glass: rgba(15, 23, 42, 0.88);
+
+  --color-border: #334155;
+  --color-border-strong: #475569;
+  --color-border-soft: #2d3a4d;
+  --color-border-bot: #3d4f66;
+
+  --color-danger: #f87171;
+  --color-danger-soft: #450a0a;
+  --color-bad: #ef4444;
+  --color-warn-soft: #422006;
+  --color-warn-ink: #fcd34d;
+
+  --color-highlight: #4ade80;
+  --color-highlight-soft: #052e16;
+  --color-shadow: 0, 0, 0;
+}

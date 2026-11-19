@@ -181,8 +181,8 @@ const currentTool = computed(() => board.writingTool)
 
 .writing-element.on .writing-element-btn {
   border-color: #93c5fd;
-  background: #eff6ff;
-  color: #1d4ed8;
+  background: #ecfdf5;
+  color: #16a34a;
 }
 
 .writing-element-swatch {

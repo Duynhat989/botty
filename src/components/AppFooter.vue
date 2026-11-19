@@ -3,7 +3,7 @@
     <div class="foot-brand">
       <RouterLink to="/" class="brand">
         <img class="brand-mark" src="/logo.png" alt="" width="28" height="28" />
-        <span>Dyna<span class="brand-accent">Geo</span></span>
+        <span class="brand-title">Botty</span>
       </RouterLink>
       <p>{{ t('footer.tagline') }}</p>
     </div>

@@ -8,7 +8,7 @@
       <div class="topbar-inner">
         <RouterLink to="/" class="brand" @click="closeMenus">
           <img class="brand-mark" src="/logo.png" alt="" width="34" height="34" />
-          <span class="brand-title">Bot<span class="brand-accent">ty</span></span>
+          <span class="brand-title">Botty</span>
         </RouterLink>
 
         <nav class="topnav" aria-label="Chính">
@@ -45,22 +45,9 @@
                 <p class="user-popup-name">{{ auth.user?.name }}</p>
                 <p v-if="auth.user?.email" class="user-popup-email">{{ auth.user.email }}</p>
                 <hr class="sep" />
-                <RouterLink to="/" class="menu-item" role="menuitem" @click="closeMenus">Trang chủ</RouterLink>
-                <RouterLink to="/config" class="menu-item" role="menuitem" @click="closeMenus">Cấu hình bot</RouterLink>
-                <RouterLink to="/config?create=1" class="menu-item" role="menuitem" @click="closeMenus">Tạo bot mới</RouterLink>
-                <RouterLink to="/pricing" class="menu-item" role="menuitem" @click="closeMenus">Gói cước</RouterLink>
+                <RouterLink to="/account" class="menu-item" role="menuitem" @click="closeMenus">Trang cá nhân</RouterLink>
                 <RouterLink to="/contact" class="menu-item" role="menuitem" @click="closeMenus">Liên hệ</RouterLink>
-                <button
-                  v-if="auth.user?.hasGeminiPin"
-                  type="button"
-                  class="menu-item"
-                  role="menuitem"
-                  :disabled="pinResetBusy"
-                  @click="requestPinReset"
-                >
-                  {{ pinResetBusy ? 'Đang gửi email…' : 'Quên PIN — gửi email đặt lại' }}
-                </button>
-                <p v-if="pinResetMsg" class="user-popup-hint">{{ pinResetMsg }}</p>
+                <RouterLink to="/report" class="menu-item" role="menuitem" @click="closeMenus">Báo cáo sự cố</RouterLink>
                 <hr class="sep" />
                 <button type="button" class="menu-item danger" role="menuitem" @click="logout">Đăng xuất</button>
               </div>
@@ -132,7 +119,6 @@ import { computed, onMounted, onUnmounted, ref, watch } from 'vue'
 import { RouterLink, useRoute, useRouter } from 'vue-router'
 import { ChevronDown } from '@lucide/vue'
 import { useAuthStore } from '@/stores/auth'
-import { api } from '@/api'
 import { geminiPinGateState, openGeminiPinSetup } from '@/composables/useGeminiPinGate'
 
 const auth = useAuthStore()
@@ -163,8 +149,6 @@ watch(
   },
   { immediate: true },
 )
-const pinResetBusy = ref(false)
-const pinResetMsg = ref('')
 const isFullWidth = computed(() => Boolean(route.meta.fullWidth))
 const isWorkspace = computed(() => Boolean(route.meta.workspace))
 const isWorkspaceWide = computed(() => route.name === 'bot-detail')
@@ -205,20 +189,6 @@ function logout() {
   closeMenus()
   auth.logout()
   router.push('/login')
-}
-
-async function requestPinReset() {
-  pinResetMsg.value = ''
-  pinResetBusy.value = true
-  try {
-    const data = await api.auth.requestGeminiPinReset()
-    pinResetMsg.value = data?.message || 'Đã gửi email. Mở link để đặt PIN mới.'
-    closeMenus()
-  } catch (e) {
-    pinResetMsg.value = e?.message || 'Không gửi được email'
-  } finally {
-    pinResetBusy.value = false
-  }
 }
 
 function handleScroll() {
@@ -314,12 +284,8 @@ onUnmounted(() => {
   font-size: 19px;
   font-weight: 750;
   letter-spacing: -0.035em;
-  color: var(--b-ink);
+  color: var(--color-ink);
   line-height: 1;
-}
-
-.brand-accent {
-  color: var(--b-accent);
 }
 
 .topnav {

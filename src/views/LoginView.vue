@@ -2,6 +2,7 @@
   <div class="login-wrap">
     <div class="b-card b-card-pad-lg login-card">
       <header class="login-header">
+        <img class="login-logo" src="/logo.png" alt="Botty" width="72" height="72" />
         <p class="b-kicker">
           <template v-if="redirect && redirect !== '/'">{{ t('login.eyebrowCreate') }}</template>
           <template v-else>Botty</template>
@@ -147,12 +148,19 @@ onMounted(async () => {
   gap: 1.25rem;
 }
 
-.login-title {
-  font-size: clamp(30px, 4vw, 40px);
+.login-logo {
+  width: 72px;
+  height: 72px;
+  object-fit: contain;
+  margin: 0 auto 4px;
 }
 
 .login-header {
   text-align: center;
+}
+
+.login-title {
+  font-size: clamp(30px, 4vw, 40px);
 }
 
 .login-lede {

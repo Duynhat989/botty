@@ -266,9 +266,9 @@ async function onPrimary() {
   width: min(420px, 100%);
   padding: 28px 26px 22px;
   border-radius: 22px;
-  border: 1px solid color-mix(in srgb, var(--b-accent, #6366f1) 14%, var(--b-border, #e2e8f0));
+  border: 1px solid color-mix(in srgb, var(--b-accent, #22c55e) 14%, var(--b-border, #e2e8f0));
   background:
-    radial-gradient(120% 80% at 0% 0%, color-mix(in srgb, var(--b-accent, #6366f1) 12%, transparent), transparent 55%),
+    radial-gradient(120% 80% at 0% 0%, color-mix(in srgb, var(--b-accent, #22c55e) 12%, transparent), transparent 55%),
   #fff;
   box-shadow: 0 28px 64px -22px rgba(15, 23, 42, 0.35), 0 2px 8px rgba(15, 23, 42, 0.06);
   text-align: center;
@@ -287,7 +287,7 @@ async function onPrimary() {
 }
 
 .pin-icon {
-  color: var(--b-accent, #6366f1);
+  color: var(--b-accent, #22c55e);
   margin: 0 auto 8px;
 }
 
@@ -336,15 +336,15 @@ async function onPrimary() {
 }
 
 .pin-step.on {
-  border-color: var(--b-accent, #6366f1);
-  background: var(--b-accent, #6366f1);
+  border-color: var(--b-accent, #22c55e);
+  background: var(--b-accent, #22c55e);
   color: #fff;
 }
 
 .pin-step.done {
-  border-color: var(--b-accent, #6366f1);
-  background: color-mix(in srgb, var(--b-accent, #6366f1) 12%, #fff);
-  color: var(--b-accent, #6366f1);
+  border-color: var(--b-accent, #22c55e);
+  background: color-mix(in srgb, var(--b-accent, #22c55e) 12%, #fff);
+  color: var(--b-accent, #22c55e);
 }
 
 .pin-step-line {
@@ -355,7 +355,7 @@ async function onPrimary() {
 }
 
 .pin-step-line.on {
-  background: var(--b-accent, #6366f1);
+  background: var(--b-accent, #22c55e);
 }
 
 .pin-field {
@@ -385,13 +385,13 @@ async function onPrimary() {
 }
 
 .pin-cell.filled {
-  border-color: color-mix(in srgb, var(--b-accent, #6366f1) 40%, var(--b-border-strong, #cbd5e1));
+  border-color: color-mix(in srgb, var(--b-accent, #22c55e) 40%, var(--b-border-strong, #cbd5e1));
   background: #fff;
 }
 
 .pin-cell.caret {
-  border-color: var(--b-accent, #6366f1);
-  box-shadow: 0 0 0 3px color-mix(in srgb, var(--b-accent, #6366f1) 22%, transparent);
+  border-color: var(--b-accent, #22c55e);
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--b-accent, #22c55e) 22%, transparent);
 }
 
 .pin-hidden-input {

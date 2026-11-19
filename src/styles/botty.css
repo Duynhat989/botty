@@ -1,26 +1,9 @@
-/* Botty UI — typography & rhythm aligned with ClipStory (global.css) */
+/* Botty UI — màu từ tokens.css (--b-* là alias) */
 
 :root {
-  --b-bg: #f6f8f7;
-  --b-surface: #ffffff;
-  --b-surface-2: #f8faf9;
-  --b-border: #e6ebe8;
-  --b-border-strong: #cfd8d3;
-  --b-ink: #0f172a;
-  --b-ink-secondary: #1e293b;
-  --b-muted: #64748b;
-  --b-accent: #15803d;
-  --b-accent-hover: #166534;
-  --b-accent-soft: #edf7f1;
-  --b-danger: #b42318;
-  --b-danger-soft: #fef3f2;
-  --b-warn-soft: #fffaeb;
-  --b-warn-ink: #854d0e;
   --b-radius-sm: 10px;
   --b-radius: 20px;
   --b-radius-lg: 20px;
-  --b-ring: 0 0 0 3px rgba(21, 128, 61, 0.18);
-  --b-shadow: 0 4px 16px rgba(15, 23, 42, 0.04);
   --b-max: 860px;
   --b-layout: 1240px;
   --b-font: var(--sans);
@@ -28,7 +11,7 @@
 
 html,
 body {
-  background: #ffffff;
+  background: var(--color-bg);
   font-size: 15px;
   line-height: 1.55;
   color: var(--b-ink);
@@ -174,7 +157,7 @@ body {
 }
 
 .b-btn--ghost {
-  background: #fff;
+  background: var(--color-surface);
   color: var(--b-accent);
   border-color: var(--b-border-strong);
 }
@@ -185,7 +168,7 @@ body {
 }
 
 .b-btn--danger {
-  background: #fff;
+  background: var(--color-surface);
   color: var(--b-danger);
   border-color: #fecdca;
 }
@@ -312,7 +295,7 @@ body {
 }
 
 .b-seg button.is-on {
-  background: #fff;
+  background: var(--color-surface);
   color: var(--b-ink);
   font-weight: 600;
   box-shadow: 0 2px 8px rgba(15, 23, 42, 0.06);
@@ -381,7 +364,7 @@ body {
   width: 18px;
   height: 18px;
   border-radius: 50%;
-  background: #fff;
+  background: var(--color-surface);
   box-shadow: 0 1px 2px rgba(0, 0, 0, 0.12);
   transition: transform 0.2s ease;
 }

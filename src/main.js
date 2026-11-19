@@ -3,8 +3,12 @@ import { createPinia } from 'pinia'
 import App from './App.vue'
 import router from './router'
 import { createI18n } from './i18n'
+import './styles/tokens.css'
 import './styles/global.css'
 import './styles/botty.css'
+import { initThemeFromStorage } from './composables/useTheme'
+
+initThemeFromStorage()
 
 const app = createApp(App)
 const i18n = createI18n()

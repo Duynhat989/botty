@@ -46,17 +46,12 @@
       </div>
     </div>
     <div class="mac-dock">
-      <img v-for="(src, i) in dockIcons" :key="i" :src="src" alt="" loading="lazy" />
+      <img src="/logo.png" alt="" width="28" height="28" loading="lazy" />
     </div>
   </div>
 </template>
 
 <script setup>
-const dockIcons = [
-  '/logo.png',
-  '/images/hero/slide-1.png',
-  '/images/hero/slide-2.png',
-]
 </script>
 
 <style scoped>

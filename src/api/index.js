@@ -20,6 +20,24 @@ export const api = {
         auth: true,
       }),
   },
+  apiKeys: {
+    list: () => apiRequest('/api-keys', { auth: true }),
+    create: (name) =>
+      apiRequest('/api-keys', {
+        method: 'POST',
+        body: { name },
+        auth: true,
+      }),
+    remove: (id) => apiRequest(`/api-keys/${id}`, { method: 'DELETE', auth: true }),
+  },
+  support: {
+    reportIncident: (body) =>
+      apiRequest('/support/incidents', {
+        method: 'POST',
+        body,
+        auth: true,
+      }),
+  },
   auth: {
     providers: () => apiRequest('/auth/providers'),
     me: () => apiRequest('/auth/me', { auth: true }),

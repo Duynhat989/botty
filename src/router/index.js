@@ -8,6 +8,8 @@ import BotPricingView from '@/views/BotPricingView.vue'
 import BotContactView from '@/views/BotContactView.vue'
 import LoginView from '@/views/LoginView.vue'
 import GeminiPinResetView from '@/views/GeminiPinResetView.vue'
+import AccountProfileView from '@/views/AccountProfileView.vue'
+import IncidentReportView from '@/views/IncidentReportView.vue'
 
 const router = createRouter({
   history: createWebHistory(),
@@ -20,6 +22,8 @@ const router = createRouter({
         { path: 'config', name: 'config', component: BotConfigView },
         { path: 'pricing', name: 'pricing', component: BotPricingView },
         { path: 'contact', name: 'contact', component: BotContactView },
+        { path: 'account', name: 'account', component: AccountProfileView, meta: { requiresAuth: true } },
+        { path: 'report', name: 'report', component: IncidentReportView, meta: { requiresAuth: true } },
         {
           path: 'bots/new',
           redirect: { path: '/config', query: { create: '1' } },

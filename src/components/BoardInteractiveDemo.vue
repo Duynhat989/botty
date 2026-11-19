@@ -1355,7 +1355,7 @@ function renderDemo3d(demo) {
       })
       ctx.closePath()
       const grad = ctx.createLinearGradient(0, cy - scale, 0, cy + scale)
-      grad.addColorStop(0, 'rgba(37, 99, 235, 0.58)')
+      grad.addColorStop(0, 'rgba(34, 197, 94, 0.58)')
       grad.addColorStop(1, 'rgba(29, 78, 216, 0.42)')
       ctx.fillStyle = grad
       ctx.fill()
@@ -1374,7 +1374,7 @@ function renderDemo3d(demo) {
         ctx.fillStyle = '#ffffff'
         ctx.fill()
         ctx.lineWidth = 2
-        ctx.strokeStyle = '#2563eb'
+        ctx.strokeStyle = '#22c55e'
         ctx.stroke()
         ctx.restore()
       })
@@ -1477,7 +1477,7 @@ function renderDemo3d(demo) {
     )
     ctx.save()
     ctx.beginPath()
-    ctx.strokeStyle = '#3b82f6'
+    ctx.strokeStyle = '#22c55e'
     ctx.lineWidth = 2.2
     ctx.moveTo(p1.x, p1.y)
     ctx.lineTo(p2.x, p2.y)
@@ -1509,7 +1509,7 @@ function renderDemo3d(demo) {
       ctx.save()
       ctx.beginPath()
       ctx.arc(proj.x, proj.y, 7, 0, Math.PI * 2)
-      ctx.fillStyle = '#3b82f6'
+      ctx.fillStyle = '#22c55e'
       ctx.fill()
       ctx.lineWidth = 2.2
       ctx.strokeStyle = '#ffffff'
@@ -1592,7 +1592,7 @@ function renderCrossSection2dBoard(demo, sectionData) {
     else ctx.lineTo(p.x, p.y)
   })
   ctx.closePath()
-  ctx.fillStyle = 'rgba(37, 99, 235, 0.52)'
+  ctx.fillStyle = 'rgba(34, 197, 94, 0.52)'
   ctx.fill()
   ctx.strokeStyle = '#93c5fd'
   ctx.lineWidth = 2.2
@@ -1610,7 +1610,7 @@ function renderCrossSection2dBoard(demo, sectionData) {
     ctx.arc(curr.x, curr.y, 4, 0, Math.PI * 2)
     ctx.fillStyle = '#ffffff'
     ctx.fill()
-    ctx.strokeStyle = '#2563eb'
+    ctx.strokeStyle = '#22c55e'
     ctx.lineWidth = 1.8
     ctx.stroke()
 
@@ -1778,7 +1778,7 @@ function renderDemoGraph(demo) {
   if (f2Expr) {
     ctx.save()
     ctx.beginPath()
-    ctx.strokeStyle = '#3b82f6'
+    ctx.strokeStyle = '#22c55e'
     ctx.lineWidth = 2.4
     let started2 = false
     let prevDiff = null
@@ -2003,7 +2003,7 @@ onUnmounted(() => {
   width: 8px;
   height: 8px;
   border-radius: 50%;
-  background: #3b82f6;
+  background: #22c55e;
   box-shadow: 0 0 6px #60a5fa;
   flex-shrink: 0;
 }
@@ -2290,7 +2290,7 @@ onUnmounted(() => {
   height: 13px;
   padding: 0 3px;
   border-radius: 999px;
-  background: #2563eb;
+  background: #22c55e;
   color: #ffffff;
   font-size: 9px;
   font-weight: 700;
@@ -2513,8 +2513,8 @@ onUnmounted(() => {
 }
 
 .wb-formula-lbl--blue {
-  color: #2563eb;
-  background: #eff6ff;
+  color: #22c55e;
+  background: #ecfdf5;
 }
 
 .wb-formula-inp {

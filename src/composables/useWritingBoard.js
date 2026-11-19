@@ -699,7 +699,7 @@ export function createWritingBoard(mainCanvasRef) {
         ctx.save()
         ctx.setLineDash([6, 4])
         ctx.lineWidth = 2
-        ctx.strokeStyle = '#2563eb'
+        ctx.strokeStyle = '#22c55e'
         ctx.beginPath()
         sel.points.forEach((p, i) => {
           const { x, y } = normToPixel(p.nx, p.ny, w, h)

@@ -7,7 +7,7 @@
           <img class="brand-mark" src="/logo.png" :alt="t('nav.brandAlt')" width="32" height="32" />
         </div>
         <div class="brand-text">
-          <span class="brand-title">Dyna<span class="brand-accent">Geo</span></span>
+          <span class="brand-title">Botty</span>
         </div>
       </RouterLink>
 
@@ -303,14 +303,8 @@ onUnmounted(() => {
   font-size: 19px;
   font-weight: 750;
   letter-spacing: -0.035em;
-  color: #0f172a;
+  color: var(--color-ink);
   line-height: 1;
-}
-
-.brand-accent {
-  background: linear-gradient(135deg, var(--accent) 0%, var(--gold) 100%);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
 }
 
 .brand-pill {

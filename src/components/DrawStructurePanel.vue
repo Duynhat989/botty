@@ -891,7 +891,7 @@ function drawSelectionHighlight(points) {
   if (!ctx) return
   if (sel.type === 'point' && points[sel.id]) {
     const p = points[sel.id]
-    ctx.strokeStyle = '#2563eb'
+    ctx.strokeStyle = '#22c55e'
     ctx.lineWidth = 3
     ctx.beginPath()
     ctx.arc(p.x, p.y, 16, 0, Math.PI * 2)
@@ -899,7 +899,7 @@ function drawSelectionHighlight(points) {
   } else if (sel.type === 'edge' && points[sel.from] && points[sel.to]) {
     const a = points[sel.from]
     const b = points[sel.to]
-    ctx.strokeStyle = 'rgba(37, 99, 235, 0.9)'
+    ctx.strokeStyle = 'rgba(34, 197, 94, 0.9)'
     ctx.lineWidth = 5
     ctx.lineCap = 'round'
     ctx.beginPath()

@@ -37,14 +37,9 @@
 
         <div class="hero-visual reveal reveal-delay">
           <div class="visual-frame">
-            <img
-              class="visual-shot"
-              src="/og-image.png"
-              alt="Botty trên điện thoại và máy tính"
-              width="520"
-              height="340"
-              loading="eager"
-            />
+            <div class="hero-brand-panel" aria-hidden="true">
+              <img class="hero-brand-logo" src="/logo.png" alt="" width="240" height="240" loading="eager" />
+            </div>
             <div class="visual-float">
               <MacAppMockup />
             </div>
@@ -87,7 +82,8 @@
         <ol class="steps-rail">
           <li v-for="step in steps" :key="step.n" class="steps-item">
             <div class="steps-thumb">
-              <img :src="step.img" :alt="step.title" loading="lazy" />
+              <div class="steps-thumb-bg" aria-hidden="true" />
+              <component :is="step.icon" class="steps-thumb-icon" :size="36" :stroke-width="1.75" aria-hidden="true" />
               <span class="steps-num">{{ step.n }}</span>
             </div>
             <div class="steps-copy">
@@ -119,7 +115,19 @@
 
 <script setup>
 import { RouterLink } from 'vue-router'
-import { FileText, MessageCircle, ShoppingBag, Sparkles, Webhook, Zap } from '@lucide/vue'
+import {
+  Bot,
+  FileText,
+  KeyRound,
+  Link2,
+  MessageCircle,
+  Package,
+  Rocket,
+  ShoppingBag,
+  Sparkles,
+  Webhook,
+  Zap,
+} from '@lucide/vue'
 import MacAppMockup from '@/components/MacAppMockup.vue'
 import { useAuthStore } from '@/stores/auth'
 
@@ -167,31 +175,31 @@ const features = [
 const steps = [
   {
     n: 1,
-    img: '/images/guide/step-1-link.jpg',
+    icon: Bot,
     title: 'Tạo bot & đặt tên',
     text: 'Mở wizard từ Cấu hình, đặt tên hiển thị cho team và khách.',
   },
   {
     n: 2,
-    img: '/images/guide/step-2-voice.jpg',
+    icon: Link2,
     title: 'Kết nối Facebook',
     text: 'Dán Page ID, token và webhook URL vào Meta Developer.',
   },
   {
     n: 3,
-    img: '/images/guide/step-3-music.jpg',
+    icon: KeyRound,
     title: 'Thêm Gemini key',
     text: 'API key lưu riêng cho bot; không chia sẻ với người khác.',
   },
   {
     n: 4,
-    img: '/images/guide/step-4-adjust.jpg',
+    icon: Package,
     title: 'Tài liệu & kho',
     text: 'Upload hướng dẫn bán, nhập sản phẩm hoặc nối API list.',
   },
   {
     n: 5,
-    img: '/images/guide/step-5-export.jpg',
+    icon: Rocket,
     title: 'Bật live & theo dõi',
     text: 'Thử phản hồi, bật chốt đơn nếu cần, kích hoạt trên Page.',
   },
@@ -252,9 +260,9 @@ const steps = [
   font-weight: 700;
   letter-spacing: 0.055em;
   text-transform: uppercase;
-  color: #166534;
-  background: rgba(240, 253, 244, 0.86);
-  border: 1px solid #bbf7d0;
+  color: var(--b-accent-hover);
+  background: var(--b-accent-soft);
+  border: 1px solid var(--accent-border, #bbf7d0);
   backdrop-filter: blur(8px);
 }
 
@@ -280,7 +288,7 @@ const steps = [
 .hero-highlight {
   display: block;
   padding-bottom: 0.06em;
-  color: #15803d;
+  color: var(--b-accent);
 }
 
 .hero-lede {
@@ -304,13 +312,13 @@ const steps = [
 }
 
 .btn-glow {
-  box-shadow: 0 8px 24px -8px rgba(21, 128, 61, 0.45);
+  box-shadow: 0 8px 24px -8px rgba(34, 197, 94, 0.4);
   transition: transform 0.2s ease, box-shadow 0.2s ease;
 }
 
 .btn-glow:hover {
   transform: translateY(-2px);
-  box-shadow: 0 14px 30px -9px rgba(21, 128, 61, 0.5);
+  box-shadow: 0 14px 30px -9px rgba(34, 197, 94, 0.48);
 }
 
 .hero-stats {
@@ -353,15 +361,21 @@ const steps = [
   padding: 0 1rem 2.2rem 0;
 }
 
-.visual-shot {
-  position: relative;
+.hero-brand-panel {
+  display: grid;
+  place-items: center;
   width: 100%;
-  height: auto;
-  aspect-ratio: 1.53;
-  object-fit: cover;
+  aspect-ratio: 1.1;
   border-radius: 26px;
-  border: 7px solid rgba(255, 255, 255, 0.9);
-  box-shadow: 0 28px 70px -32px rgba(15, 23, 42, 0.42);
+  border: 1px solid #bbf7d0;
+  background: radial-gradient(120% 100% at 50% 0%, #ecfdf5 0%, #ffffff 55%, #f8fafc 100%);
+  box-shadow: 0 28px 70px -32px rgba(34, 197, 94, 0.22);
+}
+
+.hero-brand-logo {
+  width: min(58%, 240px);
+  height: auto;
+  object-fit: contain;
 }
 
 .visual-float {
@@ -396,7 +410,7 @@ const steps = [
   .hero-stats { gap: 1rem 1.25rem; }
   .hero-stats li { min-width: 27%; }
   .visual-frame { padding: 0 0.35rem 1.2rem 0; }
-  .visual-shot { border-width: 5px; border-radius: 20px; }
+  .hero-brand-panel { border-radius: 20px; }
   .visual-float { position: relative; right: auto; bottom: auto; width: 100%; margin-top: -1.5rem; }
 }
 
@@ -456,8 +470,8 @@ const steps = [
 
 .bento-card:hover {
   transform: translateY(-4px);
-  border-color: #a7dbba;
-  box-shadow: 0 22px 44px -28px rgba(21, 128, 61, 0.42);
+  border-color: var(--accent-border, #bbf7d0);
+  box-shadow: 0 22px 44px -28px rgba(34, 197, 94, 0.35);
 }
 
 .bento-icon {
@@ -624,8 +638,8 @@ const steps = [
 }
 
 .steps-item:hover {
-  border-color: #bbf7d0;
-  box-shadow: 0 16px 36px -22px rgba(21, 128, 61, 0.28);
+  border-color: var(--accent-border, #bbf7d0);
+  box-shadow: 0 16px 36px -22px rgba(34, 197, 94, 0.22);
   transform: translateY(-2px);
 }
 
@@ -637,15 +651,23 @@ const steps = [
 
 .steps-thumb {
   position: relative;
+  display: grid;
+  place-items: center;
   height: 132px;
   overflow: hidden;
 }
 
-.steps-thumb img {
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-  display: block;
+.steps-thumb-bg {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(145deg, #ecfdf5 0%, #d1fae5 55%, #dcfce7 100%);
+}
+
+.steps-thumb-icon {
+  position: relative;
+  z-index: 1;
+  color: var(--b-accent);
+  opacity: 0.92;
 }
 
 .steps-num {
@@ -662,8 +684,8 @@ const steps = [
   font-size: 15px;
   font-weight: 800;
   color: #fff;
-  background: rgba(21, 128, 61, 0.94);
-  box-shadow: 0 4px 12px rgba(21, 128, 61, 0.35);
+  background: rgba(34, 197, 94, 0.94);
+  box-shadow: 0 4px 12px rgba(34, 197, 94, 0.35);
 }
 
 .steps-copy {
@@ -716,7 +738,7 @@ const steps = [
   gap: 1.25rem;
   padding: clamp(1.5rem, 3vw, 2rem) clamp(1.25rem, 3vw, 2rem);
   border-radius: 20px;
-  border: 1px solid #bbf7d0;
+  border: 1px solid var(--accent-border, #bbf7d0);
   background: #fff;
 }
 
