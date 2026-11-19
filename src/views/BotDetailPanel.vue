@@ -117,6 +117,43 @@
             <strong>Messenger → API Setup → Generate</strong> của <strong>cùng App</strong> với App ID/Secret ở trên.
           </p>
         </div>
+
+        <div class="fb-ice b-card b-card-pad">
+          <h4 class="fb-ice-title">Câu hỏi gợi ý (Ice Breakers)</h4>
+          <p class="b-micro fb-ice-lede">
+            Tối đa <strong>4</strong> câu hiện dạng chip trên Messenger (sau khi bấm Bắt đầu / lần đầu vào).
+            Khách bấm chip → bot trả lời như tin nhắn thường. Sau khi sửa: <strong>Lưu cấu hình</strong> rồi
+            <strong>Kiểm tra kết nối</strong> để đẩy lên Meta. Mỗi câu tối đa 80 ký tự.
+          </p>
+          <ul class="fb-ice-list">
+            <li v-for="(item, idx) in form.messengerIceBreakers" :key="item._key" class="fb-ice-row">
+              <span class="fb-ice-num b-micro">{{ idx + 1 }}.</span>
+              <input
+                v-model="item.question"
+                class="b-input"
+                type="text"
+                maxlength="80"
+                :placeholder="icePlaceholder(idx)"
+              />
+              <button
+                v-if="form.messengerIceBreakers.length > 1"
+                type="button"
+                class="text-danger fb-ice-remove"
+                @click="removeIceBreaker(idx)"
+              >
+                Xóa
+              </button>
+            </li>
+          </ul>
+          <button
+            type="button"
+            class="b-btn b-btn--ghost b-btn--sm"
+            :disabled="form.messengerIceBreakers.length >= 4"
+            @click="addIceBreaker"
+          >
+            + Thêm câu gợi ý
+          </button>
+        </div>
       </section>
 
       <section class="fb-section">
@@ -214,6 +251,11 @@
             <strong v-if="fbTestResult.profileHasGetStarted">đã gắn trên Meta</strong>
             <template v-else-if="fbTestResult.getStarted.ok">đã gọi API — chưa đọc lại được payload (thử xóa hội thoại cũ rồi mở lại)</template>
             <template v-else>chưa gắn được — {{ shortFbErr(fbTestResult.getStarted.reason) }}</template>
+          </p>
+          <p v-if="fbTestResult.iceBreakersSynced" class="b-micro fb-gs-ok">
+            Câu gợi ý: đã gửi {{ fbTestResult.iceBreakersSynced }} câu lên Meta
+            <span v-if="fbTestResult.profileIceCount">(đọc lại {{ fbTestResult.profileIceCount }})</span>.
+            Xóa hội thoại cũ hoặc dùng tài khoản khác để thấy chip.
           </p>
           <p class="b-micro">
             Webhook đã cấu hình trên Meta thì tin nhắn khách sẽ vào bot. Thử ngay:
@@ -485,6 +527,7 @@ const form = reactive({
   orderClosingReminderText: '',
   sessionGreetingEnabled: false,
   sessionGreetings: [{ _key: 'g-default', text: '', imageUrl: '' }],
+  messengerIceBreakers: [{ _key: 'ib-1', question: '' }],
   orderClosingNote: '',
   orderClosingPayment: cloneOrderClosingPayment(),
 })
@@ -523,6 +566,47 @@ function sessionGreetingsPayload() {
     .filter((item) => item.text || item.imageUrl)
 }
 
+const ICE_PLACEHOLDERS = [
+  'Bảng giá / menu?',
+  'Ship bao lâu?',
+  'Đổi trả thế nào?',
+  'Liên hệ nhân viên?',
+]
+
+function iceKey() {
+  return `ib-${Date.now()}-${Math.random().toString(36).slice(2, 7)}`
+}
+
+function hydrateIceBreakers(list) {
+  const rows = Array.isArray(list) ? list : []
+  const mapped = rows.map((item, i) => ({
+    _key: `ib-${i}-${String(item?.question || '').slice(0, 6)}`,
+    question: item?.question || '',
+  }))
+  return mapped.length ? mapped : [{ _key: 'ib-1', question: '' }]
+}
+
+function icePlaceholder(idx) {
+  return ICE_PLACEHOLDERS[idx] || 'Câu hỏi gợi ý…'
+}
+
+function messengerIceBreakersPayload() {
+  return (form.messengerIceBreakers || [])
+    .map((item) => ({ question: String(item?.question || '').trim() }))
+    .filter((item) => item.question)
+}
+
+function addIceBreaker() {
+  if (!Array.isArray(form.messengerIceBreakers)) form.messengerIceBreakers = []
+  if (form.messengerIceBreakers.length >= 4) return
+  form.messengerIceBreakers.push({ _key: iceKey(), question: '' })
+}
+
+function removeIceBreaker(index) {
+  if (!Array.isArray(form.messengerIceBreakers) || form.messengerIceBreakers.length <= 1) return
+  form.messengerIceBreakers.splice(index, 1)
+}
+
 function syncFromBot(b) {
   form.facebookPageId = b.facebookPageId || ''
   form.facebookAppId = b.facebookAppId || ''
@@ -542,6 +626,7 @@ function syncFromBot(b) {
   form.orderClosingReminderText = b.orderClosingReminderText || ''
   form.sessionGreetingEnabled = Boolean(b.sessionGreetingEnabled)
   form.sessionGreetings = hydrateSessionGreetings(b.sessionGreetings)
+  form.messengerIceBreakers = hydrateIceBreakers(b.messengerIceBreakers)
   form.orderClosingNote = b.orderClosingNote || ''
   form.orderClosingPayment = cloneOrderClosingPayment(b.orderClosingPayment)
   inventory.value = b.inventory
@@ -606,6 +691,7 @@ async function save() {
     orderClosingReminderText: form.orderClosingReminderText.trim(),
     sessionGreetingEnabled: form.sessionGreetingEnabled,
     sessionGreetings: sessionGreetingsPayload(),
+    messengerIceBreakers: messengerIceBreakersPayload(),
     orderClosingNote: form.orderClosingNote,
     orderClosingPayment: cloneOrderClosingPayment(form.orderClosingPayment),
   }
@@ -735,6 +821,8 @@ async function runFacebookTest() {
     const draft = form.facebookPageAccessToken.trim()
     if (draft) body.facebookPageAccessToken = draft
     if (form.facebookAppSecret.trim()) body.facebookAppSecret = form.facebookAppSecret.trim()
+  const ice = messengerIceBreakersPayload()
+  if (ice.length) body.messengerIceBreakers = ice
     fbTestResult.value = await api.bots.testFacebook(props.bot.id, body)
   } catch (e) {
     fbTestErr.value = e?.message || 'Không kiểm tra được kết nối Facebook'
@@ -1460,6 +1548,49 @@ async function applyInstructionTemplate(tpl) {
 
 .fb-gs-warn {
   color: #9a3412;
+}
+
+.fb-ice {
+  margin-top: 14px;
+  background: #fafafa;
+  border-color: #e5e7eb;
+}
+
+.fb-ice-title {
+  margin: 0 0 8px;
+  font-size: 0.95rem;
+  font-weight: 700;
+}
+
+.fb-ice-lede {
+  margin: 0 0 12px;
+  line-height: 1.5;
+  color: var(--b-muted);
+}
+
+.fb-ice-list {
+  list-style: none;
+  margin: 0 0 12px;
+  padding: 0;
+  display: grid;
+  gap: 10px;
+}
+
+.fb-ice-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.fb-ice-num {
+  flex-shrink: 0;
+  width: 1.25rem;
+  color: var(--b-muted);
+}
+
+.fb-ice-remove {
+  flex-shrink: 0;
+  font-size: 0.8rem;
 }
 
 .doc-form {
