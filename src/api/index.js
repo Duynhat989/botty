@@ -204,6 +204,8 @@ export const api = {
     },
     retryOrderWebhook: (id, orderId) =>
       apiRequest(`/bots/${id}/orders/${orderId}/retry-webhook`, { method: 'POST', auth: true }),
+    sendOutboundMessage: (id, body) =>
+      apiRequest(`/bots/${id}/outbound-message`, { method: 'POST', body, auth: true }),
     promptTemplatesList: () => apiRequest('/bots/prompt-templates/list', { auth: true }),
     createPromptTemplate: (body) =>
       apiRequest('/bots/prompt-templates', { method: 'POST', body, auth: true }),

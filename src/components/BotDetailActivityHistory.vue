@@ -75,6 +75,40 @@
           </button>
 
           <div v-show="isOpen(s)" class="session-thread">
+            <div v-if="isOpen(s)" class="outbound-box">
+              <p class="b-micro outbound-lede">
+                Gửi tin chủ động tới phiên này
+                <span v-if="s.channel === 'facebook'"> (Messenger, trong 24h kể từ lần khách nhắn)</span>.
+              </p>
+              <textarea
+                v-model="outboundDraft[keyFor(s)]"
+                class="b-textarea outbound-input"
+                rows="2"
+                maxlength="2000"
+                placeholder="Nội dung tin shop gửi…"
+              />
+              <div class="outbound-actions">
+                <button
+                  type="button"
+                  class="b-btn b-btn--primary b-btn--sm"
+                  :disabled="outboundBusyKey === keyFor(s)"
+                  @click="sendOutbound(s, false)"
+                >
+                  {{ outboundBusyKey === keyFor(s) ? 'Đang gửi…' : 'Gửi' }}
+                </button>
+                <button
+                  v-if="props.bot.orderClosingEnabled"
+                  type="button"
+                  class="b-btn b-btn--ghost b-btn--sm"
+                  :disabled="outboundBusyKey === keyFor(s)"
+                  @click="sendOutbound(s, true)"
+                >
+                  Gửi mẫu nhắc chốt đơn
+                </button>
+              </div>
+              <p v-if="outboundErr[keyFor(s)]" class="b-msg-err outbound-err">{{ outboundErr[keyFor(s)] }}</p>
+              <p v-else-if="outboundOk[keyFor(s)]" class="b-micro outbound-ok">{{ outboundOk[keyFor(s)] }}</p>
+            </div>
             <div
               v-for="(m, i) in s.messages"
               :key="i"
@@ -149,6 +183,10 @@ const loading = ref(true)
 const sessions = ref([])
 const channelFilter = ref('')
 const openKeys = ref(new Set())
+const outboundDraft = ref({})
+const outboundBusyKey = ref('')
+const outboundErr = ref({})
+const outboundOk = ref({})
 const page = ref(1)
 const pagination = ref({
   page: 1,
@@ -161,6 +199,10 @@ function sessionKey(s) {
   return `${s.channel}:${s.peerId}`
 }
 
+function keyFor(s) {
+  return sessionKey(s)
+}
+
 function isOpen(s) {
   return openKeys.value.has(sessionKey(s))
 }
@@ -169,8 +211,46 @@ function toggle(s) {
   const key = sessionKey(s)
   const next = new Set(openKeys.value)
   if (next.has(key)) next.delete(key)
-  else next.add(key)
+  else {
+    next.add(key)
+    if (!outboundDraft.value[key]) {
+      outboundDraft.value = {
+        ...outboundDraft.value,
+        [key]: props.bot.orderClosingReminderText?.trim() || '',
+      }
+    }
+  }
   openKeys.value = next
+}
+
+async function sendOutbound(s, useReminderTemplate) {
+  const key = keyFor(s)
+  outboundErr.value = { ...outboundErr.value, [key]: '' }
+  outboundOk.value = { ...outboundOk.value, [key]: '' }
+  outboundBusyKey.value = key
+  try {
+    const body = {
+      channel: s.channel,
+      peerId: s.peerId,
+      useReminderTemplate,
+    }
+    if (!useReminderTemplate) {
+      const text = String(outboundDraft.value[key] || '').trim()
+      if (!text) {
+        outboundErr.value = { ...outboundErr.value, [key]: 'Nhập nội dung tin nhắn.' }
+        return
+      }
+      body.text = text
+    }
+    await api.bots.sendOutboundMessage(props.bot.id, body)
+    outboundOk.value = { ...outboundOk.value, [key]: 'Đã gửi — làm mới để xem trong luồng.' }
+    await load()
+    openKeys.value = new Set([...openKeys.value, key])
+  } catch (e) {
+    outboundErr.value = { ...outboundErr.value, [key]: e?.message || 'Gửi thất bại' }
+  } finally {
+    outboundBusyKey.value = ''
+  }
 }
 
 function channelLabel(ch) {
@@ -410,6 +490,42 @@ onMounted(load)
   max-height: min(420px, 55vh);
   overflow-y: auto;
   background: #fafbfa;
+}
+
+.outbound-box {
+  padding: 10px 10px 12px;
+  border: 1px dashed var(--b-border);
+  border-radius: 10px;
+  background: #fff;
+  display: grid;
+  gap: 8px;
+}
+
+.outbound-lede {
+  margin: 0;
+  line-height: 1.45;
+  color: var(--b-muted);
+}
+
+.outbound-input {
+  font-size: 13px;
+  min-height: 52px;
+}
+
+.outbound-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.outbound-err {
+  margin: 0;
+  font-size: 12px;
+}
+
+.outbound-ok {
+  margin: 0;
+  color: #166534;
 }
 
 .thread-bubble {

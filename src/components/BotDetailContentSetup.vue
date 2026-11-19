@@ -200,6 +200,7 @@
           Gửi <strong>trước</strong> khi bot trả lời AI: phiên thử mới, hoặc trên Messenger khi khách bấm
           <strong>Bắt đầu (Get Started)</strong>, vào qua link <code>m.me</code> (referral), opt-in plugin, hoặc ngay khi webhook nhận tin.
           Facebook <em>không</em> báo khi khách chỉ mở cửa sổ chat — hãy bật nút Get Started (Botty tự gắn khi kiểm tra kết nối Facebook).
+          Khách <strong>xóa hội thoại</strong> rồi bấm <strong>Bắt đầu</strong> lại → Botty <strong>gửi lại</strong> tin chào (nút Bắt đầu do Meta quyết định có hiện hay không).
           Nhiều tin: chữ và/hoặc ảnh (tự nén dưới 5MB).
         </p>
         <label class="b-switch order-toggle">
@@ -331,6 +332,21 @@
               placeholder="Để trống dùng mẫu mặc định của shop"
             />
           </label>
+
+          <label class="b-switch order-toggle">
+            <input
+              type="checkbox"
+              :checked="form.orderClosingOutboundEnabled"
+              @change="form.orderClosingOutboundEnabled = $event.target.checked"
+            />
+            <span class="b-switch-track" aria-hidden="true" />
+            Tự động nhắn Messenger nếu chưa chốt đơn trong ngày
+          </label>
+          <p v-if="form.orderClosingOutboundEnabled" class="b-micro order-field-hint">
+            Botty tự gửi <strong>tin riêng</strong> (không chờ khách nhắn) tối đa 1 lần/ngày/khách,
+            khi khách đã nhắn trong <strong>24h</strong> và chưa có đơn chốt hôm nay. Dùng chung nội dung nhắc ở trên.
+            Gửi thủ công: tab <strong>Lịch sử phản hồi</strong>.
+          </p>
 
           <label class="b-switch order-toggle">
             <input v-model="form.orderClosingPayment.collectInstallerName" type="checkbox" />

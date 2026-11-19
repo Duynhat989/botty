@@ -185,7 +185,7 @@
           <summary>Chỉ thấy dòng “đoạn chat kinh doanh / quyền riêng tư”, không có nút Bắt đầu?</summary>
           <ul class="fb-getstarted-faq-list">
             <li>Dòng đó là <strong>nhãn mặc định của Meta</strong> — không phải lỗi Botty.</li>
-            <li>Nút <strong>Bắt đầu</strong> chỉ hiện <strong>lần đầu</strong> khách chat Page. Nếu bạn đã nhắn Page trước đó → <strong>xóa hội thoại</strong> (facebook.com → Messenger → bánh răng → Xóa) rồi mở lại, hoặc thử tài khoản Facebook khác.</li>
+            <li>Nút <strong>Bắt đầu</strong> do <strong>Meta</strong> quyết định — Botty không bật/tắt được. Thường hiện khi khách <strong>lần đầu</strong> hoặc <strong>xóa cả hội thoại</strong> trên facebook.com rồi mở lại Page. Khách bấm Bắt đầu → Botty <strong>gửi lại</strong> tin chào (nếu đã bật Chào phiên).</li>
             <li>Bấm <strong>Kiểm tra kết nối</strong> để Botty gắn nút qua API. Token cần <code>pages_manage_metadata</code>.</li>
             <li>App/Page còn bot khác (ManyChat, …) có thể ghi đè profile — tắt hoặc gắn lại Get Started sau khi Botty kiểm tra OK.</li>
             <li>Vẫn không có nút: <strong>gửi một tin bất kỳ</strong> — Botty vẫn chào phiên (nếu đã bật) và trả lời AI.</li>
@@ -524,6 +524,7 @@ const form = reactive({
   status: 'active',
   orderClosingEnabled: false,
   orderClosingReminderEnabled: false,
+  orderClosingOutboundEnabled: false,
   orderClosingReminderText: '',
   sessionGreetingEnabled: false,
   sessionGreetings: [{ _key: 'g-default', text: '', imageUrl: '' }],
@@ -623,6 +624,7 @@ function syncFromBot(b) {
   form.status = b.status || 'active'
   form.orderClosingEnabled = Boolean(b.orderClosingEnabled)
   form.orderClosingReminderEnabled = Boolean(b.orderClosingReminderEnabled)
+  form.orderClosingOutboundEnabled = Boolean(b.orderClosingOutboundEnabled)
   form.orderClosingReminderText = b.orderClosingReminderText || ''
   form.sessionGreetingEnabled = Boolean(b.sessionGreetingEnabled)
   form.sessionGreetings = hydrateSessionGreetings(b.sessionGreetings)
@@ -688,6 +690,7 @@ async function save() {
     inventory: invPayload,
     orderClosingEnabled: form.orderClosingEnabled,
     orderClosingReminderEnabled: form.orderClosingReminderEnabled,
+    orderClosingOutboundEnabled: form.orderClosingOutboundEnabled,
     orderClosingReminderText: form.orderClosingReminderText.trim(),
     sessionGreetingEnabled: form.sessionGreetingEnabled,
     sessionGreetings: sessionGreetingsPayload(),
