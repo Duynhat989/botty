@@ -6,6 +6,7 @@ import BotDetailView from '@/views/BotDetailView.vue'
 import BotConfigView from '@/views/BotConfigView.vue'
 import BotPricingView from '@/views/BotPricingView.vue'
 import BotContactView from '@/views/BotContactView.vue'
+import BotLegalView from '@/views/BotLegalView.vue'
 import LoginView from '@/views/LoginView.vue'
 import GeminiPinResetView from '@/views/GeminiPinResetView.vue'
 import AccountProfileView from '@/views/AccountProfileView.vue'
@@ -31,6 +32,9 @@ const router = createRouter({
         { path: 'config', name: 'config', component: BotConfigView },
         { path: 'pricing', name: 'pricing', component: BotPricingView, meta: { fullWidth: true } },
         { path: 'contact', name: 'contact', component: BotContactView },
+        { path: 'terms', name: 'terms', component: BotLegalView, meta: { fullWidth: true } },
+        { path: 'privacy', name: 'privacy', component: BotLegalView, meta: { fullWidth: true } },
+        { path: 'policy', redirect: { name: 'privacy' } },
         { path: 'account', name: 'account', component: AccountProfileView, meta: { requiresAuth: true } },
         {
           path: 'report',

@@ -35,8 +35,8 @@ export default {
       profile: 'Profile · DynaGeo',
       login: 'Sign in · DynaGeo',
       faq: 'FAQ · DynaGeo',
-      terms: 'Terms · DynaGeo',
-      privacy: 'Privacy · DynaGeo',
+      terms: 'Terms · Botty',
+      privacy: 'Privacy · Botty',
       affiliate: 'Affiliate · DynaGeo',
       contact: 'Contact · DynaGeo',
     },
@@ -1036,16 +1036,36 @@ export default {
   },
 
   info: {
+    legalUpdated: 'Last updated: November 2025.',
+    contactCta: 'Contact support',
+    toPrivacy: 'Privacy policy →',
+    toTerms: 'Terms of use →',
     termsKicker: 'Legal',
     termsTitle: 'Terms of use',
-    terms1: 'DynaGeo turns Reddit, and posts into videos. You are responsible for the content you submit.',
-    terms2: 'New accounts get 30 credits. Fetching post info uses 5 credits; each video uses 25 credits. Credits are non-refundable as cash.',
-    terms3: 'We may suspend accounts for illegal content or rights violations.',
+    termsLede: 'These terms apply when you sign up, configure bots, and connect a Facebook Page on Botty.',
+    terms1:
+      'Botty provides tools to configure Facebook Messenger bots (auto-reply, inventory, order capture). You are responsible for all messages your bot sends and for complying with Meta/Facebook policies.',
+    terms2:
+      'Plans, AI limits, and billing are described on the Pricing page. Fees paid are not automatically refunded unless a separate refund policy is published.',
+    terms3:
+      'Do not use Botty for spam, fraud, or content that violates law, privacy, or intellectual property. We may suspend accounts or bots when we detect abuse.',
+    terms4:
+      'Connecting a Messenger Page requires admin rights on that Page and compliance with Meta’s terms. Botty is not liable if your Page is restricted due to your violations.',
+    terms5:
+      'We may update these terms; the current version is shown on this page. Continued use means you accept changes.',
     privacyKicker: 'Legal',
     privacyTitle: 'Privacy policy',
-    privacy1: 'When you sign in with Google or Facebook, DynaGeo receives your name, email, and avatar to create an account.',
-    privacy2: 'Content you paste to create videos is stored to render and show again in your schedule.',
-    privacy3: 'We do not sell account data. You can stop using the service anytime.',
+    privacyLede: 'How Botty collects and processes data when you sign in, configure bots, and receive customer messages.',
+    privacy1:
+      'When you sign in with Google or Facebook, Botty receives your name, email, and avatar to create and manage your account.',
+    privacy2:
+      'Data you enter — shop docs, inventory, prompts, order settings, Page tokens, greeting images — is stored to run your bot as configured.',
+    privacy3:
+      'Customer messages via the Messenger webhook are processed for replies; some history may be stored for conversation continuity, dashboard stats, and support.',
+    privacy4:
+      'Page tokens, AI API keys you provide, and other secrets are protected per server configuration. We do not sell account data to third parties for advertising.',
+    privacy5:
+      'You can request help viewing or deleting data via Contact. You may stop using the service and disconnect webhooks at any time.',
     affiliateKicker: 'Partners',
     affiliateTitle: 'Affiliate',
     affiliate1: 'Refer DynaGeo and earn commission when they become paying customers.',

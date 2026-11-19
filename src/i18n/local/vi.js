@@ -37,8 +37,8 @@ export default {
       profile: 'Hồ sơ · DynaGeo',
       login: 'Đăng nhập · DynaGeo',
       faq: 'Giải đáp thắc mắc (FAQ) · DynaGeo',
-      terms: 'Điều khoản · DynaGeo',
-      privacy: 'Bảo mật · DynaGeo',
+      terms: 'Điều khoản · Botty',
+      privacy: 'Chính sách bảo mật · Botty',
       affiliate: 'Affiliate · DynaGeo',
       contact: 'Liên hệ · DynaGeo',
     },
@@ -1209,16 +1209,38 @@ export default {
   },
 
   info: {
+    legalUpdated: 'Cập nhật lần cuối: tháng 11/2025.',
+    contactCta: 'Liên hệ hỗ trợ',
+    toPrivacy: 'Xem chính sách bảo mật →',
+    toTerms: 'Xem điều khoản sử dụng →',
     termsKicker: 'Pháp lý',
     termsTitle: 'Điều khoản sử dụng',
-    terms1: 'DynaGeo dùng để gom link Reddit và bài viết thành video. Bạn chịu trách nhiệm với nội dung mình đưa vào.',
-    terms2: 'Tài khoản mới nhận 30 credits. Lấy thông tin bài viết dùng 5 credits; mỗi video dùng 25 credits. Credits không hoàn thành tiền mặt.',
-    terms3: 'Chúng tôi có thể khóa tài khoản nếu nội dung vi phạm pháp luật hoặc quyền của người khác.',
+    termsLede:
+      'Điều khoản áp dụng khi bạn tạo tài khoản, cấu hình bot và kết nối Facebook Page trên Botty.',
+    terms1:
+      'Botty cung cấp công cụ cấu hình bot Facebook Messenger (trả lời tự động, kho hàng, chốt đơn). Bạn chịu trách nhiệm mọi nội dung bot gửi cho khách và việc tuân thủ chính sách Meta/Facebook.',
+    terms2:
+      'Gói cước, hạn mức AI và thanh toán được mô tả trên trang Gói cước. Phí đã thanh toán không tự hoàn trừ trừ khi có chính sách hoàn tiền riêng được công bố.',
+    terms3:
+      'Không dùng Botty cho spam, lừa đảo hoặc nội dung vi phạm pháp luật, quyền riêng tư hay quyền sở hữu trí tuệ. Chúng tôi có thể tạm khóa tài khoản hoặc bot khi phát hiện vi phạm.',
+    terms4:
+      'Kết nối Page Messenger yêu cầu bạn có quyền quản trị Page và tuân thủ điều khoản nền tảng Meta. Botty không chịu trách nhiệm khi Page bị hạn chế do vi phạm từ phía bạn.',
+    terms5:
+      'Điều khoản có thể được cập nhật; phiên bản hiện hành hiển thị trên trang này. Tiếp tục sử dụng dịch vụ đồng nghĩa bạn chấp nhận thay đổi.',
     privacyKicker: 'Pháp lý',
     privacyTitle: 'Chính sách bảo mật',
-    privacy1: 'Khi đăng nhập bằng Google hoặc Facebook, DynaGeo nhận tên, email và ảnh đại diện để tạo tài khoản.',
-    privacy2: 'Nội dung bạn dán để tạo video được lưu để dựng và hiển thị lại trong lịch của bạn.',
-    privacy3: 'Chúng tôi không bán dữ liệu tài khoản. Bạn có thể ngừng dùng dịch vụ bất cứ lúc nào.',
+    privacyLede:
+      'Chúng tôi mô tả cách Botty thu thập và xử lý dữ liệu khi bạn đăng nhập, cấu hình bot và nhận tin nhắn từ khách.',
+    privacy1:
+      'Khi đăng nhập bằng Google hoặc Facebook, Botty nhận tên, email và ảnh đại diện để tạo và quản lý tài khoản của bạn.',
+    privacy2:
+      'Dữ liệu bạn nhập — tài liệu shop, kho hàng, prompt, cấu hình chốt đơn, token Page, ảnh chào phiên — được lưu để vận hành bot theo thiết lập của bạn.',
+    privacy3:
+      'Tin nhắn khách qua webhook Messenger được xử lý để bot trả lời; một phần lịch sử có thể lưu trên máy chủ để duy trì hội thoại, thống kê dashboard và hỗ trợ khiếu nại.',
+    privacy4:
+      'Token Page, API key AI (nếu bạn tự nhập) và thông tin nhạy cảm khác được bảo vệ theo cấu hình máy chủ. Chúng tôi không bán dữ liệu tài khoản cho bên thứ ba vì mục đích quảng cáo.',
+    privacy5:
+      'Bạn có thể yêu cầu hỗ trợ xem hoặc xóa dữ liệu qua trang Liên hệ. Bạn có thể ngừng dùng dịch vụ và ngắt kết nối webhook bất cứ lúc nào.',
     affiliateKicker: 'Hợp tác',
     affiliateTitle: 'Affiliate',
     affiliate1: 'Giới thiệu DynaGeo cho người khác và nhận hoa hồng khi họ trở thành khách trả phí.',

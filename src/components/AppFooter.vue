@@ -27,8 +27,8 @@
 
       <nav class="foot-col" :aria-label="t('footer.legal')">
         <strong>{{ t('footer.legal') }}</strong>
-        <RouterLink to="/contact">{{ t('footer.terms') }}</RouterLink>
-        <RouterLink to="/contact">{{ t('footer.privacy') }}</RouterLink>
+        <RouterLink to="/terms">{{ t('footer.terms') }}</RouterLink>
+        <RouterLink to="/privacy">{{ t('footer.privacy') }}</RouterLink>
       </nav>
 
       <p class="foot-copy">{{ t('footer.copy', { year, host: siteHost }) }}</p>
