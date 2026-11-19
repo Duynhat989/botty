@@ -23,12 +23,12 @@ export default {
   },
 
   meta: {
-    title: 'Botty — Bot phản hồi tự động Facebook',
+    title: 'Botty — Trợ lý bán hàng AI cho Facebook Messenger',
     description:
-      'Tạo bot Messenger: webhook, tài liệu, kho hàng, instruction. Miễn phí với Gemini API key của bạn.',
-    imageAlt: 'DynaGeo — Hình vẽ canvas tương tác từ bài toán',
+      'Tự động trả lời khách theo tài liệu, kho hàng và quy tắc bán của shop. Tạo bot Messenger trên Botty.',
+    imageAlt: 'Botty — trợ lý bán hàng AI',
     pages: {
-      home: 'DynaGeo — Chuyển bài toán thành hình vẽ tương tác',
+      home: 'Botty — Trợ lý bán hàng AI cho Facebook Messenger',
       draw: 'Canvas · DynaGeo',
       board: 'Digital Whiteboard toán học · DynaGeo',
       history: 'Lịch sử hình vẽ · DynaGeo',
