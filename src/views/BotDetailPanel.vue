@@ -105,10 +105,18 @@
             <small v-if="bot.facebookPageAccessTokenMasked">Đã lưu {{ bot.facebookPageAccessTokenMasked }}</small>
           </label>
         </div>
-        <p class="b-micro fb-hint">
-          Messenger → API Setup → chọn Page → Generate token (quyền
-          <code>pages_messaging</code>). Gắn webhook subscription cho <strong>đúng Page</strong> này.
-        </p>
+        <div class="fb-perms b-card b-card-pad">
+          <p class="b-micro fb-perms-title">Quyền cần khi Generate Page token</p>
+          <ul class="fb-perms-list b-micro">
+            <li><code>pages_messaging</code> — bot gửi/nhận tin Messenger</li>
+            <li><code>pages_manage_metadata</code> — webhook / Subscribe Page</li>
+            <li><code>pages_show_list</code> — chọn Page trong API Setup</li>
+          </ul>
+          <p class="b-micro fb-perms-warn">
+            Không dùng token User từ Graph API Explorer. Chỉ dùng Page token (EAA…) từ
+            <strong>Messenger → API Setup → Generate</strong> của <strong>cùng App</strong> với App ID/Secret ở trên.
+          </p>
+        </div>
       </section>
 
       <section class="fb-section">
@@ -136,6 +144,16 @@
           <li>Bật: <code>messages</code>, <code>messaging_postbacks</code> (nút Bắt đầu / chào phiên), và tuỳ chọn <code>messaging_referrals</code>, <code>messaging_optins</code>.</li>
           <li>App ở chế độ <strong>Live</strong> (hoặc thêm tester Page ở Development).</li>
         </ol>
+        <details class="fb-getstarted-faq b-micro">
+          <summary>Chỉ thấy dòng “đoạn chat kinh doanh / quyền riêng tư”, không có nút Bắt đầu?</summary>
+          <ul class="fb-getstarted-faq-list">
+            <li>Dòng đó là <strong>nhãn mặc định của Meta</strong> — không phải lỗi Botty.</li>
+            <li>Nút <strong>Bắt đầu</strong> chỉ hiện <strong>lần đầu</strong> khách chat Page. Nếu bạn đã nhắn Page trước đó → <strong>xóa hội thoại</strong> (facebook.com → Messenger → bánh răng → Xóa) rồi mở lại, hoặc thử tài khoản Facebook khác.</li>
+            <li>Bấm <strong>Kiểm tra kết nối</strong> để Botty gắn nút qua API. Token cần <code>pages_manage_metadata</code>.</li>
+            <li>App/Page còn bot khác (ManyChat, …) có thể ghi đè profile — tắt hoặc gắn lại Get Started sau khi Botty kiểm tra OK.</li>
+            <li>Vẫn không có nút: <strong>gửi một tin bất kỳ</strong> — Botty vẫn chào phiên (nếu đã bật) và trả lời AI.</li>
+          </ul>
+        </details>
       </section>
 
       <section class="fb-test b-card b-card-pad" aria-labelledby="fb-test-title">
@@ -187,6 +205,16 @@
           <p v-if="fbTestResult.appError && fbTestResult.checks?.pageTokenValid" class="b-msg-err fb-test-msg">
             App ID / Secret: {{ fbTestResult.appError }}
           </p>
+          <p
+            v-if="fbTestResult.getStarted"
+            class="b-micro"
+            :class="fbTestResult.profileHasGetStarted ? 'fb-gs-ok' : 'fb-gs-warn'"
+          >
+            Nút Bắt đầu (Get Started):
+            <strong v-if="fbTestResult.profileHasGetStarted">đã gắn trên Meta</strong>
+            <template v-else-if="fbTestResult.getStarted.ok">đã gọi API — chưa đọc lại được payload (thử xóa hội thoại cũ rồi mở lại)</template>
+            <template v-else>chưa gắn được — {{ shortFbErr(fbTestResult.getStarted.reason) }}</template>
+          </p>
           <p class="b-micro">
             Webhook đã cấu hình trên Meta thì tin nhắn khách sẽ vào bot. Thử ngay:
           </p>
@@ -200,21 +228,29 @@
           </div>
         </div>
 
-        <p v-else-if="fbTestResult && !fbTestResult.connected" class="fb-test-warn b-micro">
-          Chưa đủ điều kiện:
-          <span v-if="!fbTestResult.checks?.hasAppId"> thiếu App ID;</span>
-          <span v-if="!fbTestResult.checks?.hasAppSecret"> thiếu App Secret;</span>
-          <span v-if="!fbTestResult.checks?.hasPageToken"> thiếu Page token;</span>
-          <span v-if="!fbTestResult.checks?.hasVerifyToken"> thiếu verify token;</span>
-          <span v-if="fbTestResult.checks?.hasPageToken && !fbTestResult.checks?.pageTokenValid">
-            Page token không hợp lệ{{ fbTestResult.tokenError ? ` (${fbTestResult.tokenError})` : '' }};
-          </span>
-          <span v-if="fbTestResult.checks?.hasAppId && fbTestResult.checks?.hasAppSecret && !fbTestResult.checks?.appPairValid">
-            App Secret không khớp token{{ fbTestResult.appError ? ` (${fbTestResult.appError})` : '' }};
-          </span>
-          <span v-if="fbTestResult.checks?.hasPageId && !fbTestResult.checks?.pageIdMatch"> Page ID sai;</span>
-          kiểm tra lại Messenger trên Meta Developer.
-        </p>
+        <div v-else-if="fbTestResult && !fbTestResult.connected" class="fb-test-warn-wrap">
+          <p class="fb-test-warn b-micro">
+            Chưa đủ điều kiện:
+            <span v-if="fbTestResult.tokenType"> loại token {{ fbTestResult.tokenType }};</span>
+            <span v-if="!fbTestResult.checks?.hasAppId"> thiếu App ID;</span>
+            <span v-if="!fbTestResult.checks?.hasAppSecret"> thiếu App Secret;</span>
+            <span v-if="!fbTestResult.checks?.hasPageToken"> thiếu Page token;</span>
+            <span v-if="!fbTestResult.checks?.hasVerifyToken"> thiếu verify token;</span>
+            <span v-if="fbTestResult.checks?.hasPageToken && !fbTestResult.checks?.pageTokenValid">
+              token không dùng được{{ fbTestResult.tokenError ? ` — ${shortFbErr(fbTestResult.tokenError)}` : '' }};
+            </span>
+            <span v-if="fbTestResult.checks?.hasAppId && fbTestResult.checks?.hasAppSecret && !fbTestResult.checks?.appPairValid">
+              App không khớp token{{ fbTestResult.appError ? ` — ${shortFbErr(fbTestResult.appError)}` : '' }};
+            </span>
+            <span v-if="fbTestResult.checks?.pageTokenValid && !fbTestResult.checks?.hasMessagingScope">
+              thiếu pages_messaging;
+            </span>
+            <span v-if="fbTestResult.checks?.hasPageId && !fbTestResult.checks?.pageIdMatch"> Page ID sai;</span>
+          </p>
+          <ul v-if="fbTestResult.hints?.length" class="fb-hints b-micro">
+            <li v-for="(hint, hi) in fbTestResult.hints" :key="hi">{{ hint }}</li>
+          </ul>
+        </div>
       </section>
       </form>
     </div>
@@ -679,6 +715,12 @@ const fbReady = computed(() => ({
 const canRunFacebookTest = computed(
   () => fbReady.value.hasPageToken && fbReady.value.hasAppId && fbReady.value.hasAppSecret,
 )
+
+function shortFbErr(msg) {
+  const s = String(msg || '').trim()
+  if (s.length <= 120) return s
+  return `${s.slice(0, 117)}…`
+}
 
 async function runFacebookTest() {
   fbTestBusy.value = true
@@ -1341,6 +1383,36 @@ async function applyInstructionTemplate(tpl) {
   gap: 8px;
 }
 
+.fb-perms {
+  margin-top: 12px;
+  background: #f8fafc;
+  border-color: #e2e8f0;
+}
+
+.fb-perms-title {
+  margin: 0 0 8px;
+  font-weight: 700;
+  color: var(--b-ink-secondary);
+}
+
+.fb-perms-list {
+  margin: 0 0 10px;
+  padding-left: 1.1rem;
+  line-height: 1.55;
+  color: var(--b-muted);
+}
+
+.fb-perms-warn {
+  margin: 0;
+  line-height: 1.5;
+  color: #9a3412;
+}
+
+.fb-test-warn-wrap {
+  display: grid;
+  gap: 10px;
+}
+
 .fb-test-warn {
   margin: 0;
   padding: 10px 12px;
@@ -1349,6 +1421,45 @@ async function applyInstructionTemplate(tpl) {
   border: 1px solid #fed7aa;
   color: #9a3412;
   line-height: 1.45;
+}
+
+.fb-hints {
+  margin: 0;
+  padding: 12px 14px 12px 2rem;
+  border-radius: 10px;
+  background: #fff;
+  border: 1px dashed #fdba74;
+  color: #7c2d12;
+  line-height: 1.55;
+}
+
+.fb-getstarted-faq {
+  margin-top: 14px;
+  padding: 10px 12px;
+  border-radius: 10px;
+  background: #f1f5f9;
+  border: 1px solid #e2e8f0;
+  line-height: 1.5;
+}
+
+.fb-getstarted-faq summary {
+  cursor: pointer;
+  font-weight: 600;
+  color: var(--b-ink-secondary);
+}
+
+.fb-getstarted-faq-list {
+  margin: 10px 0 0;
+  padding-left: 1.15rem;
+  color: var(--b-muted);
+}
+
+.fb-gs-ok {
+  color: #166534;
+}
+
+.fb-gs-warn {
+  color: #9a3412;
 }
 
 .doc-form {
