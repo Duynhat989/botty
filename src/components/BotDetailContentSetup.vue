@@ -25,14 +25,18 @@
 
         <fieldset class="ai-mode-fieldset">
           <legend class="b-caption">Nguồn AI</legend>
-          <label class="ai-mode-opt">
-            <input v-model="form.aiProvider" type="radio" value="own" />
-            <span>Gemini API key của tôi</span>
-          </label>
-          <label class="ai-mode-opt">
-            <input v-model="form.aiProvider" type="radio" value="botty" />
-            <span>Gói Botty AI (không cần key)</span>
-          </label>
+          <div class="b-choice-grid b-choice-grid--2">
+            <label class="b-choice-card" :class="{ on: form.aiProvider === 'own' }">
+              <input v-model="form.aiProvider" type="radio" value="own" />
+              <span class="b-choice-title">Gemini API key của tôi</span>
+              <span class="b-micro b-choice-hint">Key từ Google AI Studio</span>
+            </label>
+            <label class="b-choice-card" :class="{ on: form.aiProvider === 'botty' }">
+              <input v-model="form.aiProvider" type="radio" value="botty" />
+              <span class="b-choice-title">Gói Botty AI</span>
+              <span class="b-micro b-choice-hint">Không cần tự nhập key</span>
+            </label>
+          </div>
         </fieldset>
 
         <div v-if="form.aiProvider === 'botty' && bot.bottyPlanRequired" class="upgrade-box">
@@ -160,12 +164,12 @@
             <label
               v-for="m in replyLanguageModes"
               :key="m.value"
-              class="lang-mode-card"
+              class="b-choice-card lang-mode-card"
               :class="{ on: form.replyLanguageMode === m.value }"
             >
               <input v-model="form.replyLanguageMode" type="radio" :value="m.value" />
-              <span class="lang-mode-label">{{ m.label }}</span>
-              <span class="b-micro lang-mode-hint">{{ m.hint }}</span>
+              <span class="b-choice-title">{{ m.label }}</span>
+              <span class="b-micro b-choice-hint">{{ m.hint }}</span>
             </label>
           </div>
           <label class="b-field lang-default-field">
@@ -188,6 +192,101 @@
             placeholder="Chính sách ship, đổi trả…"
           />
         </label>
+      </section>
+
+      <section v-show="modelValue === 'greeting'" id="section-greeting" class="setup-section">
+        <h3 class="setup-h">Chào & khuyến mãi</h3>
+        <p class="b-caption panel-intro">
+          Gửi <strong>trước</strong> khi bot trả lời AI: phiên thử mới, hoặc trên Messenger khi khách bấm
+          <strong>Bắt đầu (Get Started)</strong>, vào qua link <code>m.me</code> (referral), opt-in plugin, hoặc ngay khi webhook nhận tin.
+          Facebook <em>không</em> báo khi khách chỉ mở cửa sổ chat — hãy bật nút Get Started (Botty tự gắn khi kiểm tra kết nối Facebook).
+          Nhiều tin: chữ và/hoặc ảnh (tự nén dưới 5MB).
+        </p>
+        <label class="b-switch order-toggle">
+          <input
+            type="checkbox"
+            :checked="form.sessionGreetingEnabled"
+            @change="form.sessionGreetingEnabled = $event.target.checked"
+          />
+          <span class="b-switch-track" aria-hidden="true" />
+          Bật chào & tin khuyến mãi đầu phiên
+        </label>
+
+        <div v-if="form.sessionGreetingEnabled" class="greeting-list">
+          <div
+            v-for="(item, idx) in form.sessionGreetings"
+            :key="item._key"
+            class="greeting-item b-card b-card-pad"
+          >
+            <form class="greeting-item-form" @submit.prevent>
+            <div class="greeting-item-head">
+              <span class="b-micro">Tin {{ idx + 1 }}</span>
+              <button
+                type="button"
+                class="text-danger"
+                :disabled="form.sessionGreetings.length <= 1"
+                @click="removeGreetingItem(idx)"
+              >
+                Xóa
+              </button>
+            </div>
+            <label class="b-field">
+              <span>Nội dung</span>
+              <textarea
+                v-model="item.text"
+                class="b-textarea"
+                rows="3"
+                placeholder="Xin chào! Shop đang giảm 20%…"
+              />
+            </label>
+            <div class="greeting-image-field">
+              <span class="b-field-label">Ảnh khuyến mãi (tuỳ chọn)</span>
+              <div class="greeting-image-actions">
+                <label class="greeting-pick">
+                  <input
+                    type="file"
+                    class="sr-only"
+                    :accept="greetingImageAccept"
+                    :disabled="greetingUploading === idx"
+                    @change="onGreetingImagePick(idx, $event)"
+                  />
+                  <span class="b-btn b-btn--ghost b-btn--sm">
+                    {{ greetingUploading === idx ? 'Đang tải…' : item.imageUrl ? 'Đổi ảnh' : 'Chọn ảnh' }}
+                  </span>
+                </label>
+                <button
+                  v-if="item.imageUrl"
+                  type="button"
+                  class="text-danger"
+                  :disabled="greetingUploading === idx"
+                  @click="clearGreetingImage(idx)"
+                >
+                  Gỡ ảnh
+                </button>
+              </div>
+              <p class="b-micro greeting-image-hint">JPG, PNG, WebP, GIF — hệ thống nén xuống dưới 5MB.</p>
+              <p v-if="greetingImageError && greetingErrorIndex === idx" class="b-msg-err greeting-img-err">
+                {{ greetingImageError }}
+              </p>
+            </div>
+            <img
+              v-if="item.imageUrl"
+              :src="item.imageUrl"
+              alt="Xem trước ảnh chào phiên"
+              class="greeting-preview"
+              loading="lazy"
+            />
+            </form>
+          </div>
+          <button
+            type="button"
+            class="b-btn b-btn--ghost b-btn--sm"
+            :disabled="form.sessionGreetings.length >= 12"
+            @click="addGreetingItem"
+          >
+            + Thêm tin
+          </button>
+        </div>
       </section>
 
       <section v-show="modelValue === 'orders'" id="section-orders" class="setup-section">
@@ -315,6 +414,8 @@
 import { computed, ref, watch } from 'vue'
 import { RouterLink } from 'vue-router'
 import { Eye, EyeOff } from '@lucide/vue'
+import { api, ApiError, apiMessage } from '@/api'
+import { compressImageFile, GREETING_IMAGE_ACCEPT, GREETING_IMAGE_MAX_BYTES } from '@/utils/imageCompress'
 import {
   REPLY_LANGUAGE_MODES,
   REPLY_LANGUAGE_OPTIONS,
@@ -340,6 +441,10 @@ const props = defineProps({
 
 const auth = useAuthStore()
 const showGeminiKey = ref(false)
+const greetingUploading = ref(-1)
+const greetingImageError = ref('')
+const greetingErrorIndex = ref(-1)
+const greetingImageAccept = GREETING_IMAGE_ACCEPT
 
 watch(
   () => auth.user?.id,
@@ -355,8 +460,68 @@ const sections = [
   { id: 'gemini', label: 'Gemini' },
   { id: 'docs', label: 'Tài liệu' },
   { id: 'voice', label: 'Giọng điệu' },
+  { id: 'greeting', label: 'Chào phiên' },
   { id: 'orders', label: 'Chốt đơn' },
 ]
+
+function greetingKey() {
+  return `g-${Date.now()}-${Math.random().toString(36).slice(2, 7)}`
+}
+
+async function onGreetingImagePick(idx, event) {
+  greetingImageError.value = ''
+  greetingErrorIndex.value = -1
+  const input = event.target
+  const file = input?.files?.[0]
+  input.value = ''
+  if (!file || !props.bot?.id) return
+
+  greetingUploading.value = idx
+  try {
+    const blob = await compressImageFile(file, { maxBytes: GREETING_IMAGE_MAX_BYTES })
+    const uploadFile = new File([blob], 'greeting.jpg', { type: blob.type || 'image/jpeg' })
+    const data = await api.bots.uploadGreetingImage(props.bot.id, uploadFile)
+    if (props.form.sessionGreetings?.[idx]) {
+      props.form.sessionGreetings[idx].imageUrl = data?.url || ''
+    }
+  } catch (err) {
+    greetingErrorIndex.value = idx
+    if (err instanceof ApiError) {
+      greetingImageError.value = apiMessage(err)
+    } else if (err?.message === 'IMAGE_FORMAT') {
+      greetingImageError.value = 'Chỉ hỗ trợ JPG, PNG, WebP hoặc GIF.'
+    } else if (err?.message === 'IMAGE_TOO_LARGE') {
+      greetingImageError.value = 'Ảnh quá lớn — chọn ảnh khác hoặc crop nhỏ hơn.'
+    } else {
+      greetingImageError.value = 'Không tải được ảnh. Thử lại.'
+    }
+  } finally {
+    greetingUploading.value = -1
+  }
+}
+
+function clearGreetingImage(idx) {
+  if (props.form.sessionGreetings?.[idx]) {
+    props.form.sessionGreetings[idx].imageUrl = ''
+  }
+  if (greetingErrorIndex.value === idx) {
+    greetingImageError.value = ''
+    greetingErrorIndex.value = -1
+  }
+}
+
+function addGreetingItem() {
+  if (!Array.isArray(props.form.sessionGreetings)) {
+    props.form.sessionGreetings = []
+  }
+  if (props.form.sessionGreetings.length >= 12) return
+  props.form.sessionGreetings.push({ _key: greetingKey(), text: '', imageUrl: '' })
+}
+
+function removeGreetingItem(index) {
+  if (!Array.isArray(props.form.sessionGreetings) || props.form.sessionGreetings.length <= 1) return
+  props.form.sessionGreetings.splice(index, 1)
+}
 
 const emit = defineEmits(['update:modelValue', 'update:docTitle', 'update:docContent', 'add-doc', 'delete-doc'])
 
@@ -397,7 +562,7 @@ const docContentModel = computed({
 .setup-panel {
   border: 1px solid var(--b-border);
   border-radius: 16px;
-  background: #fff;
+  background: var(--color-surface);
   padding: 20px 22px 24px;
   box-shadow: var(--b-shadow);
 }
@@ -440,7 +605,7 @@ const docContentModel = computed({
 }
 
 .setup-tab.on {
-  background: #fff;
+  background: var(--color-surface);
   color: var(--b-ink);
   font-weight: 600;
   box-shadow: 0 2px 8px rgba(15, 23, 42, 0.06);
@@ -518,6 +683,78 @@ const docContentModel = computed({
   line-height: 1.45;
 }
 
+.greeting-list {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  margin-top: 8px;
+}
+
+.greeting-item-form {
+  margin: 0;
+}
+
+.greeting-item-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 10px;
+}
+
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+.greeting-image-field {
+  margin-bottom: 10px;
+}
+
+.b-field-label {
+  display: block;
+  margin-bottom: 6px;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--b-ink-secondary);
+}
+
+.greeting-image-actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 10px;
+}
+
+.greeting-pick {
+  display: inline-block;
+  cursor: pointer;
+}
+
+.greeting-image-hint {
+  margin: 8px 0 0;
+}
+
+.greeting-img-err {
+  margin: 8px 0 0;
+}
+
+.greeting-preview {
+  display: block;
+  max-width: 200px;
+  max-height: 200px;
+  margin-top: 8px;
+  border-radius: 8px;
+  border: 1px solid var(--b-border);
+  object-fit: cover;
+}
+
 .pay-block {
   margin: 12px 0 18px;
   background: var(--b-surface-2);
@@ -573,20 +810,7 @@ const docContentModel = computed({
 }
 
 .lang-mode-card {
-  display: grid;
-  gap: 4px;
-  padding: 10px 12px;
-  border-radius: 10px;
-  border: 1px solid var(--b-border);
-  background: #fff;
-  cursor: pointer;
-  transition: border-color 0.15s ease, box-shadow 0.15s ease;
-}
-
-.lang-mode-card:has(input:checked),
-.lang-mode-card.on {
-  border-color: var(--b-accent);
-  box-shadow: 0 0 0 1px rgba(21, 128, 61, 0.12);
+  margin: 0;
 }
 
 .setup-form-plain {
@@ -600,13 +824,8 @@ const docContentModel = computed({
   margin: 0 0 14px;
 }
 
-.ai-mode-opt {
-  display: flex;
-  align-items: center;
-  gap: 8px;
+.ai-mode-fieldset .b-choice-grid {
   margin-top: 8px;
-  font-size: 14px;
-  cursor: pointer;
 }
 
 .upgrade-box {
@@ -669,23 +888,6 @@ const docContentModel = computed({
 
 .input-reveal__btn:hover {
   color: var(--b-ink);
-}
-
-.lang-mode-card input {
-  position: absolute;
-  opacity: 0;
-  pointer-events: none;
-}
-
-.lang-mode-label {
-  font-size: 13px;
-  font-weight: 600;
-  color: var(--b-ink);
-  line-height: 1.35;
-}
-
-.lang-mode-hint {
-  line-height: 1.4;
 }
 
 .lang-default-field {

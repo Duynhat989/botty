@@ -83,11 +83,6 @@ img {
   content: '';
   position: fixed;
   inset: 0;
-  background-image: url('/threads-bg.jpg');
-  background-size: cover;
-  background-position: center;
-  background-repeat: no-repeat;
-  opacity: 0.08;
   pointer-events: none;
   z-index: -1;
 }
@@ -794,6 +789,18 @@ input[type='radio'],
 input[type='range'],
 input[type='file'] {
   font-size: inherit;
+  width: auto;
+  max-width: none;
+  min-height: 0;
+  padding: 0;
+  border-radius: 0;
+  background: transparent;
+}
+
+input[type='checkbox'],
+input[type='radio'] {
+  accent-color: var(--accent, #22c55e);
+  cursor: pointer;
 }
 
 /* Ép 16px trên mobile kể cả scoped CSS — Safari zoom nếu < 16px */

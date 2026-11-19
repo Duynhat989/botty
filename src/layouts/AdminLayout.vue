@@ -2,22 +2,37 @@
   <div class="admin-shell">
     <aside class="admin-side">
       <RouterLink to="/" class="brand">
-        <strong>Dyna<span>Geo</span></strong>
+        <strong>Bot<span>ty</span></strong>
         <em>{{ t('admin.badge') }}</em>
       </RouterLink>
       <nav :aria-label="t('admin.navAria')">
+        <RouterLink to="/admin" :class="{ on: route.path === '/admin' || route.path === '/admin/' }">
+          {{ t('admin.navOverview') }}
+        </RouterLink>
         <RouterLink to="/admin/users" :class="{ on: route.path.startsWith('/admin/users') }">
           {{ t('admin.navUsers') }}
         </RouterLink>
-        <RouterLink to="/admin/orders" :class="{ on: route.path.startsWith('/admin/orders') }">
-          {{ t('admin.navOrders') }}
+        <RouterLink to="/admin/notifications" :class="{ on: route.path.startsWith('/admin/notifications') }">
+          {{ t('admin.navNotifications') }}
+        </RouterLink>
+        <RouterLink to="/admin/bots" :class="{ on: route.path.startsWith('/admin/bots') }">
+          {{ t('admin.navBots') }}
+        </RouterLink>
+        <RouterLink to="/admin/ai-config" :class="{ on: route.path.startsWith('/admin/ai-config') }">
+          {{ t('admin.navAi') }}
         </RouterLink>
         <RouterLink to="/admin/packages" :class="{ on: route.path.startsWith('/admin/packages') }">
           {{ t('admin.navPackages') }}
         </RouterLink>
+        <RouterLink to="/admin/orders" :class="{ on: route.path.startsWith('/admin/orders') }">
+          {{ t('admin.navOrders') }}
+        </RouterLink>
+        <RouterLink to="/admin/settings" :class="{ on: route.path.startsWith('/admin/settings') }">
+          {{ t('admin.navSettings') }}
+        </RouterLink>
       </nav>
       <div class="side-foot">
-        <RouterLink to="/profile">{{ t('admin.backProfile') }}</RouterLink>
+        <RouterLink to="/account">{{ t('admin.backProfile') }}</RouterLink>
         <button type="button" @click="logout">{{ t('admin.logout') }}</button>
       </div>
     </aside>

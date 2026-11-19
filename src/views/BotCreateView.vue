@@ -36,7 +36,7 @@
 import { ref } from 'vue'
 import { useRouter, RouterLink } from 'vue-router'
 import { ArrowLeft } from '@lucide/vue'
-import { api } from '@/api'
+import { api, ApiError, apiMessage } from '@/api'
 
 const router = useRouter()
 const name = ref('')
@@ -52,7 +52,7 @@ async function submit() {
     if (id) router.push(`/bots/${id}/test`)
     else router.push('/')
   } catch (e) {
-    error.value = 'Không tạo được bot. Thử lại.'
+    error.value = e instanceof ApiError ? apiMessage(e) : 'Không tạo được bot. Thử lại.'
     console.error(e)
   } finally {
     saving.value = false

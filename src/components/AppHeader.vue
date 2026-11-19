@@ -38,6 +38,8 @@
       <div class="top-actions">
         <!-- Logged in state -->
         <template v-if="auth.isLoggedIn">
+          <NotificationBell />
+
           <RouterLink
             to="/pricing"
             class="credit-pill"
@@ -52,9 +54,9 @@
           </RouterLink>
 
           <RouterLink
-            to="/profile"
+            to="/account"
             class="profile-btn"
-            :class="{ on: route.path.startsWith('/profile') }"
+            :class="{ on: route.path.startsWith('/account') }"
             :title="t('nav.profileTitle')"
           >
             <div class="avatar-circle">
@@ -121,7 +123,7 @@
           </RouterLink>
 
           <template v-if="auth.isLoggedIn">
-            <RouterLink to="/profile" :class="{ on: route.path.startsWith('/profile') }" @click="closeMobile">
+            <RouterLink to="/account" :class="{ on: route.path.startsWith('/account') }" @click="closeMobile">
               <User :size="18" :stroke-width="2" />
               <span>{{ t('nav.mobileProfile') }}</span>
             </RouterLink>
@@ -161,6 +163,7 @@ import {
 import { useAuthStore } from '@/stores/auth'
 import { useDrawSessionStore } from '@/stores/drawSession'
 import { useI18n } from '@/i18n'
+import NotificationBell from '@/components/NotificationBell.vue'
 
 const route = useRoute()
 const router = useRouter()
@@ -437,6 +440,7 @@ onUnmounted(() => {
   gap: 10px;
   flex-shrink: 0;
 }
+
 
 .lang-menu {
   position: relative;

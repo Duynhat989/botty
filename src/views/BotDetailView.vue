@@ -60,15 +60,26 @@ watch(() => route.params.id, load)
   gap: 1rem;
 }
 
+.detail-loading {
+  width: min(100%, 90vw);
+  max-width: none;
+  margin: 0 auto;
+  padding: 1rem 0 2rem;
+}
+
 .detail-loading .load-card {
   display: grid;
   gap: 12px;
+  border-radius: 22px;
+  border: 1px solid var(--accent-border, #bbf7d0);
+  background: radial-gradient(120% 100% at 50% 0%, #ecfdf5 0%, #fff 55%, #f8fafc 100%);
+  box-shadow: 0 14px 40px -28px rgba(34, 197, 94, 0.18);
 }
 
 .load-shimmer {
   height: 14px;
   border-radius: 8px;
-  background: linear-gradient(90deg, #eef2f0 0%, #f8faf9 50%, #eef2f0 100%);
+  background: linear-gradient(90deg, #e8f5ee 0%, #f4faf7 50%, #e8f5ee 100%);
   background-size: 200% 100%;
   animation: shimmer 1.2s ease-in-out infinite;
 }

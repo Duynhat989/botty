@@ -153,7 +153,7 @@ import { computed, reactive, ref, watch } from 'vue'
 import { Eye, EyeOff } from '@lucide/vue'
 import { useRouter, RouterLink } from 'vue-router'
 import { useAuthStore } from '@/stores/auth'
-import { api } from '@/api'
+import { api, ApiError, apiMessage } from '@/api'
 import { confirm as askConfirm } from '@/composables/useConfirm'
 import { attachEncryptedGeminiKey } from '@/utils/geminiKeyCrypto'
 import { ensureGeminiPinForUser } from '@/utils/ensureGeminiPin'
@@ -240,13 +240,7 @@ async function nextFromStep1() {
     step.value = 2
     emit('created')
   } catch (e) {
-    if (e?.code === 'BOT_LIMIT_REACHED') {
-      error.value =
-        e?.message ||
-        'Miễn phí chỉ 1 bot. Mua gói Botty AI trên trang Gói cước để tạo không giới hạn.'
-    } else {
-      error.value = 'Không tạo được bot. Thử lại.'
-    }
+    error.value = e instanceof ApiError ? apiMessage(e) : 'Không tạo được bot. Thử lại.'
     console.error(e)
   } finally {
     saving.value = false

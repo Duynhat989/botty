@@ -1,0 +1,13 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 600 264" fill="none" role="img" aria-label="Kho hàng">
+  <rect width="600" height="264" fill="#ECFDF5"/>
+  <rect x="64" y="44" width="472" height="176" rx="16" fill="#fff" stroke="#BBF7D0"/>
+  <rect x="88" y="68" width="200" height="56" rx="12" fill="#F0FDF4" stroke="#86EFAC"/>
+  <rect x="100" y="82" width="80" height="10" rx="4" fill="#16A34A"/>
+  <rect x="100" y="100" width="120" height="8" rx="4" fill="#BBF7D0"/>
+  <rect x="308" y="68" width="200" height="56" rx="12" fill="#FFF7ED" stroke="#FED7AA"/>
+  <rect x="320" y="84" width="100" height="8" rx="4" fill="#EA580C"/>
+  <rect x="88" y="144" width="420" height="52" rx="10" fill="#F8FAFC" stroke="#E2E8F0"/>
+  <rect x="104" y="160" width="12" height="20" rx="3" fill="#22C55E"/>
+  <rect x="128" y="160" width="200" height="8" rx="4" fill="#CBD5E1"/>
+  <rect x="128" y="176" width="140" height="8" rx="4" fill="#E2E8F0"/>
+</svg>

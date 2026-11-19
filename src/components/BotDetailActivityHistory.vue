@@ -44,7 +44,14 @@
 
       <p v-if="!sessions.length" class="b-caption">Chưa có tin nhắn.</p>
 
-      <ul v-else class="session-list">
+      <p v-if="sessions.length && pagination.total" class="hist-summary b-caption">
+        {{ pagination.total }} phiên
+        <template v-if="pagination.totalPages > 1">
+          · trang {{ pagination.page }}/{{ pagination.totalPages }}
+        </template>
+      </p>
+
+      <ul v-if="sessions.length" class="session-list">
         <li
           v-for="s in sessions"
           :key="s.channel + ':' + s.peerId"
@@ -98,6 +105,32 @@
           </div>
         </li>
       </ul>
+
+      <nav
+        v-if="pagination.totalPages > 1"
+        class="hist-pager"
+        aria-label="Phân trang phiên chat"
+      >
+        <button
+          type="button"
+          class="b-btn b-btn--ghost b-btn--sm"
+          :disabled="loading || pagination.page <= 1"
+          @click="goPage(pagination.page - 1)"
+        >
+          Trước
+        </button>
+        <span class="pager-meta">
+          Trang {{ pagination.page }} / {{ pagination.totalPages }}
+        </span>
+        <button
+          type="button"
+          class="b-btn b-btn--ghost b-btn--sm"
+          :disabled="loading || pagination.page >= pagination.totalPages"
+          @click="goPage(pagination.page + 1)"
+        >
+          Sau
+        </button>
+      </nav>
     </template>
   </div>
 </template>
@@ -110,10 +143,19 @@ const props = defineProps({
   bot: { type: Object, required: true },
 })
 
+const PAGE_SIZE = 15
+
 const loading = ref(true)
 const sessions = ref([])
 const channelFilter = ref('')
 const openKeys = ref(new Set())
+const page = ref(1)
+const pagination = ref({
+  page: 1,
+  pageSize: PAGE_SIZE,
+  total: 0,
+  totalPages: 1,
+})
 
 function sessionKey(s) {
   return `${s.channel}:${s.peerId}`
@@ -149,11 +191,28 @@ function formatTime(iso) {
 async function load() {
   loading.value = true
   try {
-    const data = await api.bots.activity(
-      props.bot.id,
-      channelFilter.value || null,
-    )
+    const data = await api.bots.activity(props.bot.id, channelFilter.value || null, {
+      page: page.value,
+      limit: PAGE_SIZE,
+    })
     sessions.value = data?.sessions || []
+    const p = data?.pagination
+    if (p) {
+      pagination.value = {
+        page: p.page ?? page.value,
+        pageSize: p.pageSize ?? PAGE_SIZE,
+        total: p.total ?? 0,
+        totalPages: p.totalPages ?? 1,
+      }
+      page.value = pagination.value.page
+    } else {
+      pagination.value = {
+        page: 1,
+        pageSize: PAGE_SIZE,
+        total: sessions.value.length,
+        totalPages: 1,
+      }
+    }
     openKeys.value = new Set()
   } catch (e) {
     console.error(e)
@@ -165,6 +224,15 @@ async function load() {
 
 function setChannel(ch) {
   channelFilter.value = ch
+  page.value = 1
+  openKeys.value = new Set()
+  load()
+}
+
+function goPage(next) {
+  const n = Math.max(1, Math.min(next, pagination.value.totalPages || 1))
+  if (n === page.value) return
+  page.value = n
   openKeys.value = new Set()
   load()
 }
@@ -185,11 +253,31 @@ onMounted(load)
   margin: 4px 0 0;
 }
 
+.hist-summary {
+  margin: 0 0 10px;
+}
+
 .filter-row {
   display: flex;
   flex-wrap: wrap;
   gap: 8px;
   margin-bottom: 14px;
+}
+
+.hist-pager {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: center;
+  gap: 10px 14px;
+  margin-top: 18px;
+  padding-top: 14px;
+  border-top: 1px solid var(--b-border);
+}
+
+.pager-meta {
+  font-size: 13px;
+  color: var(--b-muted);
 }
 
 .filter-btn {

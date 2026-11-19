@@ -47,7 +47,18 @@
                 <hr class="sep" />
                 <RouterLink to="/account" class="menu-item" role="menuitem" @click="closeMenus">Trang cá nhân</RouterLink>
                 <RouterLink to="/contact" class="menu-item" role="menuitem" @click="closeMenus">Liên hệ</RouterLink>
-                <RouterLink to="/report" class="menu-item" role="menuitem" @click="closeMenus">Báo cáo sự cố</RouterLink>
+                <RouterLink to="/contact#incident-report" class="menu-item" role="menuitem" @click="closeMenus">
+                  Báo cáo sự cố
+                </RouterLink>
+                <RouterLink
+                  v-if="auth.isAdmin"
+                  to="/admin"
+                  class="menu-item"
+                  role="menuitem"
+                  @click="closeMenus"
+                >
+                  Quản trị
+                </RouterLink>
                 <hr class="sep" />
                 <button type="button" class="menu-item danger" role="menuitem" @click="logout">Đăng xuất</button>
               </div>
@@ -107,9 +118,7 @@
       <RouterView />
     </main>
 
-    <footer v-if="!isLogin" class="site-foot">
-      <p>Phản hồi tự động Facebook — miễn phí với Gemini API key của bạn</p>
-    </footer>
+    <AppFooter v-if="showSiteFooter" />
 
   </div>
 </template>
@@ -120,6 +129,7 @@ import { RouterLink, useRoute, useRouter } from 'vue-router'
 import { ChevronDown } from '@lucide/vue'
 import { useAuthStore } from '@/stores/auth'
 import { geminiPinGateState, openGeminiPinSetup } from '@/composables/useGeminiPinGate'
+import AppFooter from '@/components/AppFooter.vue'
 
 const auth = useAuthStore()
 const router = useRouter()
@@ -154,6 +164,9 @@ const isWorkspace = computed(() => Boolean(route.meta.workspace))
 const isWorkspaceWide = computed(() => route.name === 'bot-detail')
 const isBotTestTab = computed(
   () => route.name === 'bot-detail' && String(route.params.tab || 'test') === 'test',
+)
+const showSiteFooter = computed(
+  () => !isLogin.value && !isPinReset.value && !isBotTestTab.value,
 )
 
 const navItems = [
@@ -630,19 +643,8 @@ onUnmounted(() => {
   display: flex;
   align-items: center;
   justify-content: center;
-  padding: 44px 20px 56px;
+  padding: clamp(32px, 6vw, 56px) clamp(16px, 4vw, 28px);
+  background: linear-gradient(180deg, rgb(255 237 229 / 45%) 0%, #fff 42%, #fff 100%);
 }
 
-.site-foot {
-  border-top: 1px solid var(--b-border);
-  background: #fff;
-  padding: 20px 24px;
-}
-
-.site-foot p {
-  margin: 0;
-  text-align: center;
-  font-size: 13.5px;
-  color: var(--b-muted);
-}
 </style>

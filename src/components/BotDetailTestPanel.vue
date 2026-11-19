@@ -16,23 +16,50 @@
 
       <div class="test-stage-main">
       <section class="session-panel" aria-labelledby="session-heading">
-        <h2 id="session-heading" class="session-panel-title">Phiên chat</h2>
-        <p class="session-panel-meta">Bot nhớ tin trong phiên này (lưu server).</p>
-        <code class="session-chip">{{ sessionShort }}</code>
-        <p class="side-stat"><strong>{{ chatMessages.length }}</strong> tin trong phiên</p>
-        <button
-          type="button"
-          class="b-btn b-btn--primary b-btn--sm session-new-btn"
-          :disabled="testLoading"
-          @click="startNewTestSession"
-        >
-          Tạo phiên mới
-        </button>
-        <p class="b-micro session-new-hint">Phiên mới = bot không nhớ tin phiên cũ (ngôn ngữ theo tin đầu tiên mới).</p>
+        <header class="session-head">
+          <p class="session-kicker">Phiên thử</p>
+          <h2 id="session-heading" class="session-panel-title">Bộ nhớ chat</h2>
+          <p class="session-panel-meta">Lịch sử gắn với mã phiên — bot dùng để trả lời liên tục.</p>
+        </header>
 
-        <RouterLink :to="tabRoute('dashboard')" class="b-btn b-btn--ghost b-btn--sm session-dash-link">
-          Xem Dashboard
-        </RouterLink>
+        <div class="session-card">
+          <div class="session-metric">
+            <span class="session-metric-value">{{ chatMessages.length }}</span>
+            <span class="session-metric-label">tin trong phiên</span>
+          </div>
+
+          <div class="session-id-block">
+            <span class="session-id-label">Mã phiên</span>
+            <div class="session-id-row">
+              <code class="session-chip" :title="fullSessionId">{{ sessionShort }}</code>
+              <button
+                type="button"
+                class="session-copy"
+                :disabled="!fullSessionId"
+                @click="copySessionId"
+              >
+                {{ copySessionOk ? 'Đã chép' : 'Sao chép' }}
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <div class="session-actions">
+          <button
+            type="button"
+            class="b-btn b-btn--primary b-btn--sm"
+            :disabled="testLoading"
+            @click="startNewTestSession"
+          >
+            Phiên mới
+          </button>
+          <RouterLink :to="tabRoute('dashboard')" class="b-btn b-btn--ghost b-btn--sm">
+            Dashboard
+          </RouterLink>
+        </div>
+        <p class="b-caption session-new-hint">
+          Phiên mới: bot quên tin cũ; ngôn ngữ trả lời lấy theo tin khách đầu tiên của phiên đó.
+        </p>
 
         <div v-if="!bot.hasGeminiKey" class="warn-box session-warn">
           <template v-if="bot.usesBottyAi">
@@ -49,12 +76,7 @@
         </div>
       </section>
 
-      <section class="phone-panel" aria-labelledby="phone-heading">
-        <header class="phone-panel-head">
-          <h2 id="phone-heading" class="main-title">Hội thoại mẫu</h2>
-          <p class="main-caption">Tỷ lệ điện thoại — thử như khách Messenger</p>
-        </header>
-
+      <section class="phone-panel" aria-label="Thử phản hồi">
         <div class="phone-frame" role="region" aria-label="Khung chat mẫu">
           <div class="phone-notch" aria-hidden="true" />
           <div class="phone-screen">
@@ -66,41 +88,45 @@
             <div class="chat-shell">
               <div ref="chatScroll" class="chat-log" role="log" aria-live="polite">
                 <p v-if="!chatMessages.length && !testLoading" class="chat-empty b-caption">
-                  Bấm <strong>Gợi ý & công cụ</strong> hoặc gõ tin nhắn khách mẫu.
+                  Phiên mới: bot gửi <strong>chào phiên</strong> trước (nếu bật trong Cấu hình). Sau đó gõ tin khách mẫu.
                 </p>
-                <TransitionGroup name="bubble" tag="div" class="chat-stream">
-                  <div
-                    v-for="(m, i) in chatMessages"
-                    :key="'m-' + i"
-                    class="chat-bubble"
-                    :class="m.role"
-                  >
-                    <span class="chat-role">{{ m.role === 'user' ? 'Khách' : bot.name }}</span>
-                    <p v-if="m.text" class="chat-text">{{ m.text }}</p>
-                    <div v-if="m.imageUrls?.length" class="chat-images">
+                <div v-else class="chat-log-anchor">
+                  <div class="chat-stream">
+                    <div
+                      v-for="m in chatMessages"
+                      :key="m._key"
+                      class="chat-bubble"
+                      :class="m.role"
+                    >
+                      <span class="chat-role">{{ m.role === 'user' ? 'Khách' : bot.name }}</span>
+                      <p v-if="m.text" class="chat-text">{{ m.text }}</p>
+                      <div v-if="m.imageUrls?.length" class="chat-images">
+                        <img
+                          v-for="(url, j) in m.imageUrls"
+                          :key="'img-' + j"
+                          :src="url"
+                          alt="Ảnh khách gửi"
+                          class="chat-user-img"
+                          loading="lazy"
+                          @load="scrollChatToBottom('auto')"
+                        />
+                      </div>
                       <img
-                        v-for="(url, j) in m.imageUrls"
-                        :key="'img-' + j"
-                        :src="url"
-                        alt="Ảnh khách gửi"
-                        class="chat-user-img"
+                        v-if="m.qrImageUrl"
+                        :src="m.qrImageUrl"
+                        alt="Mã QR thanh toán"
+                        class="payment-qr"
                         loading="lazy"
+                        @load="scrollChatToBottom('auto')"
                       />
                     </div>
-                    <img
-                      v-if="m.qrImageUrl"
-                      :src="m.qrImageUrl"
-                      alt="Mã QR thanh toán"
-                      class="payment-qr"
-                      loading="lazy"
-                    />
                   </div>
-                </TransitionGroup>
-                <div v-if="testLoading" class="chat-bubble bot typing">
-                  <span class="chat-role">{{ bot.name }}</span>
-                  <span class="typing-dots" aria-label="Bot đang trả lời">
-                    <span /><span /><span />
-                  </span>
+                  <div v-if="testLoading" class="chat-bubble bot typing">
+                    <span class="chat-role">{{ bot.name }}</span>
+                    <span class="typing-dots" aria-label="Bot đang trả lời">
+                      <span /><span /><span />
+                    </span>
+                  </div>
                 </div>
               </div>
 
@@ -125,18 +151,19 @@
                 <button
                   type="button"
                   class="compose-attach"
-                  title="Gửi ảnh"
+                  aria-label="Đính kèm ảnh"
+                  title="Đính kèm ảnh"
                   :disabled="testLoading || !bot.hasGeminiKey || pendingImages.length >= maxComposeImages"
                   @click="fileInputRef?.click()"
                 >
-                  Ảnh
+                  <ImagePlus :size="20" :stroke-width="2" aria-hidden="true" />
                 </button>
                 <textarea
                   ref="composeAreaRef"
                   v-model="testInput"
-                  class="b-input chat-input chat-textarea"
+                  class="compose-field"
                   rows="1"
-                  placeholder="Nhắn tin… (Enter gửi, Shift+Enter xuống dòng)"
+                  placeholder="Nhắn tin…"
                   :disabled="testLoading || !bot.hasGeminiKey"
                   autocomplete="off"
                   @keydown="onComposeKeydown"
@@ -144,10 +171,13 @@
                 />
                 <button
                   type="submit"
-                  class="b-btn b-btn--primary b-btn--sm compose-send"
+                  class="compose-send"
+                  :class="{ 'compose-send--busy': testLoading }"
+                  aria-label="Gửi tin"
                   :disabled="testLoading || !canSendTest || !bot.hasGeminiKey"
                 >
-                  {{ testLoading ? '…' : 'Gửi' }}
+                  <Loader2 v-if="testLoading" class="compose-send-spin" :size="18" aria-hidden="true" />
+                  <Send v-else :size="18" :stroke-width="2.25" aria-hidden="true" />
                 </button>
               </form>
               <p v-if="testError" class="b-msg-err chat-err">{{ testError }}</p>
@@ -246,6 +276,7 @@
 <script setup>
 import { computed, nextTick, onMounted, onUnmounted, ref, watch } from 'vue'
 import { RouterLink } from 'vue-router'
+import { ImagePlus, Loader2, Send } from '@lucide/vue'
 import { api } from '@/api'
 import { confirm as askConfirm } from '@/composables/useConfirm'
 const props = defineProps({
@@ -264,6 +295,69 @@ const pendingImages = ref([])
 const testSessionId = ref('')
 const toolsOpen = ref(false)
 const maxComposeImages = 4
+let chatMessageSeq = 0
+
+function withMessageKey(entry) {
+  chatMessageSeq += 1
+  return { ...entry, _key: `msg-${chatMessageSeq}` }
+}
+
+function scrollChatToBottom(behavior = 'auto') {
+  const run = () => {
+    const el = chatScroll.value
+    if (!el) return
+    const top = el.scrollHeight - el.clientHeight
+    if (behavior === 'smooth' && typeof el.scrollTo === 'function') {
+      el.scrollTo({ top, behavior: 'smooth' })
+    } else {
+      el.scrollTop = top
+    }
+  }
+  nextTick(() => {
+    requestAnimationFrame(() => {
+      requestAnimationFrame(run)
+    })
+  })
+}
+
+function mapHistoryMessage(m, index) {
+  return withMessageKey({
+    role: m.role,
+    text: m.text,
+    qrImageUrl: m.qrImageUrl || null,
+    imageUrls: Array.isArray(m.imageUrls) ? m.imageUrls : [],
+    isSessionGreeting: Boolean(m.isSessionGreeting),
+    _historyIndex: index,
+  })
+}
+
+function appendSessionGreetings(greetings) {
+  for (const g of greetings) {
+    chatMessages.value.push(
+      withMessageKey({
+        role: 'bot',
+        text: g.text || '',
+        imageUrls: g.imageUrl ? [g.imageUrl] : [],
+        isSessionGreeting: true,
+      }),
+    )
+  }
+}
+
+async function deliverSessionGreetingIfNew() {
+  if (!props.bot.sessionGreetingEnabled) return
+  const sid = ensureTestSessionId()
+  try {
+    const data = await api.bots.triggerSessionGreeting(props.bot.id, sid)
+    const greetings = Array.isArray(data?.sessionGreetings) ? data.sessionGreetings : []
+    if (greetings.length) {
+      appendSessionGreetings(greetings)
+      scrollChatToBottom('smooth')
+    }
+  } catch (e) {
+    console.error(e)
+  }
+}
 
 const canSendTest = computed(
   () => Boolean(testInput.value.trim() || pendingImages.value.length),
@@ -283,11 +377,33 @@ const quickLinks = computed(() => [
   { label: 'Chốt đơn', to: props.tabRoute('setup', 'orders') },
 ])
 
+const copySessionOk = ref(false)
+let copySessionTimer = null
+
+const fullSessionId = computed(() => String(testSessionId.value || '').trim())
+
 const sessionShort = computed(() => {
-  const s = testSessionId.value || ''
-  if (s.length <= 12) return s || '…'
+  const s = fullSessionId.value
+  if (!s) return '…'
+  if (s.length <= 14) return s
   return `${s.slice(0, 8)}…${s.slice(-4)}`
 })
+
+async function copySessionId() {
+  const id = fullSessionId.value || ensureTestSessionId()
+  if (!id) return
+  try {
+    await navigator.clipboard.writeText(id)
+    copySessionOk.value = true
+    if (copySessionTimer) clearTimeout(copySessionTimer)
+    copySessionTimer = setTimeout(() => {
+      copySessionOk.value = false
+      copySessionTimer = null
+    }, 2000)
+  } catch {
+    /* ignore */
+  }
+}
 
 function sessionStorageKey() {
   return `botty-test-session-${props.bot.id}`
@@ -332,6 +448,7 @@ async function startNewTestSession() {
   testError.value = ''
   testInput.value = ''
   pendingImages.value = []
+  await deliverSessionGreetingIfNew()
 }
 
 let paymentPollTimer = null
@@ -377,22 +494,20 @@ async function loadTestHistory(opts = {}) {
   try {
     const data = await api.bots.chatHistory(props.bot.id, sid)
     const prevLen = chatMessages.value.length
+    chatMessageSeq = 0
     chatMessages.value = Array.isArray(data?.messages)
-      ? data.messages.map((m) => ({
-          role: m.role,
-          text: m.text,
-          qrImageUrl: m.qrImageUrl || null,
-          imageUrls: Array.isArray(m.imageUrls) ? m.imageUrls : [],
-        }))
+      ? data.messages.map((m, i) => mapHistoryMessage(m, i))
       : []
+    if (!chatMessages.value.length) {
+      await deliverSessionGreetingIfNew()
+    }
+    scrollChatToBottom('auto')
     if (
       opts.silent &&
       chatMessages.value.length > prevLen &&
       chatMessages.value[chatMessages.value.length - 1]?.text?.includes('đã ghi nhận')
     ) {
       stopPaymentPoll()
-      await nextTick()
-      chatScroll.value?.scrollTo?.({ top: chatScroll.value.scrollHeight, behavior: 'smooth' })
     }
   } catch (e) {
     if (!opts.silent) console.error(e)
@@ -507,26 +622,29 @@ async function sendTest() {
   const images = [...pendingImages.value]
   if ((!text && !images.length) || testLoading.value || !props.bot.hasGeminiKey) return
   testError.value = ''
-  chatMessages.value.push({
-    role: 'user',
-    text,
-    imageUrls: images.length ? images : [],
-  })
+  chatMessages.value.push(
+    withMessageKey({
+      role: 'user',
+      text,
+      imageUrls: images.length ? images : [],
+    }),
+  )
   testInput.value = ''
   pendingImages.value = []
   nextTick(resizeCompose)
   testLoading.value = true
-  await nextTick()
-  chatScroll.value?.scrollTo?.({ top: chatScroll.value.scrollHeight, behavior: 'smooth' })
+  scrollChatToBottom('smooth')
 
   try {
     const sid = testSessionId.value || ensureTestSessionId()
     const data = await api.bots.test(props.bot.id, text, sid, images)
-    chatMessages.value.push({
-      role: 'bot',
-      text: data.reply || '—',
-      qrImageUrl: data.paymentQrImageUrl || null,
-    })
+    chatMessages.value.push(
+      withMessageKey({
+        role: 'bot',
+        text: data.reply || '—',
+        qrImageUrl: data.paymentQrImageUrl || null,
+      }),
+    )
     if (data.paymentQrImageUrl) startPaymentPoll()
   } catch (e) {
     const code = e?.messageCode || e?.code
@@ -540,10 +658,18 @@ async function sendTest() {
     console.error(e)
   } finally {
     testLoading.value = false
-    await nextTick()
-    chatScroll.value?.scrollTo?.({ top: chatScroll.value.scrollHeight, behavior: 'smooth' })
+    scrollChatToBottom('smooth')
   }
 }
+
+watch(
+  () => chatMessages.value.length,
+  () => scrollChatToBottom('auto'),
+)
+
+watch(testLoading, (loading) => {
+  if (loading) scrollChatToBottom('smooth')
+})
 
 onMounted(() => {
   loadTestHistory()
@@ -553,6 +679,7 @@ onUnmounted(() => {
   stopPaymentPoll()
   window.removeEventListener('keydown', onToolsKeydown)
   document.body.style.overflow = ''
+  if (copySessionTimer) clearTimeout(copySessionTimer)
 })
 </script>
 
@@ -634,40 +761,152 @@ onUnmounted(() => {
 }
 
 .session-panel {
-  flex: 0 0 min(260px, 34%);
-  max-width: 280px;
+  flex: 0 0 min(268px, 34%);
+  max-width: 292px;
   display: flex;
   flex-direction: column;
-  gap: 8px;
+  gap: 12px;
   min-height: 0;
   max-height: 100%;
   overflow-y: auto;
-  padding: 14px 14px 16px;
-  border-radius: 14px;
+  padding: 1rem 1.1rem 1.15rem;
+  border-radius: 18px;
   border: 1px solid var(--b-border);
-  background: #fff;
-  box-shadow: 0 2px 12px rgba(15, 23, 42, 0.04);
+  background: var(--color-surface);
+  box-shadow: 0 8px 24px -22px rgba(15, 23, 42, 0.28);
+}
+
+.session-head {
+  margin: 0;
+}
+
+.session-kicker {
+  margin: 0 0 4px;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--b-accent-hover);
 }
 
 .session-panel-title {
   margin: 0;
-  font-size: 15px;
+  font-size: 1.05rem;
   font-weight: 700;
-  letter-spacing: -0.02em;
+  letter-spacing: -0.03em;
   color: var(--b-ink);
 }
 
 .session-panel-meta {
-  margin: 0;
+  margin: 6px 0 0;
   font-size: 12px;
-  line-height: 1.45;
+  line-height: 1.5;
   color: var(--b-muted);
 }
 
-.session-dash-link {
-  margin-top: 4px;
-  width: 100%;
+.session-card {
+  padding: 12px 12px 11px;
+  border-radius: 14px;
+  border: 1px solid var(--b-border);
+  background: var(--b-surface-2);
+  display: grid;
+  gap: 12px;
+}
+
+.session-metric {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.session-metric-value {
+  font-size: 1.75rem;
+  font-weight: 750;
+  letter-spacing: -0.04em;
+  line-height: 1;
+  color: var(--b-ink);
+}
+
+.session-metric-label {
+  font-size: 12px;
+  color: var(--b-muted);
+}
+
+.session-id-block {
+  display: grid;
+  gap: 6px;
+}
+
+.session-id-label {
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  color: var(--b-accent);
+}
+
+.session-id-row {
+  display: flex;
+  align-items: stretch;
+  gap: 6px;
+  min-width: 0;
+}
+
+.session-chip {
+  flex: 1;
+  min-width: 0;
+  margin: 0;
+  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+  font-size: 11px;
+  line-height: 1.45;
+  padding: 8px 10px;
+  border-radius: 10px;
+  background: var(--color-surface);
+  border: 1px solid var(--b-border);
+  color: var(--b-ink-secondary);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.session-copy {
+  flex-shrink: 0;
+  padding: 8px 10px;
+  border-radius: 10px;
+  border: 1px solid var(--b-border);
+  background: var(--color-surface);
+  font: inherit;
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--b-ink-secondary);
+  cursor: pointer;
+  transition:
+    border-color 0.15s ease,
+    color 0.15s ease,
+    background 0.15s ease;
+}
+
+.session-copy:hover:not(:disabled) {
+  border-color: var(--accent-border, var(--color-accent-border));
+  color: var(--b-accent-hover);
+  background: var(--b-accent-soft);
+}
+
+.session-copy:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.session-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.session-actions .b-btn {
+  flex: 1 1 auto;
   justify-content: center;
+  min-width: 7rem;
 }
 
 .session-warn {
@@ -688,12 +927,6 @@ onUnmounted(() => {
   overflow: hidden;
   container-type: size;
   container-name: phone-slot;
-}
-
-.phone-panel-head {
-  width: 100%;
-  text-align: center;
-  flex-shrink: 0;
 }
 
 .phone-frame {
@@ -905,22 +1138,6 @@ onUnmounted(() => {
   color: var(--b-muted);
 }
 
-.session-chip {
-  display: block;
-  font-size: 11px;
-  padding: 6px 8px;
-  border-radius: 8px;
-  background: #fff;
-  border: 1px solid var(--b-border);
-  word-break: break-all;
-}
-
-.side-stat {
-  margin: 10px 0 0;
-  font-size: 13px;
-  color: var(--b-ink-secondary);
-}
-
 .side-list {
   list-style: none;
   margin: 0;
@@ -1003,29 +1220,10 @@ onUnmounted(() => {
   cursor: not-allowed;
 }
 
-.session-new-btn {
-  width: 100%;
-  margin-top: 10px;
-}
-
 .session-new-hint {
-  margin: 8px 0 0;
-  line-height: 1.4;
-}
-
-.main-title {
   margin: 0;
-  font-size: 15px;
-  font-weight: 700;
-  letter-spacing: -0.02em;
-  line-height: 1.25;
-}
-
-.main-caption {
-  margin: 2px 0 0;
-  font-size: 11.5px;
-  line-height: 1.35;
-  color: var(--b-muted);
+  line-height: 1.45;
+  font-size: 12px;
 }
 
 .warn-box {
@@ -1059,13 +1257,23 @@ onUnmounted(() => {
   min-height: 0;
   max-height: 100%;
   overflow-y: auto;
+  overflow-x: hidden;
   padding: 8px 6px;
   border: none;
   border-radius: 0;
   background: transparent;
   display: flex;
   flex-direction: column;
-  gap: 8px;
+  overscroll-behavior: contain;
+}
+
+.chat-log-anchor {
+  margin-top: auto;
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  flex-shrink: 0;
 }
 
 .chat-stream {
@@ -1084,7 +1292,8 @@ onUnmounted(() => {
 }
 
 .chat-empty {
-  margin: auto;
+  margin: auto 0 auto;
+  padding: 12px 8px;
   text-align: center;
 }
 
@@ -1129,15 +1338,6 @@ onUnmounted(() => {
   background: #fff;
 }
 
-.bubble-enter-active {
-  transition: opacity 0.3s ease, transform 0.35s cubic-bezier(0.16, 1, 0.3, 1);
-}
-
-.bubble-enter-from {
-  opacity: 0;
-  transform: translateY(8px) scale(0.98);
-}
-
 .typing-dots {
   display: inline-flex;
   gap: 5px;
@@ -1177,7 +1377,7 @@ onUnmounted(() => {
   display: flex;
   flex-wrap: wrap;
   gap: 6px;
-  padding: 0 4px;
+  padding: 6px 8px 0;
 }
 
 .compose-thumb {
@@ -1238,70 +1438,129 @@ onUnmounted(() => {
 .chat-compose {
   flex-shrink: 0;
   display: flex;
-  gap: 6px;
   align-items: flex-end;
-  padding: 8px;
+  gap: 4px;
+  margin: 0 6px 4px;
+  padding: 6px 6px 6px 4px;
   border: 1px solid var(--b-border);
-  border-radius: 18px;
-  background: #fff;
-  box-shadow: 0 1px 6px rgba(15, 23, 42, 0.06);
+  border-radius: 22px;
+  background: var(--color-surface);
+  box-shadow: 0 2px 10px rgba(15, 23, 42, 0.05);
 }
 
 .compose-attach {
   flex-shrink: 0;
-  padding: 8px 10px;
-  border-radius: 12px;
-  border: 1px solid var(--b-border);
-  background: #f8faf9;
-  font: inherit;
-  font-size: 12px;
-  font-weight: 600;
-  color: var(--b-ink-secondary);
+  display: grid;
+  place-items: center;
+  width: 38px;
+  height: 38px;
+  margin-bottom: 1px;
+  padding: 0;
+  border: none;
+  border-radius: 50%;
+  background: transparent;
+  color: var(--b-accent-hover);
   cursor: pointer;
+  transition:
+    background 0.15s ease,
+    color 0.15s ease,
+    transform 0.15s ease;
 }
 
 .compose-attach:disabled {
-  opacity: 0.5;
+  opacity: 0.45;
   cursor: not-allowed;
 }
 
 .compose-attach:not(:disabled):hover {
-  border-color: #a7f3c0;
   background: var(--b-accent-soft);
+  color: var(--b-accent);
 }
 
-.chat-textarea {
-  resize: none;
-  min-height: 36px;
+.compose-attach:not(:disabled):active {
+  transform: scale(0.96);
+}
+
+.compose-field {
+  flex: 1;
+  min-width: 0;
+  min-height: 38px;
   max-height: 120px;
+  margin: 0;
+  padding: 9px 4px 9px 2px;
+  border: none;
+  border-radius: 0;
+  resize: none;
+  font: inherit;
+  font-size: 15px;
   line-height: 1.4;
+  color: var(--b-ink);
+  background: transparent;
   overflow-y: auto;
-  padding-top: 8px;
-  padding-bottom: 8px;
+}
+
+.compose-field::placeholder {
+  color: #94a3b8;
+}
+
+.compose-field:focus {
+  outline: none;
+}
+
+.compose-field:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
 }
 
 .compose-send {
   flex-shrink: 0;
-  align-self: flex-end;
+  display: grid;
+  place-items: center;
+  width: 36px;
+  height: 36px;
+  margin-bottom: 2px;
+  padding: 0;
+  border: none;
+  border-radius: 50%;
+  background: var(--b-accent);
+  color: #fff;
+  cursor: pointer;
+  transition:
+    background 0.15s ease,
+    transform 0.15s ease,
+    opacity 0.15s ease;
+}
+
+.compose-send:not(:disabled):hover {
+  background: var(--b-accent-hover);
+}
+
+.compose-send:not(:disabled):active {
+  transform: scale(0.94);
+}
+
+.compose-send:disabled {
+  opacity: 0.38;
+  cursor: not-allowed;
+}
+
+.compose-send--busy {
+  opacity: 0.85;
+}
+
+.compose-send-spin {
+  animation: compose-spin 0.75s linear infinite;
+}
+
+@keyframes compose-spin {
+  to {
+    transform: rotate(360deg);
+  }
 }
 
 .chat-err {
-  margin: 0 4px;
+  margin: 4px 12px 0;
   font-size: 12px;
-}
-
-.chat-compose .chat-input {
-  flex: 1;
-  min-width: 0;
-  font-size: 13px;
-  border: none;
-  background: transparent;
-  box-shadow: none;
-}
-
-.chat-compose .chat-input:focus {
-  outline: none;
-  box-shadow: none;
 }
 
 @media (max-width: 900px) {
@@ -1319,17 +1578,17 @@ onUnmounted(() => {
     flex: 0 0 auto;
     max-width: none;
     width: 100%;
-    max-height: min(28dvh, 220px);
+    max-height: none;
+  }
+
+  .session-actions .b-btn {
+    flex: 1 1 calc(50% - 4px);
   }
 
   .phone-panel {
     max-width: none;
     flex: 1 1 0;
     min-height: 0;
-  }
-
-  .phone-panel-head {
-    flex-shrink: 0;
   }
 
   .phone-frame {

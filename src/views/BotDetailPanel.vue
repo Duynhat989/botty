@@ -1,26 +1,24 @@
 <template>
   <div class="b-studio detail-shell" :class="{ 'detail-shell--test': tab === 'test' }">
-    <aside class="detail-sidebar b-card">
-      <RouterLink to="/config" class="back">
-        <ArrowLeft :size="16" aria-hidden="true" />
+    <aside class="detail-sidebar">
+      <RouterLink to="/config" class="back-pill">
+        <ArrowLeft :size="15" aria-hidden="true" />
         Danh sách bot
       </RouterLink>
 
-      <div class="side-head">
-        <p class="b-kicker head-kicker">Cấu hình bot</p>
-        <h1 class="b-title-sm side-title">{{ bot.name }}</h1>
-        <p class="b-micro head-meta">
-          Mã bot: <code class="bot-code">{{ bot.id }}</code>
-        </p>
+      <div class="side-hero">
+        <span class="side-avatar" aria-hidden="true">{{ botInitial }}</span>
+        <p class="side-kicker">Workspace bot</p>
+        <h1 class="side-title">{{ bot.name }}</h1>
         <div class="head-badges">
-          <span class="b-badge" :class="form.status === 'active' ? 'b-badge--ok' : 'b-badge--off'">
+          <span class="status-pill" :class="form.status === 'active' ? 'status-pill--on' : 'status-pill--off'">
             {{ form.status === 'active' ? 'Đang chạy' : 'Tạm dừng' }}
           </span>
-          <span class="b-badge" :class="bot.hasGeminiKey ? 'b-badge--ok' : 'b-badge--err'">
-            {{ bot.hasGeminiKey ? 'Gemini OK' : 'Thiếu Gemini' }}
-          </span>
-          <span v-if="form.orderClosingEnabled" class="b-badge b-badge--ok">Chốt đơn bật</span>
+          <span v-if="form.orderClosingEnabled" class="status-pill status-pill--soft">Chốt đơn</span>
         </div>
+        <p class="head-meta">
+          <span class="code-chip" :title="bot.id">ID {{ shortBotId }}</span>
+        </p>
       </div>
 
       <nav class="side-nav" aria-label="Cấu hình theo trang">
@@ -71,8 +69,76 @@
       <ol class="steps">
         <li>Meta Developer → Messenger → Webhooks — dán URL trên.</li>
         <li>Verify token trùng với giá trị bạn đã lưu.</li>
-        <li>Đăng ký sự kiện <code>messages</code> và <code>messaging_postbacks</code>.</li>
+        <li>
+          Đăng ký <code>messages</code>, <code>messaging_postbacks</code> (Get Started), và tuỳ chọn
+          <code>messaging_referrals</code> / <code>messaging_optins</code>.
+        </li>
       </ol>
+
+      <section class="fb-test b-card b-card-pad" aria-labelledby="fb-test-title">
+        <h3 id="fb-test-title" class="fb-test-title">Kiểm tra kết nối</h3>
+        <p class="b-micro fb-test-lede">
+          Kiểm tra Page Access Token với Facebook. Nếu vừa dán token mới, hãy <strong>Lưu cấu hình</strong> trước
+          hoặc bấm kiểm tra để thử token đang gõ (chưa lưu).
+        </p>
+
+        <ul class="fb-checklist b-micro">
+          <li :class="{ ok: fbReady.hasPageToken }">
+            Page token {{ fbReady.hasPageToken ? '✓' : '—' }}
+          </li>
+          <li :class="{ ok: fbReady.hasVerifyToken }">
+            Verify token {{ fbReady.hasVerifyToken ? '✓' : '—' }}
+          </li>
+          <li :class="{ ok: form.status === 'active' }">
+            Bot đang chạy {{ form.status === 'active' ? '✓' : '(tạm dừng)' }}
+          </li>
+        </ul>
+
+        <div class="fb-test-actions">
+          <button
+            type="button"
+            class="b-btn b-btn--primary b-btn--sm"
+            :disabled="fbTestBusy || !canRunFacebookTest"
+            @click="runFacebookTest"
+          >
+            {{ fbTestBusy ? 'Đang kiểm tra…' : 'Kiểm tra kết nối' }}
+          </button>
+        </div>
+
+        <p v-if="fbTestErr" class="b-msg-err fb-test-msg">{{ fbTestErr }}</p>
+
+        <div
+          v-else-if="fbTestResult?.connected"
+          class="fb-test-ok"
+        >
+          <p class="fb-test-ok-title">Kết nối thành công</p>
+          <p class="b-micro">
+            Page: <strong>{{ fbTestResult.page?.name || 'Facebook' }}</strong>
+            <span v-if="fbTestResult.page?.id" class="fb-page-id">(ID {{ fbTestResult.page.id }})</span>
+          </p>
+          <p class="b-micro">
+            Webhook đã cấu hình trên Meta thì tin nhắn khách sẽ vào bot. Thử ngay:
+          </p>
+          <div class="fb-test-links">
+            <RouterLink class="b-btn b-btn--ghost b-btn--sm" :to="tabRoute('test')">
+              Mở Thử phản hồi
+            </RouterLink>
+            <RouterLink class="b-btn b-btn--ghost b-btn--sm" :to="tabRoute('history')">
+              Xem lịch sử chat
+            </RouterLink>
+          </div>
+        </div>
+
+        <p v-else-if="fbTestResult && !fbTestResult.connected" class="fb-test-warn b-micro">
+          Chưa đủ điều kiện:
+          <span v-if="!fbTestResult.checks?.hasPageToken"> thiếu Page token;</span>
+          <span v-if="!fbTestResult.checks?.hasVerifyToken"> thiếu verify token;</span>
+          <span v-if="fbTestResult.checks?.hasPageToken && !fbTestResult.checks?.pageTokenValid">
+            token không hợp lệ{{ fbTestResult.tokenError ? ` (${fbTestResult.tokenError})` : '' }};
+          </span>
+          kiểm tra lại Meta Developer.
+        </p>
+      </section>
       </form>
     </div>
 
@@ -121,7 +187,7 @@
 
     <div v-else-if="tab === 'inventory'" key="inventory" class="b-card b-card-pad-lg panel page-panel">
       <h2 class="b-title-sm panel-title">Kho hàng</h2>
-      <BotInventoryEditor ref="inventoryRef" v-model="inventory" />
+      <BotInventoryEditor ref="inventoryRef" v-model="inventory" :bot-id="bot.id" />
     </div>
 
     <BotDetailDashboard v-else-if="tab === 'dashboard'" key="dashboard" :bot="bot" @reload="emit('reload')" />
@@ -147,7 +213,7 @@
         <span class="b-switch-track" aria-hidden="true" />
         Bot đang chạy
       </label>
-      <button type="button" class="b-btn b-btn--primary" :disabled="saving" @click="save">
+      <button type="button" class="b-btn b-btn--primary btn-glow" :disabled="saving" @click="save">
         {{ saving ? 'Đang lưu…' : 'Lưu cấu hình' }}
       </button>
       <p v-if="message" class="b-msg-ok">{{ message }}</p>
@@ -206,7 +272,7 @@ const saving = ref(false)
 const message = ref('')
 const saveError = ref('')
 const TAB_IDS = ['test', 'dashboard', 'history', 'facebook', 'setup', 'inventory']
-const SETUP_SECTION_IDS = ['gemini', 'docs', 'voice', 'orders']
+const SETUP_SECTION_IDS = ['gemini', 'docs', 'voice', 'greeting', 'orders']
 const LEGACY_TAB_MAP = {
   gemini: 'gemini',
   docs: 'docs',
@@ -219,9 +285,22 @@ const tabs = [
   { id: 'dashboard', label: 'Dashboard' },
   { id: 'history', label: 'Lịch sử phản hồi' },
   { id: 'facebook', label: 'Facebook' },
-  { id: 'setup', label: 'Nội dung & AI' },
+  { id: 'setup', label: 'Nội dung' },
   { id: 'inventory', label: 'Kho hàng' },
 ]
+
+const botInitial = computed(() =>
+  String(props.bot?.name || '?')
+    .trim()
+    .slice(0, 1)
+    .toUpperCase(),
+)
+
+const shortBotId = computed(() => {
+  const id = String(props.bot?.id || '')
+  if (id.length <= 14) return id
+  return `${id.slice(0, 8)}…`
+})
 
 const slideDir = ref(1)
 
@@ -288,11 +367,13 @@ const form = reactive({
   orderClosingEnabled: false,
   orderClosingReminderEnabled: false,
   orderClosingReminderText: '',
+  sessionGreetingEnabled: false,
+  sessionGreetings: [{ _key: 'g-default', text: '', imageUrl: '' }],
   orderClosingNote: '',
   orderClosingPayment: cloneOrderClosingPayment(),
 })
 
-const inventory = ref({ mode: 'manual', products: [], api: {} })
+const inventory = ref({ mode: 'manual', products: [], api: {}, links: { urls: [], sourceText: '' } })
 const inventoryRef = ref(null)
 const docTitle = ref('')
 const docContent = ref('')
@@ -306,6 +387,25 @@ const templatesLoading = ref(false)
 const editorOpen = ref(false)
 const editorKind = ref('industry')
 const editorTemplate = ref(null)
+
+function hydrateSessionGreetings(list) {
+  const rows = Array.isArray(list) ? list : []
+  const mapped = rows.map((item, i) => ({
+    _key: `g-${i}-${String(item?.text || '').slice(0, 8)}`,
+    text: item?.text || '',
+    imageUrl: item?.imageUrl || '',
+  }))
+  return mapped.length ? mapped : [{ _key: 'g-default', text: '', imageUrl: '' }]
+}
+
+function sessionGreetingsPayload() {
+  return (form.sessionGreetings || [])
+    .map((item) => ({
+      text: String(item?.text || '').trim(),
+      imageUrl: String(item?.imageUrl || '').trim(),
+    }))
+    .filter((item) => item.text || item.imageUrl)
+}
 
 function syncFromBot(b) {
   form.facebookVerifyToken = b.facebookVerifyToken || ''
@@ -322,11 +422,13 @@ function syncFromBot(b) {
   form.orderClosingEnabled = Boolean(b.orderClosingEnabled)
   form.orderClosingReminderEnabled = Boolean(b.orderClosingReminderEnabled)
   form.orderClosingReminderText = b.orderClosingReminderText || ''
+  form.sessionGreetingEnabled = Boolean(b.sessionGreetingEnabled)
+  form.sessionGreetings = hydrateSessionGreetings(b.sessionGreetings)
   form.orderClosingNote = b.orderClosingNote || ''
   form.orderClosingPayment = cloneOrderClosingPayment(b.orderClosingPayment)
   inventory.value = b.inventory
     ? JSON.parse(JSON.stringify(b.inventory))
-    : { mode: 'manual', products: [], api: {} }
+    : { mode: 'manual', products: [], api: {}, links: { urls: [], sourceText: '' } }
 }
 
 function hydrateGeminiPinFromLocal() {
@@ -361,7 +463,7 @@ async function save() {
 
   const invPayload = inventoryRef.value?.getValue?.() || inventory.value
   if (inventoryRef.value && !inventoryRef.value.validate()) {
-    saveError.value = 'Kho hàng: header API không hợp lệ'
+    saveError.value = 'Kho hàng: kiểm tra dữ liệu trước khi lưu.'
     router.push(tabRoute('inventory'))
     return
   }
@@ -382,6 +484,8 @@ async function save() {
     orderClosingEnabled: form.orderClosingEnabled,
     orderClosingReminderEnabled: form.orderClosingReminderEnabled,
     orderClosingReminderText: form.orderClosingReminderText.trim(),
+    sessionGreetingEnabled: form.sessionGreetingEnabled,
+    sessionGreetings: sessionGreetingsPayload(),
     orderClosingNote: form.orderClosingNote,
     orderClosingPayment: cloneOrderClosingPayment(form.orderClosingPayment),
   }
@@ -469,6 +573,44 @@ function copy(text) {
     message.value = 'Đã sao chép webhook'
   })
 }
+
+const fbTestBusy = ref(false)
+const fbTestResult = ref(null)
+const fbTestErr = ref('')
+
+const fbReady = computed(() => ({
+  hasPageToken: Boolean(form.facebookPageAccessToken.trim() || props.bot.hasFacebookToken),
+  hasVerifyToken: Boolean(
+    (form.facebookVerifyToken || '').trim() || (props.bot.facebookVerifyToken || '').trim(),
+  ),
+}))
+
+const canRunFacebookTest = computed(() => fbReady.value.hasPageToken)
+
+async function runFacebookTest() {
+  fbTestBusy.value = true
+  fbTestErr.value = ''
+  fbTestResult.value = null
+  try {
+    const body = {}
+    const draft = form.facebookPageAccessToken.trim()
+    if (draft) body.facebookPageAccessToken = draft
+    fbTestResult.value = await api.bots.testFacebook(props.bot.id, body)
+  } catch (e) {
+    fbTestErr.value = e?.message || 'Không kiểm tra được kết nối Facebook'
+  } finally {
+    fbTestBusy.value = false
+  }
+}
+
+watch(
+  () => route.params.tab,
+  (t) => {
+    if (String(t) !== 'facebook') return
+    fbTestResult.value = null
+    fbTestErr.value = ''
+  },
+)
 
 function instructionShopLabel() {
   return form.shopName.trim() || props.bot.name
@@ -571,23 +713,20 @@ async function applyInstructionTemplate(tpl) {
 
 <style scoped>
 .detail-shell {
-  /* Ghi đè .b-studio (max 860px) — chỉ chừa ~10% lề hai bên */
   width: min(100%, 90vw);
   max-width: none;
   margin-left: auto;
   margin-right: auto;
-  padding: 0;
+  padding: clamp(0.5rem, 1.5vw, 1rem) 0 clamp(1.25rem, 3vw, 2rem);
   flex: 1;
   min-height: 0;
   display: grid;
-  grid-template-columns: minmax(248px, 280px) minmax(0, 1fr);
-  gap: clamp(1rem, 2vw, 1.5rem);
+  grid-template-columns: minmax(248px, 272px) minmax(0, 1fr);
+  gap: clamp(1rem, 2.2vw, 1.35rem);
   align-items: stretch;
 }
 
 .detail-shell--test {
-  width: min(100%, 90vw);
-  max-width: none;
   height: 100%;
   max-height: 100%;
   min-height: 0;
@@ -624,7 +763,11 @@ async function applyInstructionTemplate(tpl) {
   display: flex;
   flex-direction: column;
   gap: 14px;
-  padding: 16px 14px 18px;
+  padding: 18px 16px 20px;
+  border-radius: 22px;
+  border: 1px solid var(--accent-border, #bbf7d0);
+  background: radial-gradient(120% 100% at 50% 0%, #ecfdf5 0%, #fff 58%, #f8fafc 100%);
+  box-shadow: 0 14px 40px -28px rgba(34, 197, 94, 0.22);
   position: sticky;
   top: 76px;
   align-self: start;
@@ -632,34 +775,116 @@ async function applyInstructionTemplate(tpl) {
   overflow-y: auto;
 }
 
-.side-head {
-  padding-top: 4px;
+.side-hero {
+  display: grid;
+  gap: 6px;
+  padding-bottom: 4px;
+}
+
+.side-avatar {
+  width: 48px;
+  height: 48px;
+  display: grid;
+  place-items: center;
+  border-radius: 14px;
+  font-size: 18px;
+  font-weight: 750;
+  color: var(--b-accent-hover);
+  background: #fff;
+  border: 1px solid color-mix(in srgb, var(--b-accent) 22%, #e2e8f0);
+  box-shadow: 0 8px 20px -14px rgba(34, 197, 94, 0.45);
+}
+
+.side-kicker {
+  margin: 4px 0 0;
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: #64756b;
 }
 
 .side-title {
-  font-size: clamp(18px, 2.5vw, 22px);
+  margin: 0;
+  font-size: clamp(1.125rem, 2.2vw, 1.35rem);
+  font-weight: 750;
+  letter-spacing: -0.035em;
+  line-height: 1.2;
+  color: #0b1b13;
+}
+
+.status-pill {
+  display: inline-flex;
+  align-items: center;
+  padding: 5px 10px;
+  border-radius: 999px;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.03em;
+  border: 1px solid #e2e8f0;
+  background: rgba(255, 255, 255, 0.85);
+  color: #475569;
+}
+
+.status-pill--on {
+  color: var(--b-accent-hover);
+  border-color: var(--accent-border, #bbf7d0);
+  background: var(--b-accent-soft);
+}
+
+.status-pill--off {
+  color: #64748b;
+}
+
+.status-pill--soft {
+  font-weight: 600;
+  text-transform: none;
+  letter-spacing: 0;
+}
+
+.code-chip {
+  display: inline-block;
+  max-width: 100%;
+  padding: 4px 8px;
+  border-radius: 8px;
+  font-family: ui-monospace, monospace;
+  font-size: 11px;
+  color: #475569;
+  background: rgba(255, 255, 255, 0.72);
+  border: 1px solid #e7ede9;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 .side-nav {
   display: flex;
   flex-direction: column;
-  gap: 4px;
-  margin-top: 4px;
+  gap: 6px;
+  margin-top: 6px;
+  padding: 6px;
+  border-radius: 16px;
+  background: rgba(255, 255, 255, 0.55);
+  border: 1px solid rgba(231, 237, 233, 0.9);
 }
 
 .side-link {
   display: block;
   padding: 10px 12px;
-  border-radius: 10px;
+  border-radius: 12px;
   text-decoration: none;
   font-size: 13.5px;
-  font-weight: 500;
+  font-weight: 600;
   line-height: 1.4;
-  color: var(--b-muted);
+  color: #64748b;
   white-space: normal;
   word-break: normal;
   overflow-wrap: break-word;
-  transition: background 0.2s ease, color 0.2s ease;
+  transition:
+    background 0.2s ease,
+    color 0.2s ease,
+    transform 0.18s ease,
+    box-shadow 0.18s ease;
 }
 
 .detail-sidebar .side-delete {
@@ -669,15 +894,16 @@ async function applyInstructionTemplate(tpl) {
 }
 
 .side-link:hover {
-  color: var(--b-ink-secondary);
-  background: var(--b-surface-2);
+  color: #334155;
+  background: #fff;
+  transform: translateX(2px);
 }
 
 .side-link.is-on,
 .side-link.router-link-active {
-  color: var(--b-ink);
-  font-weight: 600;
-  background: var(--b-accent-soft);
+  color: #0b1b13;
+  background: #fff;
+  box-shadow: 0 6px 18px -14px rgba(15, 23, 42, 0.2);
 }
 
 .side-delete {
@@ -699,6 +925,12 @@ async function applyInstructionTemplate(tpl) {
   bottom: auto;
   flex-shrink: 0;
   margin-top: auto;
+  border-radius: 20px;
+  border: 1px solid #e7ede9;
+  background: rgba(255, 255, 255, 0.94);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  box-shadow: 0 10px 32px -24px rgba(15, 23, 42, 0.28);
 }
 
 .detail-shell--test .page-panel,
@@ -706,34 +938,40 @@ async function applyInstructionTemplate(tpl) {
   width: 100%;
 }
 
-.back {
+.back-pill {
   display: inline-flex;
   align-items: center;
   gap: 6px;
-  font-size: 13px;
-  font-weight: 500;
-  color: var(--b-muted);
+  padding: 6px 11px;
+  border-radius: 999px;
+  font-size: 12px;
+  font-weight: 600;
+  color: #64748b;
   text-decoration: none;
   width: fit-content;
+  background: rgba(255, 255, 255, 0.8);
+  border: 1px solid #e7ede9;
+  transition:
+    color 0.18s ease,
+    border-color 0.18s ease,
+    transform 0.18s ease;
 }
 
-.back:hover {
-  color: var(--b-accent);
-}
-
-.head-kicker {
-  margin-bottom: 4px;
+.back-pill:hover {
+  color: var(--b-accent-hover);
+  border-color: var(--accent-border, #bbf7d0);
+  transform: translateX(-2px);
 }
 
 .head-badges {
   display: flex;
   flex-wrap: wrap;
   gap: 6px;
-  margin-top: 12px;
+  margin-top: 8px;
 }
 
 .head-meta {
-  margin: 0.35rem 0 0;
+  margin: 6px 0 0;
 }
 
 .panel-stage {
@@ -759,9 +997,62 @@ async function applyInstructionTemplate(tpl) {
   overflow-y: auto;
 }
 
+.btn-glow {
+  box-shadow: 0 8px 24px -8px rgba(34, 197, 94, 0.4);
+  transition:
+    transform 0.2s ease,
+    box-shadow 0.2s ease;
+}
+
+.btn-glow:hover:not(:disabled) {
+  transform: translateY(-1px);
+  box-shadow: 0 14px 30px -9px rgba(34, 197, 94, 0.48);
+}
+
 .page-panel {
-  box-shadow: var(--b-shadow);
-  border: 1px solid var(--b-border);
+  border-radius: 22px;
+  border: 1px solid #e7ede9;
+  background: #fff;
+  box-shadow: 0 8px 24px -22px rgba(15, 23, 42, 0.28);
+  transition:
+    border-color 0.22s ease,
+    box-shadow 0.22s ease;
+}
+
+.detail-main :deep(.page-panel),
+.detail-main :deep(.setup-panel),
+.detail-main :deep(.history-panel),
+.detail-main :deep(.dash-panel) {
+  border-radius: 22px;
+  border: 1px solid #e7ede9;
+  background: #fff;
+  box-shadow: 0 8px 24px -22px rgba(15, 23, 42, 0.28);
+}
+
+.detail-main :deep(.setup-top .b-kicker) {
+  margin-bottom: 0.35rem;
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: #64756b;
+}
+
+.detail-main :deep(.setup-subnav) {
+  padding: 6px;
+  border-radius: 14px;
+  background: #f8fafc;
+  border: 1px solid #e7ede9;
+}
+
+.detail-main :deep(.setup-tab) {
+  border-radius: 10px;
+  font-weight: 600;
+}
+
+.detail-main :deep(.setup-tab.on) {
+  background: #fff;
+  box-shadow: 0 4px 14px -12px rgba(15, 23, 42, 0.25);
 }
 
 .panel-slide-next-enter-active,
@@ -822,6 +1113,95 @@ async function applyInstructionTemplate(tpl) {
 .steps code {
   font-size: 13px;
   color: var(--b-ink-secondary);
+}
+
+.fb-test {
+  margin-top: 22px;
+  display: grid;
+  gap: 12px;
+  border: 1px solid var(--b-border);
+  background: linear-gradient(165deg, rgb(255 247 237 / 70%) 0%, #fff 45%);
+}
+
+.fb-test-title {
+  margin: 0;
+  font-size: 16px;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+}
+
+.fb-test-lede {
+  margin: 0;
+  line-height: 1.5;
+  color: var(--b-muted);
+}
+
+.fb-checklist {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px 14px;
+}
+
+.fb-checklist li {
+  padding: 4px 10px;
+  border-radius: 999px;
+  background: #f1f5f9;
+  color: #64748b;
+  font-weight: 600;
+}
+
+.fb-checklist li.ok {
+  background: #ecfdf5;
+  color: #166534;
+}
+
+.fb-test-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.fb-test-msg {
+  margin: 0;
+}
+
+.fb-test-ok {
+  padding: 12px 14px;
+  border-radius: 12px;
+  border: 1px solid #bbf7d0;
+  background: #f0fdf4;
+  display: grid;
+  gap: 8px;
+}
+
+.fb-test-ok-title {
+  margin: 0;
+  font-weight: 700;
+  color: #166534;
+}
+
+.fb-page-id {
+  color: #64748b;
+  font-weight: 500;
+}
+
+.fb-test-links {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.fb-test-warn {
+  margin: 0;
+  padding: 10px 12px;
+  border-radius: 10px;
+  background: #fff7ed;
+  border: 1px solid #fed7aa;
+  color: #9a3412;
+  line-height: 1.45;
 }
 
 .doc-form {
@@ -1102,103 +1482,6 @@ async function applyInstructionTemplate(tpl) {
 
 .instruct-panel .panel-intro {
   margin-bottom: 18px;
-}
-
-.style-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
-  gap: 10px;
-}
-
-.style-block {
-  margin-top: 18px;
-}
-
-.style-card {
-  text-align: left;
-  padding: 12px 14px;
-  border-radius: 12px;
-  border: 1px solid var(--b-border);
-  background: #fff;
-  cursor: pointer;
-  font: inherit;
-  transition: border-color 0.2s ease, box-shadow 0.2s ease;
-}
-
-.style-card:hover {
-  border-color: #a7f3c0;
-}
-
-.style-card.picked {
-  border-color: var(--b-accent);
-  box-shadow: 0 0 0 2px rgba(21, 128, 61, 0.15);
-}
-
-.style-sample {
-  display: block;
-  margin-top: 8px;
-  font-size: 11.5px;
-  line-height: 1.45;
-  color: var(--b-muted);
-  font-style: italic;
-}
-
-.tpl-block {
-  margin: 20px 0 22px;
-  padding: 16px;
-  border-radius: 14px;
-  border: 1px dashed var(--b-border-strong);
-  background: var(--b-surface-2);
-}
-
-.tpl-label {
-  margin: 0 0 12px;
-  font-size: 13px;
-  font-weight: 600;
-  color: var(--b-ink-secondary);
-}
-
-.tpl-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
-  gap: 10px;
-}
-
-.tpl-card {
-  text-align: left;
-  padding: 12px 14px;
-  border-radius: 12px;
-  border: 1px solid var(--b-border);
-  background: #fff;
-  cursor: pointer;
-  font: inherit;
-  transition: border-color 0.2s ease, box-shadow 0.2s ease, transform 0.15s ease;
-}
-
-.tpl-card:hover {
-  border-color: #a7f3c0;
-  box-shadow: 0 4px 14px rgba(21, 128, 61, 0.08);
-  transform: translateY(-1px);
-}
-
-.tpl-card.picked {
-  border-color: var(--b-accent);
-  box-shadow: 0 0 0 2px rgba(21, 128, 61, 0.15);
-}
-
-.tpl-name {
-  display: block;
-  font-size: 14px;
-  font-weight: 600;
-  color: var(--b-ink);
-}
-
-.tpl-hint {
-  display: block;
-  margin-top: 4px;
-  font-size: 12px;
-  color: var(--b-muted);
-  line-height: 1.4;
 }
 
 .tpl-note {

@@ -64,7 +64,7 @@ export function applyDocumentMeta({ routeName, fullPath = '/' } = {}) {
   const title = te(titleKey) ? t(titleKey) : t('meta.title')
   const description = t('meta.description')
   const imageAlt = t('meta.imageAlt')
-  const siteUrl = (import.meta.env.VITE_SITE_URL || 'https://dynageo.app').replace(/\/$/, '')
+  const siteUrl = (import.meta.env.VITE_SITE_URL || 'https://botty.live').replace(/\/$/, '')
   const path = fullPath === '/' ? '/' : fullPath
   const url = `${siteUrl}${path}`
   const image = `${siteUrl}/og-image.png`

@@ -52,38 +52,88 @@
       <section class="section features reveal">
         <p class="b-kicker">Tính năng</p>
         <h2 class="b-section-title section-head">Tính năng chính</h2>
-        <div class="bento">
-          <article
-            v-for="(feat, idx) in features"
-            :key="feat.title"
-            class="bento-card"
-            :class="'bento-card--' + (idx + 1)"
+        <div
+          class="feat-carousel"
+          @mouseenter="pauseFeatAutoplay"
+          @mouseleave="resumeFeatAutoplay"
+          @focusin="pauseFeatAutoplay"
+          @focusout="resumeFeatAutoplay"
+        >
+          <button
+            type="button"
+            class="feat-nav feat-nav--prev"
+            aria-label="Tính năng trước"
+            @click="featPrev"
           >
-            <div class="bento-icon">
-              <component :is="feat.icon" :size="20" :stroke-width="2" aria-hidden="true" />
-            </div>
-            <h3>{{ feat.title }}</h3>
-            <p>{{ feat.text }}</p>
-            <img
-              v-if="feat.img"
-              :src="feat.img"
-              :alt="feat.title"
-              class="bento-img"
-              loading="lazy"
-            />
-          </article>
+            <ChevronLeft :size="22" :stroke-width="2.25" aria-hidden="true" />
+          </button>
+
+          <div class="feat-stage" aria-live="polite">
+            <article
+              v-for="(feat, idx) in features"
+              :key="feat.title"
+              class="feat-slide"
+              :class="'feat-slide--' + featSlideRole(idx)"
+              :aria-hidden="featSlideRole(idx) === 'hidden'"
+            >
+              <div class="feat-slide-inner bento-card">
+                <div class="bento-icon">
+                  <component :is="feat.icon" :size="20" :stroke-width="2" aria-hidden="true" />
+                </div>
+                <h3>{{ feat.title }}</h3>
+                <p>{{ feat.text }}</p>
+                <img
+                  v-if="feat.img"
+                  :src="feat.img"
+                  :alt="feat.title"
+                  class="bento-img"
+                  loading="lazy"
+                />
+              </div>
+            </article>
+          </div>
+
+          <button
+            type="button"
+            class="feat-nav feat-nav--next"
+            aria-label="Tính năng tiếp theo"
+            @click="featNext"
+          >
+            <ChevronRight :size="22" :stroke-width="2.25" aria-hidden="true" />
+          </button>
+        </div>
+
+        <div class="feat-dots" role="tablist" aria-label="Chọn tính năng">
+          <button
+            v-for="(feat, idx) in features"
+            :key="'dot-' + feat.title"
+            type="button"
+            role="tab"
+            class="feat-dot"
+            :class="{ 'feat-dot--on': idx === featActive }"
+            :aria-selected="idx === featActive"
+            :aria-label="feat.title"
+            @click="featGo(idx)"
+          />
         </div>
       </section>
 
       <section class="section start-steps reveal">
         <p class="b-kicker">Bắt đầu</p>
         <h2 class="b-section-title section-head">Bắt đầu trong vài bước</h2>
-        <p class="steps-hint b-muted">Vuốt ngang để xem các bước tiếp theo.</p>
+        <p class="steps-hint b-muted">Trên điện thoại: vuốt ngang để xem đủ 4 bước.</p>
         <ol class="steps-rail">
           <li v-for="step in steps" :key="step.n" class="steps-item">
             <div class="steps-thumb">
-              <div class="steps-thumb-bg" aria-hidden="true" />
-              <component :is="step.icon" class="steps-thumb-icon" :size="36" :stroke-width="1.75" aria-hidden="true" />
+              <img
+                class="steps-thumb-img"
+                :src="step.img"
+                :alt="step.imgAlt"
+                width="600"
+                height="264"
+                loading="lazy"
+                decoding="async"
+              />
               <span class="steps-num">{{ step.n }}</span>
             </div>
             <div class="steps-copy">
@@ -114,15 +164,13 @@
 </template>
 
 <script setup>
+import { onMounted, onUnmounted, ref } from 'vue'
 import { RouterLink } from 'vue-router'
 import {
-  Bot,
+  ChevronLeft,
+  ChevronRight,
   FileText,
-  KeyRound,
-  Link2,
   MessageCircle,
-  Package,
-  Rocket,
   ShoppingBag,
   Sparkles,
   Webhook,
@@ -132,6 +180,79 @@ import MacAppMockup from '@/components/MacAppMockup.vue'
 import { useAuthStore } from '@/stores/auth'
 
 const auth = useAuthStore()
+
+const FEAT_AUTO_MS = 5000
+
+const featActive = ref(0)
+let featTimer = null
+let featAutoplayPaused = false
+
+function featWrap(i) {
+  const n = features.length
+  return ((i % n) + n) % n
+}
+
+function featSlideRole(idx) {
+  const n = features.length
+  const active = featActive.value
+  const prev = featWrap(active - 1)
+  const next = featWrap(active + 1)
+  if (idx === active) return 'center'
+  if (idx === prev) return 'left'
+  if (idx === next) return 'right'
+  return 'hidden'
+}
+
+function featNext() {
+  featActive.value = featWrap(featActive.value + 1)
+  restartFeatAutoplay()
+}
+
+function featPrev() {
+  featActive.value = featWrap(featActive.value - 1)
+  restartFeatAutoplay()
+}
+
+function featGo(idx) {
+  featActive.value = idx
+  restartFeatAutoplay()
+}
+
+function startFeatAutoplay() {
+  if (featAutoplayPaused) return
+  clearFeatAutoplay()
+  featTimer = setInterval(featNext, FEAT_AUTO_MS)
+}
+
+function clearFeatAutoplay() {
+  if (featTimer) {
+    clearInterval(featTimer)
+    featTimer = null
+  }
+}
+
+function restartFeatAutoplay() {
+  clearFeatAutoplay()
+  startFeatAutoplay()
+}
+
+function pauseFeatAutoplay() {
+  featAutoplayPaused = true
+  clearFeatAutoplay()
+}
+
+function resumeFeatAutoplay() {
+  featAutoplayPaused = false
+  startFeatAutoplay()
+}
+
+onMounted(() => {
+  startFeatAutoplay()
+})
+
+onUnmounted(() => {
+  clearFeatAutoplay()
+})
 
 const stats = [
   { value: 'Tự động', label: 'Trả lời tin nhắn' },
@@ -175,31 +296,29 @@ const features = [
 const steps = [
   {
     n: 1,
-    icon: Bot,
+    img: '/steps/step-1.svg',
+    imgAlt: 'Tạo bot mới trong Botty',
     title: 'Tạo bot & đặt tên',
     text: 'Mở wizard từ Cấu hình, đặt tên hiển thị cho team và khách.',
   },
   {
     n: 2,
-    icon: Link2,
+    img: '/steps/step-2.svg',
+    imgAlt: 'Kết nối Facebook Page và webhook',
     title: 'Kết nối Facebook',
     text: 'Dán Page ID, token và webhook URL vào Meta Developer.',
   },
   {
     n: 3,
-    icon: KeyRound,
-    title: 'Thêm Gemini key',
-    text: 'API key lưu riêng cho bot; không chia sẻ với người khác.',
+    img: '/steps/step-3.svg',
+    imgAlt: 'Quản lý tài liệu và kho hàng',
+    title: 'Tài liệu & kho',
+    text: 'Upload hướng dẫn bán, nhập sản phẩm hoặc dán bảng giá — AI điền kho.',
   },
   {
     n: 4,
-    icon: Package,
-    title: 'Tài liệu & kho',
-    text: 'Upload hướng dẫn bán, nhập sản phẩm hoặc nối API list.',
-  },
-  {
-    n: 5,
-    icon: Rocket,
+    img: '/steps/step-4.svg',
+    imgAlt: 'Bật bot live và theo dõi đơn',
     title: 'Bật live & theo dõi',
     text: 'Thử phản hồi, bật chốt đơn nếu cần, kích hoạt trên Page.',
   },
@@ -435,24 +554,179 @@ const steps = [
   letter-spacing: -0.045em;
 }
 
-.bento {
+.feat-carousel {
+  position: relative;
   display: grid;
-  gap: 14px;
-  grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+  grid-template-columns: auto 1fr auto;
+  align-items: center;
+  gap: clamp(8px, 2vw, 16px);
+  margin-top: 0.25rem;
 }
 
-@media (min-width: 900px) {
-  .bento {
-    grid-template-columns: repeat(3, 1fr);
-    grid-auto-rows: minmax(140px, auto);
+.feat-stage {
+  position: relative;
+  display: grid;
+  grid-template-columns: 1fr minmax(0, 1.12fr) 1fr;
+  align-items: center;
+  gap: clamp(10px, 2.5vw, 18px);
+  min-height: clamp(200px, 28vw, 240px);
+  overflow: hidden;
+  padding: 12px 4px 8px;
+}
+
+.feat-slide {
+  grid-row: 1;
+  min-width: 0;
+  transition:
+    transform 0.55s cubic-bezier(0.22, 1, 0.36, 1),
+    opacity 0.45s ease,
+    filter 0.45s ease;
+  will-change: transform, opacity, filter;
+}
+
+.feat-slide--left {
+  grid-column: 1;
+  transform: scale(0.88) translateX(6%);
+  opacity: 0.55;
+  filter: blur(3px);
+  pointer-events: none;
+  z-index: 0;
+}
+
+.feat-slide--center {
+  grid-column: 2;
+  transform: scale(1.04);
+  opacity: 1;
+  filter: none;
+  z-index: 2;
+}
+
+.feat-slide--right {
+  grid-column: 3;
+  transform: scale(0.88) translateX(-6%);
+  opacity: 0.55;
+  filter: blur(3px);
+  pointer-events: none;
+  z-index: 0;
+}
+
+.feat-slide--hidden {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  white-space: nowrap;
+  opacity: 0;
+  pointer-events: none;
+}
+
+.feat-slide-inner {
+  height: 100%;
+}
+
+.feat-slide--center .feat-slide-inner {
+  border-color: var(--accent-border, #bbf7d0);
+  box-shadow:
+    0 24px 48px -28px rgba(34, 197, 94, 0.4),
+    0 0 0 1px rgba(34, 197, 94, 0.08);
+}
+
+.feat-nav {
+  flex-shrink: 0;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 44px;
+  height: 44px;
+  border-radius: 999px;
+  border: 1px solid #e2e8f0;
+  background: #fff;
+  color: #334155;
+  cursor: pointer;
+  box-shadow: 0 6px 18px -10px rgba(15, 23, 42, 0.25);
+  transition:
+    border-color 0.2s ease,
+    color 0.2s ease,
+    transform 0.2s ease,
+    box-shadow 0.2s ease;
+}
+
+.feat-nav:hover {
+  border-color: var(--accent-border, #bbf7d0);
+  color: var(--b-accent-hover);
+  transform: translateY(-1px);
+  box-shadow: 0 10px 22px -12px rgba(34, 197, 94, 0.35);
+}
+
+.feat-nav:focus-visible {
+  outline: 2px solid var(--b-accent);
+  outline-offset: 2px;
+}
+
+.feat-dots {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 8px;
+  margin-top: 1.25rem;
+}
+
+.feat-dot {
+  width: 8px;
+  height: 8px;
+  padding: 0;
+  border: none;
+  border-radius: 999px;
+  background: #cbd5e1;
+  cursor: pointer;
+  transition:
+    width 0.25s ease,
+    background 0.25s ease;
+}
+
+.feat-dot--on {
+  width: 22px;
+  background: var(--b-accent);
+}
+
+.feat-dot:focus-visible {
+  outline: 2px solid var(--b-accent);
+  outline-offset: 2px;
+}
+
+@media (max-width: 720px) {
+  .feat-carousel {
+    grid-template-columns: 1fr;
+    grid-template-rows: auto auto auto;
+    justify-items: center;
   }
 
-  .bento-card--1 {
-    grid-column: span 2;
+  .feat-nav--prev {
+    grid-row: 2;
+    grid-column: 1;
+    justify-self: start;
   }
 
-  .bento-card--3 {
-    grid-row: span 2;
+  .feat-nav--next {
+    grid-row: 2;
+    grid-column: 1;
+    justify-self: end;
+  }
+
+  .feat-stage {
+    grid-row: 1;
+    grid-column: 1;
+    width: 100%;
+    grid-template-columns: minmax(0, 0.78fr) minmax(0, 1fr) minmax(0, 0.78fr);
+    min-height: 210px;
+    padding-bottom: 4px;
+  }
+
+  .feat-slide--left,
+  .feat-slide--right {
+    filter: blur(2.5px);
+    opacity: 0.5;
   }
 }
 
@@ -468,7 +742,7 @@ const steps = [
   transition: transform 0.25s ease, box-shadow 0.25s ease, border-color 0.25s ease;
 }
 
-.bento-card:hover {
+.feat-slide--center .bento-card:hover {
   transform: translateY(-4px);
   border-color: var(--accent-border, #bbf7d0);
   box-shadow: 0 22px 44px -28px rgba(34, 197, 94, 0.35);
@@ -577,12 +851,16 @@ const steps = [
   display: block;
 }
 
+.start-steps .section-head {
+  max-width: none;
+}
+
 .steps-hint {
   margin: -0.5rem 0 1.25rem;
   font-size: 14px;
 }
 
-@media (min-width: 900px) {
+@media (min-width: 720px) {
   .steps-hint {
     display: none;
   }
@@ -592,13 +870,14 @@ const steps = [
   list-style: none;
   margin: 0;
   padding: 4px 2px 12px;
+  width: 100%;
   display: flex;
   gap: 16px;
   overflow-x: auto;
   scroll-snap-type: x mandatory;
   -webkit-overflow-scrolling: touch;
   scrollbar-width: thin;
-  scrollbar-color: #bbf7d0 transparent;
+  scrollbar-color: #fed7aa transparent;
 }
 
 .steps-rail::-webkit-scrollbar {
@@ -606,26 +885,33 @@ const steps = [
 }
 
 .steps-rail::-webkit-scrollbar-thumb {
-  background: #bbf7d0;
+  background: #fed7aa;
   border-radius: 999px;
 }
 
-@media (min-width: 1180px) {
+@media (min-width: 720px) {
   .steps-rail {
     display: grid;
-    grid-template-columns: repeat(5, minmax(0, 1fr));
+    grid-template-columns: repeat(2, minmax(0, 1fr));
     overflow: visible;
-    gap: 14px;
+    gap: clamp(14px, 2vw, 20px);
     padding: 0;
   }
 }
 
+@media (min-width: 960px) {
+  .steps-rail {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+  }
+}
+
 .steps-item {
-  flex: 0 0 min(300px, 88vw);
+  flex: 0 0 min(280px, 86vw);
   scroll-snap-align: start;
   display: flex;
   flex-direction: column;
   min-width: 0;
+  height: 100%;
   border: 1px solid var(--b-border);
   border-radius: 18px;
   background: #fff;
@@ -637,37 +923,35 @@ const steps = [
     transform 0.2s ease;
 }
 
-.steps-item:hover {
-  border-color: var(--accent-border, #bbf7d0);
-  box-shadow: 0 16px 36px -22px rgba(34, 197, 94, 0.22);
-  transform: translateY(-2px);
-}
-
-@media (min-width: 1180px) {
+@media (min-width: 720px) {
   .steps-item {
     flex: initial;
   }
 }
 
+.steps-item:hover {
+  border-color: var(--accent-border, #fed7aa);
+  box-shadow: 0 16px 36px -22px rgba(234, 88, 12, 0.18);
+  transform: translateY(-2px);
+}
+
 .steps-thumb {
   position: relative;
-  display: grid;
-  place-items: center;
-  height: 132px;
+  flex-shrink: 0;
+  aspect-ratio: 600 / 264;
+  width: 100%;
   overflow: hidden;
+  background: linear-gradient(165deg, #fff7ed 0%, #f8fafc 55%, #fff 100%);
 }
 
-.steps-thumb-bg {
-  position: absolute;
-  inset: 0;
-  background: linear-gradient(145deg, #ecfdf5 0%, #d1fae5 55%, #dcfce7 100%);
-}
-
-.steps-thumb-icon {
-  position: relative;
-  z-index: 1;
-  color: var(--b-accent);
-  opacity: 0.92;
+.steps-thumb-img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  object-position: center;
+  padding: 0;
+  vertical-align: middle;
 }
 
 .steps-num {
@@ -684,13 +968,20 @@ const steps = [
   font-size: 15px;
   font-weight: 800;
   color: #fff;
-  background: rgba(34, 197, 94, 0.94);
-  box-shadow: 0 4px 12px rgba(34, 197, 94, 0.35);
+  background: rgba(234, 88, 12, 0.94);
+  box-shadow: 0 4px 12px rgba(234, 88, 12, 0.28);
 }
 
 .steps-copy {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
   padding: 14px 16px 18px;
   min-width: 0;
+}
+
+.steps-copy p {
+  flex: 1;
 }
 
 .steps-label {
@@ -783,7 +1074,7 @@ const steps = [
     animation: none;
   }
 
-  .bento-card:hover,
+  .feat-slide--center .bento-card:hover,
   .product-card:hover,
   .btn-glow:hover {
     transform: none;
