@@ -308,13 +308,13 @@
       <section v-show="modelValue === 'goals'" id="section-goals" class="setup-section">
         <h3 class="setup-h">Mục tiêu</h3>
         <p class="b-caption panel-intro">
-          Bật từng mục tiêu bot hướng tới trong chat — có thể bật đồng thời chốt đơn, thu liên hệ và khảo sát.
+          Bot hướng tới mục tiêu bạn bật trong chat. Khi khách đạt mục tiêu (vd. chốt xong), hệ thống <strong>ghi lại</strong> và có thể gọi webhook.
         </p>
 
         <div v-if="!bot.orderClosingPlanAllowed" class="plan-gate b-card b-card-pad">
           <p class="plan-gate-title">Chốt đơn — gói trả phí</p>
           <p class="b-micro">
-            Mục tiêu <strong>chốt đơn</strong>, nhắc đơn và webhook đơn chỉ khi tài khoản có
+            Mục tiêu <strong>chốt đơn</strong>, nhắc đơn và webhook mục tiêu chỉ khi tài khoản có
             <strong>gói Botty AI đang hoạt động</strong>. Liên hệ & khảo sát vẫn dùng miễn phí.
           </p>
           <RouterLink to="/pricing" class="b-btn b-btn--primary b-btn--sm">Xem gói</RouterLink>
@@ -500,6 +500,55 @@
             />
           </label>
         </div>
+
+        <div class="goal-block" :class="{ 'goal-block--locked': !bot.orderClosingPlanAllowed }">
+          <h4 class="goal-block-title">Webhook mục tiêu</h4>
+          <p class="b-micro goal-block-lede">
+            Khi bot <strong>ghi nhận mục tiêu đạt</strong> (hiện chủ yếu là chốt đơn), Botty POST JSON tới URL của bạn
+            <span v-if="bot.hasOrderWebhookSecret"> (header <code>X-Botty-Signature</code>)</span>.
+          </p>
+          <label class="b-switch order-toggle">
+            <input
+              v-model="webhookForm.enabled"
+              type="checkbox"
+              :disabled="!bot.orderClosingPlanAllowed"
+            />
+            <span class="b-switch-track" aria-hidden="true" />
+            Bật webhook
+          </label>
+          <template v-if="webhookForm.enabled && bot.orderClosingPlanAllowed">
+            <label class="b-field">
+              <span>URL</span>
+              <input
+                v-model="webhookForm.url"
+                class="b-input"
+                type="url"
+                placeholder="https://your-app.com/hooks/botty"
+              />
+            </label>
+            <label class="b-field">
+              <span>Secret (tuỳ chọn)</span>
+              <input
+                v-model="webhookForm.secret"
+                class="b-input"
+                type="password"
+                autocomplete="off"
+                placeholder="Nhập mới để thay thế"
+              />
+              <small v-if="bot.hasOrderWebhookSecret" class="b-micro">Đã lưu secret</small>
+            </label>
+          </template>
+          <button
+            type="button"
+            class="b-btn b-btn--primary b-btn--sm"
+            :disabled="webhookSaving || !bot.orderClosingPlanAllowed"
+            @click="saveGoalWebhook"
+          >
+            {{ webhookSaving ? 'Đang lưu…' : 'Lưu webhook' }}
+          </button>
+          <p v-if="webhookMsg" class="b-msg-ok">{{ webhookMsg }}</p>
+          <p v-if="webhookErr" class="b-msg-err">{{ webhookErr }}</p>
+        </div>
       </section>
 
       <section v-show="modelValue === 'ops'" id="section-ops" class="setup-section">
@@ -618,7 +667,7 @@
 </template>
 
 <script setup>
-import { computed, ref, watch } from 'vue'
+import { computed, reactive, ref, watch } from 'vue'
 import { RouterLink } from 'vue-router'
 import { Eye, EyeOff } from '@lucide/vue'
 import { api, ApiError, apiMessage } from '@/api'
@@ -652,6 +701,47 @@ const greetingUploading = ref(-1)
 const greetingImageError = ref('')
 const greetingErrorIndex = ref(-1)
 const greetingImageAccept = GREETING_IMAGE_ACCEPT
+
+const webhookForm = reactive({
+  enabled: false,
+  url: '',
+  secret: '',
+})
+const webhookSaving = ref(false)
+const webhookMsg = ref('')
+const webhookErr = ref('')
+
+function syncWebhookFromBot() {
+  webhookForm.enabled = Boolean(props.bot?.orderWebhookEnabled)
+  webhookForm.url = props.bot?.orderWebhookUrl || ''
+  webhookForm.secret = ''
+}
+
+watch(() => props.bot, syncWebhookFromBot, { immediate: true })
+
+async function saveGoalWebhook() {
+  webhookMsg.value = ''
+  webhookErr.value = ''
+  webhookSaving.value = true
+  try {
+    const body = {
+      orderWebhookEnabled: webhookForm.enabled,
+      orderWebhookUrl: webhookForm.url.trim(),
+    }
+    if (webhookForm.secret.trim()) {
+      body.orderWebhookSecret = webhookForm.secret.trim()
+    }
+    await api.bots.update(props.bot.id, body)
+    webhookForm.secret = ''
+    webhookMsg.value = 'Đã lưu — bản ghi mục tiêu mới sẽ gọi webhook.'
+    emit('reload')
+  } catch (e) {
+    webhookErr.value = 'Lưu webhook thất bại'
+    console.error(e)
+  } finally {
+    webhookSaving.value = false
+  }
+}
 
 watch(
   () => auth.user?.id,

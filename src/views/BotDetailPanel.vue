@@ -348,6 +348,8 @@
 
     <BotDetailDashboard v-else-if="tab === 'dashboard'" key="dashboard" :bot="bot" @reload="emit('reload')" />
 
+    <BotDetailGoalRecords v-else-if="tab === 'goal-records'" key="goal-records" :bot="bot" />
+
     <div v-else-if="tab === 'schedules'" key="schedules" class="b-card b-card-pad-lg panel page-panel">
       <h2 class="b-title-sm panel-title">Lịch nhắn khách</h2>
       <p v-if="bot.schedulesEnabled === false" class="b-caption panel-intro">
@@ -372,7 +374,7 @@
       </Transition>
     </div>
 
-    <footer class="b-sticky-bar" :class="{ 'hide-on-test': tab === 'test' || tab === 'dashboard' || tab === 'history' || tab === 'schedules' }">
+    <footer class="b-sticky-bar" :class="{ 'hide-on-test': tab === 'test' || tab === 'dashboard' || tab === 'goal-records' || tab === 'history' || tab === 'schedules' }">
       <label class="b-switch">
         <input
           type="checkbox"
@@ -414,6 +416,7 @@ import BotDetailActivityHistory from '@/components/BotDetailActivityHistory.vue'
 import BotDetailTestPanel from '@/components/BotDetailTestPanel.vue'
 import BotDetailContentSetup from '@/components/BotDetailContentSetup.vue'
 import BotDetailSchedules from '@/components/BotDetailSchedules.vue'
+import BotDetailGoalRecords from '@/components/BotDetailGoalRecords.vue'
 import { fillInstructionTemplate } from '@/constants/instructionTemplates'
 import { DEFAULT_CHAT_STYLE } from '@/constants/chatStyles'
 import {
@@ -441,7 +444,7 @@ const isAdmin = computed(() => auth.isAdmin)
 const saving = ref(false)
 const message = ref('')
 const saveError = ref('')
-const TAB_IDS = ['test', 'dashboard', 'schedules', 'history', 'facebook', 'setup', 'inventory']
+const TAB_IDS = ['test', 'dashboard', 'goal-records', 'schedules', 'history', 'facebook', 'setup', 'inventory']
 const SETUP_SECTION_IDS = ['gemini', 'docs', 'voice', 'greeting', 'goals', 'ops']
 const LEGACY_SETUP_HASH_MAP = {
   orders: 'goals',
@@ -456,6 +459,7 @@ const LEGACY_TAB_MAP = {
 const tabs = [
   { id: 'test', label: 'Thử phản hồi' },
   { id: 'dashboard', label: 'Dashboard' },
+  { id: 'goal-records', label: 'Mục tiêu' },
   { id: 'schedules', label: 'Lịch' },
   { id: 'history', label: 'Lịch sử phản hồi' },
   { id: 'facebook', label: 'Facebook' },
