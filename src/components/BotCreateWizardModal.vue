@@ -37,7 +37,27 @@
         </section>
 
         <section v-show="step === 2" class="body">
-          <p class="b-caption">Gắn Facebook Page và webhook. Verify token bắt buộc.</p>
+          <p class="b-caption">App Meta + Page + webhook. Có thể bỏ qua token và cấu hình đầy đủ ở tab Facebook sau.</p>
+          <div class="wiz-grid">
+            <label class="b-field">
+              <span>App ID</span>
+              <input v-model="form.facebookAppId" class="b-input" type="text" inputmode="numeric" autocomplete="off" />
+            </label>
+            <label class="b-field">
+              <span>App Secret</span>
+              <input
+                v-model="form.facebookAppSecret"
+                class="b-input"
+                type="password"
+                autocomplete="off"
+                placeholder="Có thể thêm sau"
+              />
+            </label>
+          </div>
+          <label class="b-field">
+            <span>Page ID</span>
+            <input v-model="form.facebookPageId" class="b-input" type="text" inputmode="numeric" autocomplete="off" />
+          </label>
           <label class="b-field">
             <span>Verify token</span>
             <input v-model="form.facebookVerifyToken" class="b-input" type="text" autocomplete="off" />
@@ -183,6 +203,9 @@ const stepLabels = ['Tên bot', 'Facebook', 'Gemini', 'Hoàn tất']
 
 const form = reactive({
   name: '',
+  facebookPageId: '',
+  facebookAppId: '',
+  facebookAppSecret: '',
   facebookVerifyToken: '',
   facebookPageAccessToken: '',
   aiProvider: 'own',
@@ -197,6 +220,9 @@ function reset() {
   error.value = ''
   bot.value = null
   form.name = ''
+  form.facebookPageId = ''
+  form.facebookAppId = ''
+  form.facebookAppSecret = ''
   form.facebookVerifyToken = ''
   form.facebookPageAccessToken = ''
   form.aiProvider = 'own'
@@ -261,7 +287,12 @@ async function nextFromStep2() {
   error.value = ''
   saving.value = true
   try {
-    const body = { facebookVerifyToken: form.facebookVerifyToken.trim() }
+    const body = {
+      facebookVerifyToken: form.facebookVerifyToken.trim(),
+      facebookPageId: form.facebookPageId.trim(),
+      facebookAppId: form.facebookAppId.trim(),
+    }
+    if (form.facebookAppSecret.trim()) body.facebookAppSecret = form.facebookAppSecret.trim()
     if (form.facebookPageAccessToken.trim()) {
       body.facebookPageAccessToken = form.facebookPageAccessToken.trim()
     }
@@ -442,6 +473,18 @@ function copyWebhook() {
 
 .footer-msg {
   padding: 0 22px;
+}
+
+.wiz-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0 12px;
+}
+
+@media (max-width: 520px) {
+  .wiz-grid {
+    grid-template-columns: 1fr;
+  }
 }
 
 .modal-foot {

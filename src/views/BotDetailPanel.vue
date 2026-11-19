@@ -42,38 +42,101 @@
     <div class="panel-stage">
       <Transition :name="panelTransition" mode="out-in">
     <div v-if="tab === 'facebook'" key="facebook" class="b-card b-card-pad-lg panel page-panel">
-      <h2 class="b-title-sm panel-title">Facebook và Webhook</h2>
+      <h2 class="b-title-sm panel-title">Facebook Messenger</h2>
+      <p class="b-caption panel-intro">
+        Cần <strong>App Meta</strong> (App ID + App Secret), <strong>Page</strong> (ID + Page token) và <strong>Webhook</strong> gắn đúng Page.
+        Lưu cấu hình rồi bấm kiểm tra kết nối.
+      </p>
       <form class="panel-form-plain" @submit.prevent>
-      <label class="b-field">
-        <span>Page Access Token</span>
-        <input
-          v-model="form.facebookPageAccessToken"
-          class="b-input"
-          type="password"
-          autocomplete="off"
-          placeholder="Nhập token mới để thay thế"
-        />
-        <small v-if="bot.facebookPageAccessTokenMasked">Đã lưu {{ bot.facebookPageAccessTokenMasked }}</small>
-      </label>
-      <label class="b-field">
-        <span>Verify token</span>
-        <input v-model="form.facebookVerifyToken" class="b-input" type="text" autocomplete="off" />
-      </label>
-      <div class="b-codebox">
-        <label>Webhook URL</label>
-        <code>{{ bot.webhookUrl }}</code>
-        <button type="button" class="b-btn b-btn--ghost b-btn--sm" @click="copy(bot.webhookUrl)">
-          Sao chép
-        </button>
-      </div>
-      <ol class="steps">
-        <li>Meta Developer → Messenger → Webhooks — dán URL trên.</li>
-        <li>Verify token trùng với giá trị bạn đã lưu.</li>
-        <li>
-          Đăng ký <code>messages</code>, <code>messaging_postbacks</code> (Get Started), và tuỳ chọn
-          <code>messaging_referrals</code> / <code>messaging_optins</code>.
-        </li>
-      </ol>
+      <section class="fb-section">
+        <h3 class="fb-section-title">1. Ứng dụng Meta (developers.facebook.com)</h3>
+        <div class="grid2 fb-grid">
+          <label class="b-field">
+            <span>App ID</span>
+            <input
+              v-model="form.facebookAppId"
+              class="b-input"
+              type="text"
+              inputmode="numeric"
+              autocomplete="off"
+              placeholder="VD: 123456789012345"
+            />
+          </label>
+          <label class="b-field">
+            <span>App Secret</span>
+            <input
+              v-model="form.facebookAppSecret"
+              class="b-input"
+              type="password"
+              autocomplete="off"
+              placeholder="Nhập secret mới để thay thế"
+            />
+            <small v-if="bot.facebookAppSecretMasked">Đã lưu {{ bot.facebookAppSecretMasked }}</small>
+          </label>
+        </div>
+        <p class="b-micro fb-hint">
+          Thêm product <strong>Messenger</strong> → Settings → lấy App ID / App Secret. Dùng để xác minh Page token thuộc đúng app.
+        </p>
+      </section>
+
+      <section class="fb-section">
+        <h3 class="fb-section-title">2. Facebook Page</h3>
+        <div class="grid2 fb-grid">
+          <label class="b-field">
+            <span>Page ID</span>
+            <input
+              v-model="form.facebookPageId"
+              class="b-input"
+              type="text"
+              inputmode="numeric"
+              autocomplete="off"
+              placeholder="Lấy từ Page → About hoặc sau khi kiểm tra token"
+            />
+          </label>
+          <label class="b-field">
+            <span>Page Access Token</span>
+            <input
+              v-model="form.facebookPageAccessToken"
+              class="b-input"
+              type="password"
+              autocomplete="off"
+              placeholder="EAA… (Page token, không phải User token)"
+            />
+            <small v-if="bot.facebookPageAccessTokenMasked">Đã lưu {{ bot.facebookPageAccessTokenMasked }}</small>
+          </label>
+        </div>
+        <p class="b-micro fb-hint">
+          Messenger → API Setup → chọn Page → Generate token (quyền
+          <code>pages_messaging</code>). Gắn webhook subscription cho <strong>đúng Page</strong> này.
+        </p>
+      </section>
+
+      <section class="fb-section">
+        <h3 class="fb-section-title">3. Webhook Messenger</h3>
+        <label class="b-field">
+          <span>Verify token</span>
+          <input
+            v-model="form.facebookVerifyToken"
+            class="b-input"
+            type="text"
+            autocomplete="off"
+            placeholder="Chuỗi bí mật — nhập y hệt trên Meta"
+          />
+        </label>
+        <div class="b-codebox">
+          <label>Callback URL</label>
+          <code>{{ bot.webhookUrl }}</code>
+          <button type="button" class="b-btn b-btn--ghost b-btn--sm" @click="copy(bot.webhookUrl)">
+            Sao chép
+          </button>
+        </div>
+        <ol class="steps fb-steps">
+          <li>Meta Developer → <strong>Messenger → Settings → Webhooks</strong> — dán Callback URL và Verify token ở trên → Verify and save.</li>
+          <li><strong>Subscribe</strong> Page của bạn (không chỉ Test Page nếu shop chạy Page thật).</li>
+          <li>Bật: <code>messages</code>, <code>messaging_postbacks</code> (nút Bắt đầu / chào phiên), và tuỳ chọn <code>messaging_referrals</code>, <code>messaging_optins</code>.</li>
+          <li>App ở chế độ <strong>Live</strong> (hoặc thêm tester Page ở Development).</li>
+        </ol>
+      </section>
 
       <section class="fb-test b-card b-card-pad" aria-labelledby="fb-test-title">
         <h3 id="fb-test-title" class="fb-test-title">Kiểm tra kết nối</h3>
@@ -83,12 +146,11 @@
         </p>
 
         <ul class="fb-checklist b-micro">
-          <li :class="{ ok: fbReady.hasPageToken }">
-            Page token {{ fbReady.hasPageToken ? '✓' : '—' }}
-          </li>
-          <li :class="{ ok: fbReady.hasVerifyToken }">
-            Verify token {{ fbReady.hasVerifyToken ? '✓' : '—' }}
-          </li>
+          <li :class="{ ok: fbReady.hasAppId }">App ID {{ fbReady.hasAppId ? '✓' : '—' }}</li>
+          <li :class="{ ok: fbReady.hasAppSecret }">App Secret {{ fbReady.hasAppSecret ? '✓' : '—' }}</li>
+          <li :class="{ ok: fbReady.hasPageToken }">Page token {{ fbReady.hasPageToken ? '✓' : '—' }}</li>
+          <li :class="{ ok: fbReady.hasVerifyToken }">Verify token {{ fbReady.hasVerifyToken ? '✓' : '—' }}</li>
+          <li :class="{ ok: fbReady.hasPageId }">Page ID {{ fbReady.hasPageId ? '✓' : '(tuỳ chọn)' }}</li>
           <li :class="{ ok: form.status === 'active' }">
             Bot đang chạy {{ form.status === 'active' ? '✓' : '(tạm dừng)' }}
           </li>
@@ -116,6 +178,15 @@
             Page: <strong>{{ fbTestResult.page?.name || 'Facebook' }}</strong>
             <span v-if="fbTestResult.page?.id" class="fb-page-id">(ID {{ fbTestResult.page.id }})</span>
           </p>
+          <p v-if="fbTestResult.page?.id && !form.facebookPageId.trim()" class="b-micro fb-sync-hint">
+            Gợi ý: dán Page ID <code>{{ fbTestResult.page.id }}</code> vào ô Page ID rồi <strong>Lưu cấu hình</strong>.
+          </p>
+          <p v-else-if="fbTestResult.pageIdMismatch" class="b-msg-err fb-test-msg">
+            Page ID đang lưu ({{ fbTestResult.pageIdMismatch.expected }}) không khớp token ({{ fbTestResult.pageIdMismatch.actual }}).
+          </p>
+          <p v-if="fbTestResult.appError && fbTestResult.checks?.pageTokenValid" class="b-msg-err fb-test-msg">
+            App ID / Secret: {{ fbTestResult.appError }}
+          </p>
           <p class="b-micro">
             Webhook đã cấu hình trên Meta thì tin nhắn khách sẽ vào bot. Thử ngay:
           </p>
@@ -131,12 +202,18 @@
 
         <p v-else-if="fbTestResult && !fbTestResult.connected" class="fb-test-warn b-micro">
           Chưa đủ điều kiện:
+          <span v-if="!fbTestResult.checks?.hasAppId"> thiếu App ID;</span>
+          <span v-if="!fbTestResult.checks?.hasAppSecret"> thiếu App Secret;</span>
           <span v-if="!fbTestResult.checks?.hasPageToken"> thiếu Page token;</span>
           <span v-if="!fbTestResult.checks?.hasVerifyToken"> thiếu verify token;</span>
           <span v-if="fbTestResult.checks?.hasPageToken && !fbTestResult.checks?.pageTokenValid">
-            token không hợp lệ{{ fbTestResult.tokenError ? ` (${fbTestResult.tokenError})` : '' }};
+            Page token không hợp lệ{{ fbTestResult.tokenError ? ` (${fbTestResult.tokenError})` : '' }};
           </span>
-          kiểm tra lại Meta Developer.
+          <span v-if="fbTestResult.checks?.hasAppId && fbTestResult.checks?.hasAppSecret && !fbTestResult.checks?.appPairValid">
+            App Secret không khớp token{{ fbTestResult.appError ? ` (${fbTestResult.appError})` : '' }};
+          </span>
+          <span v-if="fbTestResult.checks?.hasPageId && !fbTestResult.checks?.pageIdMatch"> Page ID sai;</span>
+          kiểm tra lại Messenger trên Meta Developer.
         </p>
       </section>
       </form>
@@ -350,6 +427,9 @@ function redirectLegacyTab() {
 }
 
 const form = reactive({
+  facebookPageId: '',
+  facebookAppId: '',
+  facebookAppSecret: '',
   facebookPageAccessToken: '',
   facebookVerifyToken: '',
   geminiApiKey: '',
@@ -408,6 +488,8 @@ function sessionGreetingsPayload() {
 }
 
 function syncFromBot(b) {
+  form.facebookPageId = b.facebookPageId || ''
+  form.facebookAppId = b.facebookAppId || ''
   form.facebookVerifyToken = b.facebookVerifyToken || ''
   form.geminiModel = b.geminiModel || 'gemini-3.1-flash-lite'
   form.aiProvider = b.aiProvider || 'own'
@@ -469,6 +551,8 @@ async function save() {
   }
 
   const body = {
+    facebookPageId: form.facebookPageId.trim(),
+    facebookAppId: form.facebookAppId.trim(),
     facebookVerifyToken: form.facebookVerifyToken,
     aiProvider: form.aiProvider,
     geminiModel: form.geminiModel,
@@ -488,6 +572,9 @@ async function save() {
     sessionGreetings: sessionGreetingsPayload(),
     orderClosingNote: form.orderClosingNote,
     orderClosingPayment: cloneOrderClosingPayment(form.orderClosingPayment),
+  }
+  if (form.facebookAppSecret.trim()) {
+    body.facebookAppSecret = form.facebookAppSecret.trim()
   }
   if (form.facebookPageAccessToken.trim()) {
     body.facebookPageAccessToken = form.facebookPageAccessToken.trim()
@@ -513,6 +600,7 @@ async function save() {
   try {
     await api.bots.update(props.bot.id, body)
     if (pinUsed) saveLocalGeminiPin(auth.user?.id, pinUsed)
+    form.facebookAppSecret = ''
     form.facebookPageAccessToken = ''
     form.geminiApiKey = ''
     form.geminiKeyPin = loadLocalGeminiPin(auth.user?.id)
@@ -579,22 +667,32 @@ const fbTestResult = ref(null)
 const fbTestErr = ref('')
 
 const fbReady = computed(() => ({
+  hasAppId: Boolean(form.facebookAppId.trim() || props.bot.facebookAppId),
+  hasAppSecret: Boolean(form.facebookAppSecret.trim() || props.bot.hasFacebookAppSecret),
+  hasPageId: Boolean(form.facebookPageId.trim() || props.bot.facebookPageId),
   hasPageToken: Boolean(form.facebookPageAccessToken.trim() || props.bot.hasFacebookToken),
   hasVerifyToken: Boolean(
     (form.facebookVerifyToken || '').trim() || (props.bot.facebookVerifyToken || '').trim(),
   ),
 }))
 
-const canRunFacebookTest = computed(() => fbReady.value.hasPageToken)
+const canRunFacebookTest = computed(
+  () => fbReady.value.hasPageToken && fbReady.value.hasAppId && fbReady.value.hasAppSecret,
+)
 
 async function runFacebookTest() {
   fbTestBusy.value = true
   fbTestErr.value = ''
   fbTestResult.value = null
   try {
-    const body = {}
+    const body = {
+      facebookVerifyToken: (form.facebookVerifyToken || '').trim(),
+      facebookAppId: form.facebookAppId.trim(),
+      facebookPageId: form.facebookPageId.trim(),
+    }
     const draft = form.facebookPageAccessToken.trim()
     if (draft) body.facebookPageAccessToken = draft
+    if (form.facebookAppSecret.trim()) body.facebookAppSecret = form.facebookAppSecret.trim()
     fbTestResult.value = await api.bots.testFacebook(props.bot.id, body)
   } catch (e) {
     fbTestErr.value = e?.message || 'Không kiểm tra được kết nối Facebook'
@@ -1113,6 +1211,55 @@ async function applyInstructionTemplate(tpl) {
 .steps code {
   font-size: 13px;
   color: var(--b-ink-secondary);
+}
+
+.fb-section {
+  margin-top: 1.35rem;
+  padding-top: 1.25rem;
+  border-top: 1px solid var(--b-border);
+}
+
+.fb-section:first-of-type {
+  margin-top: 0;
+  padding-top: 0;
+  border-top: none;
+}
+
+.fb-section-title {
+  margin: 0 0 12px;
+  font-size: 15px;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+}
+
+.fb-hint {
+  margin: 10px 0 0;
+  line-height: 1.5;
+  color: var(--b-muted);
+}
+
+.fb-steps {
+  margin-top: 12px;
+}
+
+.fb-grid {
+  gap: 0 14px;
+}
+
+.grid2 {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0 12px;
+}
+
+@media (max-width: 640px) {
+  .grid2 {
+    grid-template-columns: 1fr;
+  }
+}
+
+.fb-sync-hint code {
+  font-size: 13px;
 }
 
 .fb-test {
