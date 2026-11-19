@@ -1,0 +1,400 @@
+<template>
+  <div class="b-card b-card-pad-lg panel page-panel history-panel">
+    <div class="hist-head">
+      <div>
+        <h2 class="b-title-sm panel-title">Lịch sử phản hồi</h2>
+        <p class="b-caption panel-intro">
+          Nhóm theo phiên chat — Messenger theo từng khách (PSID), thử theo từng phiên.
+        </p>
+      </div>
+      <button type="button" class="b-btn b-btn--ghost b-btn--sm" :disabled="loading" @click="load">
+        Làm mới
+      </button>
+    </div>
+
+    <p v-if="loading" class="b-caption">Đang tải…</p>
+
+    <template v-else>
+      <div class="filter-row">
+        <button
+          type="button"
+          class="filter-btn"
+          :class="{ on: channelFilter === '' }"
+          @click="setChannel('')"
+        >
+          Tất cả
+        </button>
+        <button
+          type="button"
+          class="filter-btn"
+          :class="{ on: channelFilter === 'facebook' }"
+          @click="setChannel('facebook')"
+        >
+          Messenger
+        </button>
+        <button
+          type="button"
+          class="filter-btn"
+          :class="{ on: channelFilter === 'test' }"
+          @click="setChannel('test')"
+        >
+          Thử
+        </button>
+      </div>
+
+      <p v-if="!sessions.length" class="b-caption">Chưa có tin nhắn.</p>
+
+      <ul v-else class="session-list">
+        <li
+          v-for="s in sessions"
+          :key="s.channel + ':' + s.peerId"
+          class="session-card"
+          :class="{ open: isOpen(s) }"
+        >
+          <button type="button" class="session-head" @click="toggle(s)">
+            <span class="session-badges">
+              <span class="ch-badge" :class="s.channel">{{ channelLabel(s.channel) }}</span>
+              <span v-if="s.truncated" class="trunc-badge">…</span>
+            </span>
+            <span class="session-titles">
+              <span class="session-title">{{ s.title }}</span>
+              <span class="session-sub">{{ s.subtitle }}</span>
+            </span>
+            <span class="session-meta">
+              <span>{{ s.messageCount }} tin</span>
+              <span class="session-time">{{ formatTime(s.lastActivityAt) }}</span>
+            </span>
+            <span class="session-chevron" aria-hidden="true">{{ isOpen(s) ? '▾' : '▸' }}</span>
+          </button>
+
+          <div v-show="isOpen(s)" class="session-thread">
+            <div
+              v-for="(m, i) in s.messages"
+              :key="i"
+              class="thread-bubble"
+              :class="m.role"
+            >
+              <span class="thread-role">{{ m.role === 'bot' ? 'Bot' : 'Khách' }}</span>
+              <span class="thread-time">{{ formatTime(m.createdAt) }}</span>
+              <p v-if="m.text" class="thread-text">{{ m.text }}</p>
+              <div v-if="m.imageUrls?.length" class="thread-images">
+                <img
+                  v-for="(url, j) in m.imageUrls"
+                  :key="'img-' + j"
+                  :src="url"
+                  alt="Ảnh khách gửi"
+                  class="thread-img"
+                  loading="lazy"
+                />
+              </div>
+              <img
+                v-if="m.qrImageUrl"
+                :src="m.qrImageUrl"
+                alt="QR thanh toán"
+                class="thread-qr"
+                loading="lazy"
+              />
+            </div>
+          </div>
+        </li>
+      </ul>
+    </template>
+  </div>
+</template>
+
+<script setup>
+import { onMounted, ref } from 'vue'
+import { api } from '@/api'
+
+const props = defineProps({
+  bot: { type: Object, required: true },
+})
+
+const loading = ref(true)
+const sessions = ref([])
+const channelFilter = ref('')
+const openKeys = ref(new Set())
+
+function sessionKey(s) {
+  return `${s.channel}:${s.peerId}`
+}
+
+function isOpen(s) {
+  return openKeys.value.has(sessionKey(s))
+}
+
+function toggle(s) {
+  const key = sessionKey(s)
+  const next = new Set(openKeys.value)
+  if (next.has(key)) next.delete(key)
+  else next.add(key)
+  openKeys.value = next
+}
+
+function channelLabel(ch) {
+  if (ch === 'facebook') return 'Messenger'
+  if (ch === 'test') return 'Thử'
+  return ch
+}
+
+function formatTime(iso) {
+  if (!iso) return '—'
+  try {
+    return new Date(iso).toLocaleString('vi-VN', { hour12: false })
+  } catch {
+    return String(iso)
+  }
+}
+
+async function load() {
+  loading.value = true
+  try {
+    const data = await api.bots.activity(
+      props.bot.id,
+      channelFilter.value || null,
+    )
+    sessions.value = data?.sessions || []
+    openKeys.value = new Set()
+  } catch (e) {
+    console.error(e)
+    sessions.value = []
+  } finally {
+    loading.value = false
+  }
+}
+
+function setChannel(ch) {
+  channelFilter.value = ch
+  openKeys.value = new Set()
+  load()
+}
+
+onMounted(load)
+</script>
+
+<style scoped>
+.hist-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 12px;
+  margin-bottom: 16px;
+}
+
+.panel-intro {
+  margin: 4px 0 0;
+}
+
+.filter-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-bottom: 14px;
+}
+
+.filter-btn {
+  border: 1px solid var(--b-border);
+  background: #fff;
+  border-radius: 999px;
+  padding: 7px 14px;
+  font-size: 12px;
+  line-height: 1.35;
+  white-space: nowrap;
+  cursor: pointer;
+}
+
+.filter-btn.on {
+  border-color: var(--b-accent);
+  background: var(--b-accent-soft);
+  font-weight: 600;
+}
+
+.session-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  gap: 10px;
+}
+
+.session-card {
+  border: 1px solid var(--b-border);
+  border-radius: 14px;
+  background: #fff;
+  overflow: hidden;
+}
+
+.session-card.open {
+  border-color: color-mix(in srgb, var(--b-accent) 35%, var(--b-border));
+}
+
+.session-head {
+  width: 100%;
+  display: grid;
+  grid-template-columns: auto 1fr auto auto;
+  gap: 10px 12px;
+  align-items: center;
+  padding: 12px 14px;
+  border: 0;
+  background: transparent;
+  text-align: left;
+  cursor: pointer;
+  font: inherit;
+  color: inherit;
+}
+
+.session-badges {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  align-items: flex-start;
+}
+
+.ch-badge {
+  font-size: 10px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.02em;
+  padding: 3px 8px;
+  border-radius: 999px;
+  border: 1px solid var(--b-border);
+  background: #f8faf9;
+}
+
+.ch-badge.facebook {
+  border-color: #c5d4f5;
+  background: #eef3ff;
+  color: #1e3a8a;
+}
+
+.ch-badge.test {
+  border-color: #c6e9d4;
+  background: var(--b-accent-soft);
+  color: #0d5c36;
+}
+
+.trunc-badge {
+  font-size: 10px;
+  color: var(--b-muted);
+}
+
+.session-titles {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+}
+
+.session-title {
+  font-size: 14px;
+  font-weight: 600;
+  line-height: 1.3;
+}
+
+.session-sub {
+  font-size: 11px;
+  color: var(--b-muted);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.session-meta {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 2px;
+  font-size: 11px;
+  color: var(--b-muted);
+  white-space: nowrap;
+}
+
+.session-chevron {
+  font-size: 12px;
+  color: var(--b-muted);
+}
+
+.session-thread {
+  border-top: 1px solid var(--b-border);
+  padding: 10px 12px 12px;
+  display: grid;
+  gap: 8px;
+  max-height: min(420px, 55vh);
+  overflow-y: auto;
+  background: #fafbfa;
+}
+
+.thread-bubble {
+  padding: 8px 10px;
+  border-radius: 10px;
+  border: 1px solid var(--b-border);
+  background: #fff;
+}
+
+.thread-bubble.user {
+  border-color: #c6e9d4;
+  background: var(--b-accent-soft);
+}
+
+.thread-role {
+  font-size: 10px;
+  font-weight: 700;
+  text-transform: uppercase;
+  color: var(--b-accent);
+  margin-right: 8px;
+}
+
+.thread-time {
+  font-size: 10px;
+  color: var(--b-muted);
+}
+
+.thread-text {
+  margin: 6px 0 0;
+  font-size: 13px;
+  line-height: 1.45;
+  white-space: pre-wrap;
+}
+
+.thread-images {
+  margin-top: 8px;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.thread-img {
+  max-width: 140px;
+  max-height: 140px;
+  border-radius: 8px;
+  object-fit: cover;
+}
+
+.thread-qr {
+  margin-top: 8px;
+  max-width: 160px;
+  border-radius: 8px;
+}
+
+@media (max-width: 640px) {
+  .session-head {
+    grid-template-columns: 1fr auto;
+    grid-template-rows: auto auto;
+  }
+
+  .session-badges {
+    grid-column: 1 / -1;
+    flex-direction: row;
+    align-items: center;
+  }
+
+  .session-meta {
+    grid-column: 2;
+    grid-row: 2;
+  }
+
+  .session-chevron {
+    display: none;
+  }
+}
+</style>
