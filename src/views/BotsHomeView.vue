@@ -1,26 +1,18 @@
 <template>
   <div class="landing">
-    <div class="ambient" aria-hidden="true">
-      <span class="blob blob-a" />
-      <span class="blob blob-b" />
-      <span class="blob blob-c" />
-      <span class="grid-fade" />
-    </div>
-
     <section class="hero">
       <div class="hero-inner">
         <div class="hero-copy reveal">
           <div class="badge-row">
-            <span class="badge">Miễn phí nền tảng</span>
-            <span class="badge badge--soft">Facebook Messenger</span>
+            <span class="badge">Trợ lý bán hàng AI</span>
+            <span class="badge badge--soft">Dành cho Facebook Messenger</span>
           </div>
           <h1 class="hero-title">
-            Bot phản hồi nhanh,
-            <span class="hero-gradient">chốt đơn thông minh</span>
+            Chăm khách tự động.
+            <span class="hero-highlight">Chốt đơn dễ dàng.</span>
           </h1>
           <p class="hero-lede">
-            Botty kết nối Page với AI — trả lời theo tài liệu, kho hàng và quy tắc bán của bạn.
-            Thanh toán QR, nhắc hóa đơn, webhook riêng từng bot.
+            Botty tự động trả lời tin nhắn, tra cứu sản phẩm và hỗ trợ ghi nhận đơn hàng cho shop.
           </p>
           <div class="hero-actions">
             <RouterLink
@@ -61,37 +53,10 @@
       </div>
     </section>
 
-    <section class="marquee-wrap" aria-label="Ảnh minh họa">
-      <div class="marquee">
-        <div class="marquee-track">
-          <img
-            v-for="(src, i) in marqueeSlides"
-            :key="'a-' + i"
-            :src="src"
-            alt=""
-            loading="lazy"
-            width="300"
-            height="190"
-          />
-        </div>
-        <div class="marquee-track" aria-hidden="true">
-          <img
-            v-for="(src, i) in marqueeSlides"
-            :key="'b-' + i"
-            :src="src"
-            alt=""
-            loading="lazy"
-            width="300"
-            height="190"
-          />
-        </div>
-      </div>
-    </section>
-
     <div class="page-container">
       <section class="section features reveal">
         <p class="b-kicker">Tính năng</p>
-        <h2 class="b-section-title section-head">Mọi thứ shop cần trong một bảng điều khiển</h2>
+        <h2 class="b-section-title section-head">Tính năng chính</h2>
         <div class="bento">
           <article
             v-for="(feat, idx) in features"
@@ -115,35 +80,10 @@
         </div>
       </section>
 
-      <section class="section showcase reveal">
-        <div class="showcase-head">
-          <div>
-            <p class="b-kicker">Thực tế</p>
-            <h2 class="b-section-title">Bot đọc kho — trả lời đúng giá & tồn</h2>
-            <p class="b-muted showcase-lede">
-              Minh họa với catalog demo: hình ảnh sản phẩm đồng bộ vào ngữ cảnh AI.
-            </p>
-          </div>
-          <img class="showcase-brand" src="/logo.png" alt="Botty" width="52" height="52" />
-        </div>
-        <div class="product-grid">
-          <figure
-            v-for="item in products"
-            :key="item.src"
-            class="product-card"
-          >
-            <div class="product-img-wrap">
-              <img :src="item.src" :alt="item.alt" loading="lazy" />
-            </div>
-            <figcaption>{{ item.caption }}</figcaption>
-          </figure>
-        </div>
-      </section>
-
       <section class="section start-steps reveal">
         <p class="b-kicker">Bắt đầu</p>
-        <h2 class="b-section-title section-head">Năm bước đưa bot lên Page</h2>
-        <p class="steps-hint b-muted">Vuốt ngang trên điện thoại để xem đủ bước.</p>
+        <h2 class="b-section-title section-head">Bắt đầu trong vài bước</h2>
+        <p class="steps-hint b-muted">Vuốt ngang để xem các bước tiếp theo.</p>
         <ol class="steps-rail">
           <li v-for="step in steps" :key="step.n" class="steps-item">
             <div class="steps-thumb">
@@ -160,13 +100,10 @@
       </section>
 
       <section class="cta reveal">
-        <div class="cta-glow" aria-hidden="true" />
         <div class="cta-card">
           <div class="cta-copy">
             <h2 class="b-section-title">Sẵn sàng nhận tin nhắn thay bạn?</h2>
-            <p class="b-muted">
-              Vào Cấu hình để xem bot hiện có hoặc mở wizard tạo bot mới trong vài phút.
-            </p>
+            <p class="b-muted">Tạo bot và bắt đầu trả lời khách tự động.</p>
           </div>
           <div class="cta-actions">
             <RouterLink class="b-btn b-btn--primary btn-glow" :to="auth.isLoggedIn ? '/config?create=1' : '/login'">
@@ -189,64 +126,42 @@ import { useAuthStore } from '@/stores/auth'
 const auth = useAuthStore()
 
 const stats = [
-  { value: '1 token', label: 'Webhook / bot' },
-  { value: 'QR + CK', label: 'Chốt đơn tự động' },
-  { value: 'Gemini', label: 'Key của bạn' },
+  { value: 'Tự động', label: 'Trả lời tin nhắn' },
+  { value: 'Chính xác', label: 'Tra cứu sản phẩm' },
+  { value: 'Dễ quản lý', label: 'Theo dõi đơn hàng' },
 ]
-
-const heroSlides = [
-  '/images/hero/slide-1.png',
-  '/images/hero/slide-2.png',
-  '/images/hero/slide-3.png',
-  '/images/hero/slide-4.png',
-]
-
-const marqueeSlides = [...heroSlides, ...heroSlides]
 
 const features = [
   {
     icon: Webhook,
-    title: 'Webhook Meta',
-    text: 'URL riêng, token bảo mật — dán vào Developer là chạy.',
+    title: 'Kết nối Facebook',
+    text: 'Kết nối Page để Botty trả lời tin nhắn.',
   },
   {
     icon: Sparkles,
-    title: 'Gemini / Botty AI',
-    text: 'Dùng key riêng hoặc gói hosting — kiểm soát chi phí.',
+    title: 'Trả lời tự động',
+    text: 'Câu trả lời dựa trên thông tin shop cung cấp.',
   },
   {
     icon: ShoppingBag,
-    title: 'Chốt đơn + thanh toán',
-    text: 'Thu SĐT, địa chỉ, QR Pay2S và đối soát CK.',
-    img: '/images/products/lotus-1.png',
+    title: 'Hỗ trợ chốt đơn',
+    text: 'Ghi nhận thông tin khách và đơn hàng.',
   },
   {
     icon: FileText,
-    title: 'Tài liệu & kho',
-    text: 'Instruction, PDF, sản phẩm có biến thể và tồn.',
+    title: 'Quản lý sản phẩm',
+    text: 'Thêm tài liệu, sản phẩm và tồn kho.',
   },
   {
     icon: MessageCircle,
-    title: 'Thử phản hồi',
-    text: 'Tab thử trước khi bật live trên Page.',
+    title: 'Dùng thử trước',
+    text: 'Kiểm tra câu trả lời trước khi bật bot.',
   },
   {
     icon: Zap,
-    title: 'Nhắc hóa đơn',
-    text: 'Một hóa đơn / phiên — AI hiểu thanh toán hay hủy.',
-    img: '/images/products/rose-1.png',
+    title: 'Theo dõi đơn hàng',
+    text: 'Xem trạng thái đơn và thông tin thanh toán.',
   },
-]
-
-const products = [
-  { src: '/images/products/lotus-1.png', alt: 'Áo Lotus', caption: 'Lotus — tồn kho & size' },
-  { src: '/images/products/lotus-2.png', alt: 'Lotus chi tiết', caption: 'Trả lời giá theo SKU' },
-  { src: '/images/products/rose-1.png', alt: 'Rose collection', caption: 'Gợi ý combo' },
-  { src: '/images/products/rose-2.png', alt: 'Rose', caption: 'Hình ảnh trong kho' },
-  { src: '/images/products/morning-1.png', alt: 'Morning', caption: 'Tone sáng, copy tự nhiên' },
-  { src: '/images/products/morning-2.png', alt: 'Morning 2', caption: 'Nhiều ảnh mỗi SP' },
-  { src: '/images/products/night-1.png', alt: 'Night', caption: 'Catalog tối' },
-  { src: '/images/products/night-2.png', alt: 'Night 2', caption: 'Đồng bộ Messenger' },
 ]
 
 const steps = [
@@ -286,305 +201,224 @@ const steps = [
 <style scoped>
 .landing {
   position: relative;
-  overflow-x: clip;
-  background: #ffffff;
-}
-
-.ambient {
-  position: absolute;
-  inset: 0;
-  height: min(920px, 120vh);
-  pointer-events: none;
   overflow: hidden;
-}
-
-.grid-fade {
-  position: absolute;
-  inset: 0;
-  background-image:
-    linear-gradient(rgba(21, 128, 61, 0.04) 1px, transparent 1px),
-  linear-gradient(90deg, rgba(21, 128, 61, 0.04) 1px, transparent 1px);
-  background-size: 48px 48px;
-  mask-image: linear-gradient(180deg, #000 0%, transparent 85%);
-}
-
-.blob {
-  position: absolute;
-  border-radius: 50%;
-  filter: blur(64px);
-  opacity: 0.55;
-  animation: blob-drift 18s ease-in-out infinite alternate;
-}
-
-.blob-a {
-  width: 420px;
-  height: 420px;
-  top: -120px;
-  left: -80px;
-  background: radial-gradient(circle, #bbf7d0 0%, transparent 70%);
-}
-
-.blob-b {
-  width: 360px;
-  height: 360px;
-  top: 80px;
-  right: -60px;
-  background: radial-gradient(circle, #d1fae5 0%, transparent 70%);
-  animation-delay: -6s;
-}
-
-.blob-c {
-  width: 280px;
-  height: 280px;
-  bottom: 40%;
-  left: 35%;
-  background: radial-gradient(circle, #fef3c7 0%, transparent 72%);
-  opacity: 0.35;
-  animation-delay: -10s;
-}
-
-@keyframes blob-drift {
-  0% {
-    transform: translate(0, 0) scale(1);
-  }
-  100% {
-    transform: translate(24px, 18px) scale(1.08);
-  }
+  isolation: isolate;
+  background: #fff;
 }
 
 .hero {
   position: relative;
-  padding: clamp(2.5rem, 6vw, 4.5rem) clamp(1.25rem, 4vw, 2.5rem) 2rem;
+  padding: clamp(3.25rem, 7.5vw, 6.5rem) clamp(1.25rem, 4vw, 2.5rem) clamp(3rem, 6vw, 5rem);
 }
 
 .hero-inner {
-  max-width: var(--b-layout);
+  max-width: 1200px;
   margin: 0 auto;
   display: grid;
   grid-template-columns: 1fr;
-  gap: 2.5rem;
+  gap: clamp(2.5rem, 6vw, 5rem);
   align-items: center;
 }
 
 @media (min-width: 980px) {
+  .hero-copy { text-align: left; }
+  .badge-row, .hero-actions { justify-content: flex-start; }
+  .hero-title { max-width: 20ch; font-size: clamp(2.8rem, 4.4vw, 3.5rem); }
+  .hero-lede { margin-inline: 0; }
+  .hero-stats { justify-content: flex-start; }
+}
+
+@media (min-width: 980px) {
   .hero-inner {
-    grid-template-columns: 1.05fr 0.95fr;
-    gap: 3rem;
+    grid-template-columns: minmax(0, 0.94fr) minmax(0, 1.06fr);
   }
 }
 
 .badge-row {
   display: flex;
   flex-wrap: wrap;
-  gap: 8px;
-  margin-bottom: 1rem;
+  gap: 9px;
+  margin-bottom: 1.4rem;
 }
 
-.badge {
+.badge-row .badge {
+  position: static;
   display: inline-flex;
   align-items: center;
-  gap: 6px;
-  padding: 6px 12px;
+  gap: 7px;
+  padding: 7px 12px;
   border-radius: 999px;
-  font-size: 12px;
-  font-weight: 650;
-  letter-spacing: 0.04em;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.055em;
   text-transform: uppercase;
-  color: var(--b-accent);
-  background: rgba(255, 255, 255, 0.85);
+  color: #166534;
+  background: rgba(240, 253, 244, 0.86);
   border: 1px solid #bbf7d0;
   backdrop-filter: blur(8px);
 }
 
 .badge--soft {
-  color: var(--b-muted);
-  border-color: var(--b-border);
+  color: #475569;
+  border-color: #e2e8f0;
+  background: rgba(255, 255, 255, 0.76);
   text-transform: none;
-  letter-spacing: 0.02em;
+  letter-spacing: 0;
   font-weight: 600;
 }
 
 .hero-title {
+  max-width: 15ch;
   margin: 0;
-  font-size: clamp(2.25rem, 5.2vw, 3.5rem);
-  font-weight: 800;
-  letter-spacing: -0.04em;
-  line-height: 1.08;
-  color: var(--b-ink);
+  font-size: clamp(2.55rem, 4vw, 3.15rem);
+  font-weight: 750;
+  letter-spacing: -0.045em;
+  line-height: 1.12;
+  color: #0b1b13;
 }
 
-.hero-gradient {
+.hero-highlight {
   display: block;
-  background: linear-gradient(120deg, #15803d 0%, #22c55e 45%, #0d9488 100%);
-  -webkit-background-clip: text;
-  background-clip: text;
-  color: transparent;
+  padding-bottom: 0.06em;
+  color: #15803d;
 }
 
 .hero-lede {
-  margin: 1.125rem 0 0;
-  max-width: 48ch;
-  font-size: 1.05rem;
-  line-height: 1.65;
-  color: var(--b-muted);
+  margin: 1.35rem 0 0;
+  max-width: 49ch;
+  font-size: clamp(1rem, 1.4vw, 1.1rem);
+  line-height: 1.75;
+  color: #475569;
 }
 
 .hero-actions {
   display: flex;
   flex-wrap: wrap;
   gap: 12px;
-  margin-top: 1.75rem;
+  margin-top: 1.8rem;
+}
+
+.hero-actions .b-btn {
+  min-height: 48px;
+  padding-inline: 22px;
 }
 
 .btn-glow {
-  box-shadow:
-    0 0 0 1px rgba(21, 128, 61, 0.12),
-    0 12px 32px -8px rgba(21, 128, 61, 0.35);
+  box-shadow: 0 8px 24px -8px rgba(21, 128, 61, 0.45);
   transition: transform 0.2s ease, box-shadow 0.2s ease;
 }
 
 .btn-glow:hover {
-  transform: translateY(-1px);
-  box-shadow:
-    0 0 0 1px rgba(21, 128, 61, 0.18),
-    0 16px 40px -10px rgba(21, 128, 61, 0.42);
+  transform: translateY(-2px);
+  box-shadow: 0 14px 30px -9px rgba(21, 128, 61, 0.5);
 }
 
 .hero-stats {
   list-style: none;
-  margin: 2rem 0 0;
-  padding: 0;
+  margin: 2.1rem 0 0;
+  padding: 1.25rem 0 0;
   display: flex;
   flex-wrap: wrap;
-  gap: 1.25rem 1.75rem;
+  gap: 1rem 1.8rem;
+  border-top: 1px solid rgba(148, 163, 184, 0.25);
 }
 
 .hero-stats li {
   display: flex;
   flex-direction: column;
-  gap: 2px;
+  gap: 3px;
 }
 
 .hero-stats strong {
-  font-size: 1.05rem;
+  font-size: 1rem;
   font-weight: 750;
-  color: var(--b-ink);
-  letter-spacing: -0.02em;
+  color: #17251c;
+  letter-spacing: -0.025em;
 }
 
 .hero-stats span {
-  font-size: 13px;
-  color: var(--b-muted);
+  font-size: 12px;
+  color: #64756b;
 }
 
 .hero-visual {
   display: grid;
   justify-items: center;
+  min-width: 0;
 }
 
 .visual-frame {
   position: relative;
-  width: min(100%, 540px);
+  width: min(100%, 590px);
+  padding: 0 1rem 2.2rem 0;
 }
 
 .visual-shot {
+  position: relative;
   width: 100%;
   height: auto;
-  border-radius: 20px;
-  border: 1px solid var(--b-border);
-  box-shadow: 0 32px 64px -28px rgba(15, 23, 42, 0.18);
-  opacity: 0.92;
+  aspect-ratio: 1.53;
+  object-fit: cover;
+  border-radius: 26px;
+  border: 7px solid rgba(255, 255, 255, 0.9);
+  box-shadow: 0 28px 70px -32px rgba(15, 23, 42, 0.42);
 }
 
 .visual-float {
   position: absolute;
-  right: -4%;
-  bottom: -12%;
-  width: min(88%, 420px);
+  z-index: 2;
+  right: -1%;
+  bottom: 0;
+  width: min(84%, 430px);
+  filter: drop-shadow(0 18px 28px rgba(15, 23, 42, 0.18));
   animation: float-y 5s ease-in-out infinite;
 }
 
 @keyframes float-y {
-  0%,
-  100% {
-    transform: translateY(0);
-  }
-  50% {
-    transform: translateY(-10px);
-  }
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-8px); }
 }
 
 @media (max-width: 979px) {
-  .visual-float {
-    position: relative;
-    right: auto;
-    bottom: auto;
-    margin-top: -3rem;
-    width: 100%;
-  }
-
-  .visual-shot {
-    display: none;
-  }
+  .hero-copy { max-width: 680px; margin-inline: auto; text-align: center; }
+  .badge-row, .hero-actions, .hero-stats { justify-content: center; }
+  .hero-title { max-width: 13ch; margin-inline: auto; }
+  .hero-lede { margin-inline: auto; }
+  .visual-frame { width: min(100%, 640px); }
+  .visual-float { right: 2%; width: min(88%, 480px); }
 }
 
-.marquee-wrap {
-  margin: 0.5rem 0 0;
-  padding: 1.25rem 0;
-  border-block: 1px solid var(--b-border);
-  background: linear-gradient(180deg, #fafdfb 0%, #ffffff 100%);
-  mask-image: linear-gradient(90deg, transparent, #000 8%, #000 92%, transparent);
-}
-
-.marquee {
-  display: flex;
-  width: max-content;
-  animation: marquee 42s linear infinite;
-}
-
-.marquee-track {
-  display: flex;
-  gap: 1rem;
-  padding: 0 0.5rem;
-}
-
-.marquee-track img {
-  width: 280px;
-  height: 172px;
-  object-fit: cover;
-  border-radius: 14px;
-  border: 1px solid var(--b-border);
-  box-shadow: 0 8px 24px -12px rgba(15, 23, 42, 0.12);
-  transition: transform 0.35s ease;
-}
-
-.marquee:hover {
-  animation-play-state: paused;
-}
-
-.marquee-track img:hover {
-  transform: scale(1.03);
-}
-
-@keyframes marquee {
-  0% {
-    transform: translateX(0);
-  }
-  100% {
-    transform: translateX(-50%);
-  }
+@media (max-width: 620px) {
+  .hero { padding-top: 2.8rem; }
+  .hero-title { font-size: clamp(2.45rem, 11vw, 3.6rem); }
+  .hero-actions { flex-direction: column; align-items: stretch; }
+  .hero-actions .b-btn { width: 100%; }
+  .hero-stats { gap: 1rem 1.25rem; }
+  .hero-stats li { min-width: 27%; }
+  .visual-frame { padding: 0 0.35rem 1.2rem 0; }
+  .visual-shot { border-width: 5px; border-radius: 20px; }
+  .visual-float { position: relative; right: auto; bottom: auto; width: 100%; margin-top: -1.5rem; }
 }
 
 .page-container {
-  max-width: var(--b-layout);
+  max-width: 1200px;
   margin: 0 auto;
-  padding: clamp(3rem, 6vw, 4.5rem) clamp(1.25rem, 4vw, 2.5rem) 3rem;
+  padding: clamp(3.5rem, 7vw, 6rem) clamp(1.25rem, 4vw, 2.5rem) 4rem;
   display: grid;
-  gap: clamp(3.5rem, 7vw, 5rem);
+  gap: clamp(3rem, 6vw, 4.5rem);
 }
 
 .section-head {
-  margin-bottom: 1.75rem;
+  max-width: 19ch;
+  margin-bottom: 1.9rem;
+}
+
+.section .b-kicker {
+  margin-bottom: 0.7rem;
+}
+
+.section .b-section-title {
+  letter-spacing: -0.045em;
 }
 
 .bento {
@@ -610,21 +444,20 @@ const steps = [
 
 .bento-card {
   position: relative;
-  padding: 1.25rem 1.35rem 1.35rem;
-  border-radius: 18px;
-  border: 1px solid var(--b-border);
+  min-height: 190px;
+  padding: 1.45rem 1.5rem 1.55rem;
+  border-radius: 22px;
+  border: 1px solid #e7ede9;
   background: #fff;
   overflow: hidden;
-  transition:
-    transform 0.25s ease,
-    box-shadow 0.25s ease,
-    border-color 0.25s ease;
+  box-shadow: 0 8px 24px -22px rgba(15, 23, 42, 0.3);
+  transition: transform 0.25s ease, box-shadow 0.25s ease, border-color 0.25s ease;
 }
 
 .bento-card:hover {
   transform: translateY(-4px);
-  border-color: #bbf7d0;
-  box-shadow: 0 20px 40px -24px rgba(21, 128, 61, 0.35);
+  border-color: #a7dbba;
+  box-shadow: 0 22px 44px -28px rgba(21, 128, 61, 0.42);
 }
 
 .bento-icon {
@@ -873,16 +706,6 @@ const steps = [
   padding: 4px;
 }
 
-.cta-glow {
-  position: absolute;
-  inset: 0;
-  border-radius: 22px;
-  background: linear-gradient(120deg, #22c55e, #0d9488, #15803d);
-  opacity: 0.55;
-  filter: blur(20px);
-  z-index: 0;
-}
-
 .cta-card {
   position: relative;
   z-index: 1;
@@ -894,7 +717,7 @@ const steps = [
   padding: clamp(1.5rem, 3vw, 2rem) clamp(1.25rem, 3vw, 2rem);
   border-radius: 20px;
   border: 1px solid #bbf7d0;
-  background: linear-gradient(145deg, #ffffff 0%, #f0fdf4 100%);
+  background: #fff;
 }
 
 .cta-actions {
@@ -923,9 +746,16 @@ const steps = [
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .blob,
+  *,
+  *::before,
+  *::after {
+    scroll-behavior: auto !important;
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+
   .visual-float,
-  .marquee,
   .reveal,
   .reveal-delay {
     animation: none;
