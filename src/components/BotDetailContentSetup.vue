@@ -1,8 +1,23 @@
 <template>
   <div class="setup-panel page-panel">
     <header class="setup-top">
-      <h2 class="b-title-sm panel-title">Nội dung & AI</h2>
-      <p class="b-caption panel-intro">Gemini, tài liệu, giọng điệu và chốt đơn trong một màn hình.</p>
+      <div class="setup-top-row">
+        <div>
+          <h2 class="b-title-sm panel-title">Nội dung & AI</h2>
+          <p class="b-caption panel-intro">Gemini, tài liệu, giọng điệu, chào phiên và mục tiêu bot trong một màn hình.</p>
+        </div>
+        <div class="setup-port-btns">
+          <button type="button" class="b-btn b-btn--ghost b-btn--sm" :disabled="portBusy" @click="exportConfig">
+            Xuất cấu hình
+          </button>
+          <label class="b-btn b-btn--ghost b-btn--sm port-import">
+            Nhập cấu hình
+            <input type="file" accept="application/json,.json" class="sr-only" @change="importConfigFile" />
+          </label>
+        </div>
+      </div>
+      <p v-if="portMsg" class="b-micro port-msg">{{ portMsg }}</p>
+      <p v-if="portErr" class="b-msg-err port-msg">{{ portErr }}</p>
     </header>
 
     <nav class="setup-subnav" aria-label="Phần cấu hình">
@@ -290,14 +305,27 @@
         </div>
       </section>
 
-      <section v-show="modelValue === 'orders'" id="section-orders" class="setup-section">
-        <h3 class="setup-h">Chốt đơn</h3>
+      <section v-show="modelValue === 'goals'" id="section-goals" class="setup-section">
+        <h3 class="setup-h">Mục tiêu</h3>
         <p class="b-caption panel-intro">
-          Bật để bot hướng dẫn khách xác nhận sản phẩm, SĐT, địa chỉ và tóm tắt đơn trong chat.
+          Bật từng mục tiêu bot hướng tới trong chat — có thể bật đồng thời chốt đơn, thu liên hệ và khảo sát.
         </p>
+
+        <div v-if="!bot.orderClosingPlanAllowed" class="plan-gate b-card b-card-pad">
+          <p class="plan-gate-title">Chốt đơn — gói trả phí</p>
+          <p class="b-micro">
+            Mục tiêu <strong>chốt đơn</strong>, nhắc đơn và webhook đơn chỉ khi tài khoản có
+            <strong>gói Botty AI đang hoạt động</strong>. Liên hệ & khảo sát vẫn dùng miễn phí.
+          </p>
+          <RouterLink to="/pricing" class="b-btn b-btn--primary b-btn--sm">Xem gói</RouterLink>
+        </div>
+
+        <div class="goal-block" :class="{ 'goal-block--locked': !bot.orderClosingPlanAllowed }">
+          <h4 class="goal-block-title">Chốt đơn</h4>
         <label class="b-switch order-toggle">
           <input
             type="checkbox"
+            :disabled="!bot.orderClosingPlanAllowed"
             :checked="form.orderClosingEnabled"
             @change="form.orderClosingEnabled = $event.target.checked"
           />
@@ -421,6 +449,169 @@
             />
           </label>
         </template>
+        </div>
+
+        <div class="goal-block">
+          <h4 class="goal-block-title">Lấy thông tin liên hệ</h4>
+          <p class="b-micro goal-block-lede">
+            Bot hỏi thêm liên hệ khi phù hợp (báo giá, để shop gọi lại) — không thay thế chốt đơn nếu bạn bật cả hai.
+          </p>
+          <label class="b-switch order-toggle">
+            <input
+              type="checkbox"
+              :checked="form.contactCollectionEnabled"
+              @change="form.contactCollectionEnabled = $event.target.checked"
+            />
+            <span class="b-switch-track" aria-hidden="true" />
+            Bật thu thập liên hệ
+          </label>
+          <label v-if="form.contactCollectionEnabled" class="b-field">
+            <span>Ghi chú / trường cần hỏi</span>
+            <textarea
+              v-model="form.contactCollectionNote"
+              class="b-textarea"
+              rows="4"
+              placeholder="VD: Hỏi họ tên, SĐT Zalo, tỉnh/thành. Không hỏi email."
+            />
+          </label>
+        </div>
+
+        <div class="goal-block">
+          <h4 class="goal-block-title">Khảo sát</h4>
+          <p class="b-micro goal-block-lede">
+            Bot đặt câu hỏi khảo sát theo kịch bản bạn ghi — từ tốn, không spam.
+          </p>
+          <label class="b-switch order-toggle">
+            <input
+              type="checkbox"
+              :checked="form.surveyEnabled"
+              @change="form.surveyEnabled = $event.target.checked"
+            />
+            <span class="b-switch-track" aria-hidden="true" />
+            Bật khảo sát
+          </label>
+          <label v-if="form.surveyEnabled" class="b-field">
+            <span>Kịch bản / danh sách câu hỏi</span>
+            <textarea
+              v-model="form.surveyNote"
+              class="b-textarea"
+              rows="5"
+              placeholder="VD:&#10;1. Bạn biết shop qua đâu?&#10;2. Mức quan tâm sản phẩm (1–5)?&#10;3. Góp ý thêm?"
+            />
+          </label>
+        </div>
+      </section>
+
+      <section v-show="modelValue === 'ops'" id="section-ops" class="setup-section">
+        <h3 class="setup-h">Vận hành</h3>
+        <p class="b-caption panel-intro">Giờ làm việc, bàn giao nhân viên — không cần gói trả phí.</p>
+
+        <div class="goal-block">
+          <h4 class="goal-block-title">Bàn giao người thật</h4>
+          <p class="b-micro goal-block-lede">
+            Khách nhắn từ khóa (vd. <em>gặp nhân viên</em>) → bot xác nhận và <strong>tạm dừng</strong> trả lời AI cho khách đó.
+            Trên tab Lịch sử có thể bật lại bot cho phiên.
+          </p>
+          <label class="b-switch order-toggle">
+            <input
+              type="checkbox"
+              :checked="form.humanHandoffEnabled"
+              @change="form.humanHandoffEnabled = $event.target.checked"
+            />
+            <span class="b-switch-track" aria-hidden="true" />
+            Bật bàn giao nhân viên
+          </label>
+          <label v-if="form.humanHandoffEnabled" class="b-field">
+            <span>Từ khóa (phẩy hoặc xuống dòng)</span>
+            <input
+              v-model="form.humanHandoffKeywords"
+              class="b-input"
+              placeholder="gặp nhân viên, nhân viên, người thật"
+            />
+          </label>
+          <label v-if="form.humanHandoffEnabled" class="b-field">
+            <span>Tin xác nhận (tuỳ chọn)</span>
+            <textarea v-model="form.humanHandoffReply" class="b-textarea" rows="2" />
+          </label>
+        </div>
+
+        <div class="goal-block">
+          <h4 class="goal-block-title">Giờ làm việc</h4>
+          <p class="b-micro goal-block-lede">
+            Ngoài giờ: bot chỉ gửi tin ngoài giờ (vẫn chào phiên nếu bật). Trong giờ: AI đầy đủ.
+          </p>
+          <label class="b-switch order-toggle">
+            <input
+              type="checkbox"
+              :checked="form.businessHoursEnabled"
+              @change="form.businessHoursEnabled = $event.target.checked"
+            />
+            <span class="b-switch-track" aria-hidden="true" />
+            Bật giờ làm việc
+          </label>
+          <template v-if="form.businessHoursEnabled">
+            <label class="b-field">
+              <span>Múi giờ</span>
+              <input v-model="form.businessHoursTimezone" class="b-input" placeholder="Asia/Ho_Chi_Minh" />
+            </label>
+            <div class="bh-days">
+              <span class="b-field-label">Ngày trong tuần</span>
+              <div class="bh-days-row">
+                <label v-for="d in businessDayOpts" :key="d.v" class="bh-day">
+                  <input
+                    v-model="form.businessHoursSchedule.days"
+                    type="checkbox"
+                    :value="d.v"
+                  />
+                  {{ d.label }}
+                </label>
+              </div>
+            </div>
+            <div class="grid2">
+              <label class="b-field">
+                <span>Mở cửa</span>
+                <input v-model="form.businessHoursSchedule.open" class="b-input" type="time" />
+              </label>
+              <label class="b-field">
+                <span>Đóng cửa</span>
+                <input v-model="form.businessHoursSchedule.close" class="b-input" type="time" />
+              </label>
+            </div>
+            <label class="b-field">
+              <span>Tin ngoài giờ (tuỳ chọn)</span>
+              <textarea v-model="form.outsideHoursMessage" class="b-textarea" rows="3" />
+            </label>
+          </template>
+        </div>
+
+        <div class="goal-block">
+          <h4 class="goal-block-title">Lịch nhắn khách</h4>
+          <p class="b-micro goal-block-lede">
+            <strong>Theo ngày</strong>: AI đọc tin khách hẹn → nhắn lại đúng ngày (mặc định <strong>8:00</strong> nếu không hẹn giờ).
+            <strong>Chờ có hàng</strong>: SP hết tồn → tạo lịch; khi bạn cập nhật tồn &gt; 0, bot nhắn ngay (trong cửa sổ 24h Messenger).
+          </p>
+          <label class="b-switch order-toggle">
+            <input
+              type="checkbox"
+              :checked="form.schedulesEnabled"
+              @change="form.schedulesEnabled = $event.target.checked"
+            />
+            <span class="b-switch-track" aria-hidden="true" />
+            Bật lịch tự động
+          </label>
+          <label v-if="form.schedulesEnabled" class="b-field">
+            <span>Tin khi có hàng lại (tuỳ chọn, dùng <code>{product}</code>)</span>
+            <textarea
+              v-model="form.schedulesRestockMessage"
+              class="b-textarea"
+              rows="2"
+              placeholder="VD: {product} đã có hàng trở lại — bạn còn muốn đặt không?"
+            />
+          </label>
+          <p v-if="form.schedulesEnabled" class="b-micro">
+            Xem và hủy lịch trên tab <strong>Lịch</strong>.
+          </p>
+        </div>
       </section>
     </div>
   </div>
@@ -477,8 +668,65 @@ const sections = [
   { id: 'docs', label: 'Tài liệu' },
   { id: 'voice', label: 'Giọng điệu' },
   { id: 'greeting', label: 'Chào phiên' },
-  { id: 'orders', label: 'Chốt đơn' },
+  { id: 'goals', label: 'Mục tiêu' },
+  { id: 'ops', label: 'Vận hành' },
 ]
+
+const businessDayOpts = [
+  { v: 0, label: 'CN' },
+  { v: 1, label: 'T2' },
+  { v: 2, label: 'T3' },
+  { v: 3, label: 'T4' },
+  { v: 4, label: 'T5' },
+  { v: 5, label: 'T6' },
+  { v: 6, label: 'T7' },
+]
+
+const portBusy = ref(false)
+const portMsg = ref('')
+const portErr = ref('')
+
+async function exportConfig() {
+  portBusy.value = true
+  portMsg.value = ''
+  portErr.value = ''
+  try {
+    const data = await api.bots.exportConfig(props.bot.id)
+    const payload = data?.format ? data : data?.data ?? data
+    const blob = new Blob([JSON.stringify(payload, null, 2)], { type: 'application/json' })
+    const url = URL.createObjectURL(blob)
+    const a = document.createElement('a')
+    a.href = url
+    a.download = `botty-${props.bot.id}-config.json`
+    a.click()
+    URL.revokeObjectURL(url)
+    portMsg.value = 'Đã tải file JSON (token đã che).'
+  } catch (e) {
+    portErr.value = e?.message || 'Xuất cấu hình thất bại'
+  } finally {
+    portBusy.value = false
+  }
+}
+
+async function importConfigFile(event) {
+  const file = event.target?.files?.[0]
+  event.target.value = ''
+  if (!file) return
+  portBusy.value = true
+  portMsg.value = ''
+  portErr.value = ''
+  try {
+    const text = await file.text()
+    const json = JSON.parse(text)
+    const data = await api.bots.importConfig(props.bot.id, json)
+    portMsg.value = `Đã nhập cấu hình${data?.documentsImported ? ` (${data.documentsImported} tài liệu)` : ''}.`
+    emit('reload')
+  } catch (e) {
+    portErr.value = e?.message || 'Nhập cấu hình thất bại'
+  } finally {
+    portBusy.value = false
+  }
+}
 
 function greetingKey() {
   return `g-${Date.now()}-${Math.random().toString(36).slice(2, 7)}`
@@ -539,7 +787,14 @@ function removeGreetingItem(index) {
   props.form.sessionGreetings.splice(index, 1)
 }
 
-const emit = defineEmits(['update:modelValue', 'update:docTitle', 'update:docContent', 'add-doc', 'delete-doc'])
+const emit = defineEmits([
+  'update:modelValue',
+  'update:docTitle',
+  'update:docContent',
+  'add-doc',
+  'delete-doc',
+  'reload',
+])
 
 const replyLanguageModes = REPLY_LANGUAGE_MODES
 const replyLanguageOptions = REPLY_LANGUAGE_OPTIONS
@@ -692,6 +947,87 @@ const docContentModel = computed({
 
 .order-toggle {
   margin: 12px 0 16px;
+}
+
+.goal-block {
+  margin-top: 20px;
+  padding-top: 18px;
+  border-top: 1px solid var(--b-border);
+}
+
+.goal-block:first-of-type {
+  margin-top: 0;
+  padding-top: 0;
+  border-top: 0;
+}
+
+.goal-block-title {
+  margin: 0 0 8px;
+  font-size: 15px;
+  font-weight: 700;
+}
+
+.goal-block-lede {
+  margin: 0 0 12px;
+  line-height: 1.45;
+  color: var(--b-muted);
+}
+
+.goal-block--locked {
+  opacity: 0.55;
+  pointer-events: none;
+}
+
+.plan-gate {
+  margin-bottom: 14px;
+  background: #fffbeb;
+  border-color: #fde68a;
+}
+
+.plan-gate-title {
+  margin: 0 0 8px;
+  font-weight: 700;
+}
+
+.setup-top-row {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 12px;
+}
+
+.setup-port-btns {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.port-import {
+  cursor: pointer;
+  margin: 0;
+}
+
+.port-msg {
+  margin: 8px 0 0;
+}
+
+.bh-days {
+  margin-bottom: 12px;
+}
+
+.bh-days-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px 12px;
+  margin-top: 6px;
+}
+
+.bh-day {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 13px;
 }
 
 .order-field-hint {

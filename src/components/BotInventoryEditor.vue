@@ -1,7 +1,7 @@
 <template>
   <div class="inv">
     <p class="b-caption panel-intro">
-      Nhập kho <strong>thủ công</strong> hoặc <strong>dán nội dung shop</strong> — AI đọc và điền danh sách sản phẩm giúp bạn.
+      Nhập kho <strong>thủ công</strong> hoặc <strong>dán nội dung shop</strong> — AI điền SP (thiếu tồn → mặc định <strong>99</strong>). Thêm <strong>ảnh chính / ảnh phụ</strong> — bot gửi khi khách hỏi xem hình.
     </p>
 
     <div class="mode-tabs" role="tablist" aria-label="Nguồn kho hàng">
@@ -153,6 +153,86 @@
                 <input v-model="editingProduct.link" class="b-input" type="url" placeholder="https://..." />
               </label>
 
+              <div class="img-block">
+                <span class="b-field-label">Ảnh chính</span>
+                <div class="inv-image-actions">
+                  <label class="inv-pick">
+                    <input
+                      type="file"
+                      class="sr-only"
+                      :accept="productImageAccept"
+                      :disabled="uploadMainBusy || !botId"
+                      @change="onMainImagePick($event)"
+                    />
+                    <span class="b-btn b-btn--ghost b-btn--sm">
+                      {{ uploadMainBusy ? 'Đang tải…' : editingProduct.imageUrl ? 'Đổi ảnh' : 'Tải ảnh lên' }}
+                    </span>
+                  </label>
+                  <button
+                    v-if="editingProduct.imageUrl"
+                    type="button"
+                    class="text-danger"
+                    :disabled="uploadMainBusy"
+                    @click="clearMainImage"
+                  >
+                    Gỡ ảnh
+                  </button>
+                </div>
+                <label class="b-field">
+                  <span class="b-micro">Hoặc dán URL https</span>
+                  <input v-model="editingProduct.imageUrl" class="b-input" type="url" placeholder="https://..." />
+                </label>
+                <p v-if="imageUploadError && imageUploadTarget === 'main'" class="b-msg-err">{{ imageUploadError }}</p>
+                <img
+                  v-if="editingProduct.imageUrl"
+                  :src="editingProduct.imageUrl"
+                  alt="Ảnh chính"
+                  class="prod-thumb"
+                  loading="lazy"
+                />
+              </div>
+
+              <div class="img-block">
+                <div class="variants-head">
+                  <span class="field-label">Ảnh phụ (tối đa 12)</span>
+                  <button
+                    type="button"
+                    class="b-btn b-btn--ghost b-btn--sm"
+                    :disabled="(editingProduct.galleryImages?.length || 0) >= 12"
+                    @click="addGalleryImage(editIndex)"
+                  >
+                    + Thêm ảnh
+                  </button>
+                </div>
+                <ul v-if="editingProduct.galleryImages?.length" class="gallery-list">
+                  <li v-for="(g, gi) in editingProduct.galleryImages" :key="gi" class="gallery-row">
+                    <div class="gallery-row-main">
+                      <label class="inv-pick inv-pick--sm">
+                        <input
+                          type="file"
+                          class="sr-only"
+                          :accept="productImageAccept"
+                          :disabled="uploadGalleryIndex === gi || !botId"
+                          @change="onGalleryImagePick(gi, $event)"
+                        />
+                        <span class="b-btn b-btn--ghost b-btn--sm">
+                          {{ uploadGalleryIndex === gi ? '…' : 'Tải lên' }}
+                        </span>
+                      </label>
+                      <input
+                        v-model="editingProduct.galleryImages[gi]"
+                        class="b-input"
+                        type="url"
+                        placeholder="URL hoặc tải lên"
+                      />
+                    </div>
+                    <button type="button" class="text-danger" @click="removeGalleryImage(editIndex, gi)">Xóa</button>
+                  </li>
+                </ul>
+                <p v-else class="b-micro">Bot gửi ảnh khi khách hỏi xem hình (Messenger / thử).</p>
+                <p v-if="imageUploadError && imageUploadTarget === 'gallery'" class="b-msg-err">{{ imageUploadError }}</p>
+              </div>
+
               <section class="variants-block">
                 <div class="variants-head">
                   <div>
@@ -274,6 +354,7 @@
 <script setup>
 import { computed, nextTick, reactive, ref, watch } from 'vue'
 import { api, ApiError, apiMessage } from '@/api'
+import { compressImageFile, GREETING_IMAGE_ACCEPT, GREETING_IMAGE_MAX_BYTES } from '@/utils/imageCompress'
 
 function newVariant() {
   return {
@@ -292,6 +373,8 @@ function newProduct() {
     name: '',
     sku: '',
     link: '',
+    imageUrl: '',
+    galleryImages: [],
     productType: 'physical',
     stockMode: 'limited',
     stock: 0,
@@ -318,6 +401,10 @@ function normalizeProduct(p) {
   const base = { ...newProduct(), ...p, id: p.id || newProduct().id }
   base.productType = base.productType === 'digital' ? 'digital' : 'physical'
   base.stockMode = base.stockMode === 'unlimited' ? 'unlimited' : 'limited'
+  base.imageUrl = String(p?.imageUrl || '').trim()
+  base.galleryImages = Array.isArray(p?.galleryImages)
+    ? p.galleryImages.map((u) => String(u || '').trim()).filter(Boolean).slice(0, 12)
+    : []
   base.variants = Array.isArray(p?.variants) ? p.variants.map((v) => normalizeVariant(v)) : []
   if (base.variants.length) {
     base.price = ''
@@ -356,6 +443,8 @@ function serializeProduct(p, { forSave = false } = {}) {
     productType: row.productType,
     stockMode: row.stockMode,
     note: row.note,
+    imageUrl: row.imageUrl,
+    galleryImages: [...(row.galleryImages || [])],
     variants,
   }
   if (variants.length) {
@@ -512,6 +601,78 @@ const analyzeErr = ref('')
 const analyzeOk = ref('')
 const analyzeProgress = ref('AI đang đọc…')
 const editIndex = ref(null)
+const productImageAccept = GREETING_IMAGE_ACCEPT
+const uploadMainBusy = ref(false)
+const uploadGalleryIndex = ref(-1)
+const imageUploadError = ref('')
+const imageUploadTarget = ref('')
+
+async function uploadProductImage(file) {
+  const blob = await compressImageFile(file, { maxBytes: GREETING_IMAGE_MAX_BYTES })
+  const uploadFile = new File([blob], 'product.jpg', { type: blob.type || 'image/jpeg' })
+  const data = await api.bots.uploadInventoryImage(props.botId, uploadFile)
+  return data?.url || ''
+}
+
+function mapImageUploadError(err) {
+  if (err instanceof ApiError) return apiMessage(err)
+  if (err?.message === 'IMAGE_FORMAT') return 'Chỉ hỗ trợ JPG, PNG, WebP hoặc GIF.'
+  if (err?.message === 'IMAGE_TOO_LARGE') return 'Ảnh quá lớn — chọn ảnh khác.'
+  return 'Không tải được ảnh. Thử lại.'
+}
+
+async function onMainImagePick(event) {
+  imageUploadError.value = ''
+  imageUploadTarget.value = ''
+  const input = event.target
+  const file = input?.files?.[0]
+  input.value = ''
+  if (!file || !props.botId || editIndex.value == null) return
+  uploadMainBusy.value = true
+  imageUploadTarget.value = 'main'
+  try {
+    const url = await uploadProductImage(file)
+    if (url) {
+      local.products[editIndex.value].imageUrl = url
+      scheduleEmit(0)
+    }
+  } catch (err) {
+    imageUploadError.value = mapImageUploadError(err)
+    imageUploadTarget.value = 'main'
+  } finally {
+    uploadMainBusy.value = false
+  }
+}
+
+function clearMainImage() {
+  if (editIndex.value == null) return
+  local.products[editIndex.value].imageUrl = ''
+  imageUploadError.value = ''
+  scheduleEmit(0)
+}
+
+async function onGalleryImagePick(gi, event) {
+  imageUploadError.value = ''
+  imageUploadTarget.value = ''
+  const input = event.target
+  const file = input?.files?.[0]
+  input.value = ''
+  if (!file || !props.botId || editIndex.value == null) return
+  uploadGalleryIndex.value = gi
+  imageUploadTarget.value = 'gallery'
+  try {
+    const url = await uploadProductImage(file)
+    if (url) {
+      local.products[editIndex.value].galleryImages[gi] = url
+      scheduleEmit(0)
+    }
+  } catch (err) {
+    imageUploadError.value = mapImageUploadError(err)
+    imageUploadTarget.value = 'gallery'
+  } finally {
+    uploadGalleryIndex.value = -1
+  }
+}
 
 const editingProduct = computed(() => {
   if (editIndex.value == null) return null
@@ -630,6 +791,22 @@ function addProduct() {
 
 function removeProduct(idx) {
   local.products.splice(idx, 1)
+  scheduleEmit(0)
+}
+
+function addGalleryImage(productIdx) {
+  const p = local.products[productIdx]
+  if (!p) return
+  if (!Array.isArray(p.galleryImages)) p.galleryImages = []
+  if (p.galleryImages.length >= 12) return
+  p.galleryImages.push('')
+  scheduleEmit(0)
+}
+
+function removeGalleryImage(productIdx, gi) {
+  const p = local.products[productIdx]
+  if (!p?.galleryImages) return
+  p.galleryImages.splice(gi, 1)
   scheduleEmit(0)
 }
 
@@ -994,6 +1171,62 @@ async function runAiFill() {
   overflow-y: auto;
   background: rgba(15, 23, 42, 0.45);
   backdrop-filter: blur(4px);
+}
+
+.img-block {
+  margin-bottom: 14px;
+}
+
+.prod-thumb {
+  margin-top: 8px;
+  max-width: 160px;
+  max-height: 160px;
+  border-radius: 10px;
+  object-fit: cover;
+  border: 1px solid var(--b-border);
+}
+
+.gallery-list {
+  list-style: none;
+  margin: 8px 0 0;
+  padding: 0;
+  display: grid;
+  gap: 8px;
+}
+
+.inv-image-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  align-items: center;
+  margin-bottom: 8px;
+}
+
+.inv-pick {
+  cursor: pointer;
+}
+
+.inv-pick--sm .b-btn {
+  font-size: 12px;
+}
+
+.gallery-row {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+}
+
+.gallery-row-main {
+  display: flex;
+  flex: 1;
+  gap: 8px;
+  align-items: center;
+  min-width: 0;
+}
+
+.gallery-row-main .b-input {
+  flex: 1;
+  min-width: 0;
 }
 
 .inv-modal {

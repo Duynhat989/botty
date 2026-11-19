@@ -97,13 +97,21 @@
                   {{ outboundBusyKey === keyFor(s) ? 'Đang gửi…' : 'Gửi' }}
                 </button>
                 <button
-                  v-if="props.bot.orderClosingEnabled"
+                  v-if="props.bot.orderClosingPlanAllowed && props.bot.orderClosingEnabled"
                   type="button"
                   class="b-btn b-btn--ghost b-btn--sm"
                   :disabled="outboundBusyKey === keyFor(s)"
                   @click="sendOutbound(s, true)"
                 >
                   Gửi mẫu nhắc chốt đơn
+                </button>
+                <button
+                  type="button"
+                  class="b-btn b-btn--ghost b-btn--sm"
+                  :disabled="handoffBusyKey === keyFor(s)"
+                  @click="clearHandoff(s)"
+                >
+                  {{ handoffBusyKey === keyFor(s) ? '…' : 'Bật lại bot' }}
                 </button>
               </div>
               <p v-if="outboundErr[keyFor(s)]" class="b-msg-err outbound-err">{{ outboundErr[keyFor(s)] }}</p>
@@ -187,6 +195,7 @@ const outboundDraft = ref({})
 const outboundBusyKey = ref('')
 const outboundErr = ref({})
 const outboundOk = ref({})
+const handoffBusyKey = ref('')
 const page = ref(1)
 const pagination = ref({
   page: 1,
@@ -221,6 +230,19 @@ function toggle(s) {
     }
   }
   openKeys.value = next
+}
+
+async function clearHandoff(s) {
+  const key = keyFor(s)
+  handoffBusyKey.value = key
+  try {
+    await api.bots.clearHandoff(props.bot.id, { channel: s.channel, peerId: s.peerId })
+    outboundOk.value = { ...outboundOk.value, [key]: 'Đã bật lại bot cho phiên này.' }
+  } catch (e) {
+    outboundErr.value = { ...outboundErr.value, [key]: e?.message || 'Không bật lại được' }
+  } finally {
+    handoffBusyKey.value = ''
+  }
 }
 
 async function sendOutbound(s, useReminderTemplate) {

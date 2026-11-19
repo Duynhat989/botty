@@ -309,6 +309,7 @@
       :doc-saving="docSaving"
       @add-doc="addDoc"
       @delete-doc="deleteDoc"
+      @reload="emit('reload')"
     >
       <template #templates>
         <BotPromptTemplateSection
@@ -347,6 +348,19 @@
 
     <BotDetailDashboard v-else-if="tab === 'dashboard'" key="dashboard" :bot="bot" @reload="emit('reload')" />
 
+    <div v-else-if="tab === 'schedules'" key="schedules" class="b-card b-card-pad-lg panel page-panel">
+      <h2 class="b-title-sm panel-title">Lịch nhắn khách</h2>
+      <p v-if="bot.schedulesEnabled === false" class="b-caption panel-intro">
+        Lịch đang tắt — bật tại <RouterLink :to="tabRoute('setup', 'ops')">Nội dung → Vận hành</RouterLink>.
+      </p>
+      <template v-else>
+        <p class="b-caption panel-intro">
+          Hẹn theo ngày và chờ báo có hàng. Hủy lịch khi không cần nữa.
+        </p>
+        <BotDetailSchedules :bot-id="bot.id" />
+      </template>
+    </div>
+
     <BotDetailActivityHistory
       v-else-if="tab === 'history'"
       key="history"
@@ -358,7 +372,7 @@
       </Transition>
     </div>
 
-    <footer class="b-sticky-bar" :class="{ 'hide-on-test': tab === 'test' || tab === 'dashboard' || tab === 'history' }">
+    <footer class="b-sticky-bar" :class="{ 'hide-on-test': tab === 'test' || tab === 'dashboard' || tab === 'history' || tab === 'schedules' }">
       <label class="b-switch">
         <input
           type="checkbox"
@@ -399,6 +413,7 @@ import BotDetailDashboard from '@/components/BotDetailDashboard.vue'
 import BotDetailActivityHistory from '@/components/BotDetailActivityHistory.vue'
 import BotDetailTestPanel from '@/components/BotDetailTestPanel.vue'
 import BotDetailContentSetup from '@/components/BotDetailContentSetup.vue'
+import BotDetailSchedules from '@/components/BotDetailSchedules.vue'
 import { fillInstructionTemplate } from '@/constants/instructionTemplates'
 import { DEFAULT_CHAT_STYLE } from '@/constants/chatStyles'
 import {
@@ -426,18 +441,22 @@ const isAdmin = computed(() => auth.isAdmin)
 const saving = ref(false)
 const message = ref('')
 const saveError = ref('')
-const TAB_IDS = ['test', 'dashboard', 'history', 'facebook', 'setup', 'inventory']
-const SETUP_SECTION_IDS = ['gemini', 'docs', 'voice', 'greeting', 'orders']
+const TAB_IDS = ['test', 'dashboard', 'schedules', 'history', 'facebook', 'setup', 'inventory']
+const SETUP_SECTION_IDS = ['gemini', 'docs', 'voice', 'greeting', 'goals', 'ops']
+const LEGACY_SETUP_HASH_MAP = {
+  orders: 'goals',
+}
 const LEGACY_TAB_MAP = {
   gemini: 'gemini',
   docs: 'docs',
   instruction: 'voice',
-  orders: 'orders',
+  orders: 'goals',
 }
 
 const tabs = [
   { id: 'test', label: 'Thử phản hồi' },
   { id: 'dashboard', label: 'Dashboard' },
+  { id: 'schedules', label: 'Lịch' },
   { id: 'history', label: 'Lịch sử phản hồi' },
   { id: 'facebook', label: 'Facebook' },
   { id: 'setup', label: 'Nội dung' },
@@ -468,6 +487,7 @@ const tab = computed(() => {
 const setupSection = computed({
   get() {
     const h = (route.hash || '').replace(/^#/, '')
+    if (LEGACY_SETUP_HASH_MAP[h]) return LEGACY_SETUP_HASH_MAP[h]
     if (SETUP_SECTION_IDS.includes(h)) return h
     const raw = String(route.params.tab || '')
     if (LEGACY_TAB_MAP[raw]) return LEGACY_TAB_MAP[raw]
@@ -526,6 +546,19 @@ const form = reactive({
   orderClosingReminderEnabled: false,
   orderClosingOutboundEnabled: false,
   orderClosingReminderText: '',
+  contactCollectionEnabled: false,
+  contactCollectionNote: '',
+  surveyEnabled: false,
+  surveyNote: '',
+  humanHandoffEnabled: false,
+  humanHandoffKeywords: '',
+  humanHandoffReply: '',
+  businessHoursEnabled: false,
+  businessHoursTimezone: 'Asia/Ho_Chi_Minh',
+  businessHoursSchedule: { days: [1, 2, 3, 4, 5, 6], open: '08:00', close: '21:00' },
+  outsideHoursMessage: '',
+  schedulesEnabled: true,
+  schedulesRestockMessage: '',
   sessionGreetingEnabled: false,
   sessionGreetings: [{ _key: 'g-default', text: '', imageUrl: '' }],
   messengerIceBreakers: [{ _key: 'ib-1', question: '' }],
@@ -626,6 +659,21 @@ function syncFromBot(b) {
   form.orderClosingReminderEnabled = Boolean(b.orderClosingReminderEnabled)
   form.orderClosingOutboundEnabled = Boolean(b.orderClosingOutboundEnabled)
   form.orderClosingReminderText = b.orderClosingReminderText || ''
+  form.contactCollectionEnabled = Boolean(b.contactCollectionEnabled)
+  form.contactCollectionNote = b.contactCollectionNote || ''
+  form.surveyEnabled = Boolean(b.surveyEnabled)
+  form.surveyNote = b.surveyNote || ''
+  form.humanHandoffEnabled = Boolean(b.humanHandoffEnabled)
+  form.humanHandoffKeywords = b.humanHandoffKeywords || ''
+  form.humanHandoffReply = b.humanHandoffReply || ''
+  form.businessHoursEnabled = Boolean(b.businessHoursEnabled)
+  form.businessHoursTimezone = b.businessHoursTimezone || 'Asia/Ho_Chi_Minh'
+  form.businessHoursSchedule = b.businessHoursSchedule
+    ? { ...b.businessHoursSchedule, days: [...(b.businessHoursSchedule.days || [1, 2, 3, 4, 5, 6])] }
+    : { days: [1, 2, 3, 4, 5, 6], open: '08:00', close: '21:00' }
+  form.outsideHoursMessage = b.outsideHoursMessage || ''
+  form.schedulesEnabled = b.schedulesEnabled !== false
+  form.schedulesRestockMessage = b.schedulesRestockMessage || ''
   form.sessionGreetingEnabled = Boolean(b.sessionGreetingEnabled)
   form.sessionGreetings = hydrateSessionGreetings(b.sessionGreetings)
   form.messengerIceBreakers = hydrateIceBreakers(b.messengerIceBreakers)
@@ -645,6 +693,14 @@ onMounted(() => {
   syncFromBot(props.bot)
   hydrateGeminiPinFromLocal()
   if (redirectLegacyTab()) return
+  const legacyHash = (route.hash || '').replace(/^#/, '')
+  if (LEGACY_SETUP_HASH_MAP[legacyHash]) {
+    router.replace({
+      name: 'bot-detail',
+      params: { id: route.params.id, tab: 'setup' },
+      hash: `#${LEGACY_SETUP_HASH_MAP[legacyHash]}`,
+    })
+  }
   const q = route.query.tab
   if (q && (TAB_IDS.includes(String(q)) || LEGACY_TAB_MAP[String(q)])) {
     if (LEGACY_TAB_MAP[String(q)]) {
@@ -692,6 +748,19 @@ async function save() {
     orderClosingReminderEnabled: form.orderClosingReminderEnabled,
     orderClosingOutboundEnabled: form.orderClosingOutboundEnabled,
     orderClosingReminderText: form.orderClosingReminderText.trim(),
+    contactCollectionEnabled: form.contactCollectionEnabled,
+    contactCollectionNote: form.contactCollectionNote,
+    surveyEnabled: form.surveyEnabled,
+    surveyNote: form.surveyNote,
+    humanHandoffEnabled: form.humanHandoffEnabled,
+    humanHandoffKeywords: form.humanHandoffKeywords.trim(),
+    humanHandoffReply: form.humanHandoffReply.trim(),
+    businessHoursEnabled: form.businessHoursEnabled,
+    businessHoursTimezone: form.businessHoursTimezone.trim(),
+    businessHoursSchedule: form.businessHoursSchedule,
+    schedulesEnabled: form.schedulesEnabled,
+    schedulesRestockMessage: form.schedulesRestockMessage.trim(),
+    outsideHoursMessage: form.outsideHoursMessage.trim(),
     sessionGreetingEnabled: form.sessionGreetingEnabled,
     sessionGreetings: sessionGreetingsPayload(),
     messengerIceBreakers: messengerIceBreakersPayload(),

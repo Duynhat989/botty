@@ -143,6 +143,11 @@ export const api = {
       fd.append('file', file)
       return apiUpload(`/bots/${id}/greeting-image`, fd, { auth: true })
     },
+    uploadInventoryImage: (id, file) => {
+      const fd = new FormData()
+      fd.append('file', file)
+      return apiUpload(`/bots/${id}/inventory-image`, fd, { auth: true })
+    },
     analyzeInventoryLinks: (id, urls) =>
       apiRequest(`/bots/${id}/inventory/analyze-links`, {
         method: 'POST',
@@ -206,6 +211,16 @@ export const api = {
       apiRequest(`/bots/${id}/orders/${orderId}/retry-webhook`, { method: 'POST', auth: true }),
     sendOutboundMessage: (id, body) =>
       apiRequest(`/bots/${id}/outbound-message`, { method: 'POST', body, auth: true }),
+    exportConfig: (id) =>
+      apiRequest(`/bots/${id}/export-config`, { auth: true }),
+    importConfig: (id, body) =>
+      apiRequest(`/bots/${id}/import-config`, { method: 'POST', body, auth: true }),
+    clearHandoff: (id, body) =>
+      apiRequest(`/bots/${id}/handoff/clear`, { method: 'POST', body, auth: true }),
+    listSchedules: (id, params) =>
+      apiRequest(`/bots/${id}/schedules${qp(params)}`, { auth: true }),
+    cancelSchedule: (id, scheduleId) =>
+      apiRequest(`/bots/${id}/schedules/${scheduleId}/cancel`, { method: 'POST', auth: true }),
     promptTemplatesList: () => apiRequest('/bots/prompt-templates/list', { auth: true }),
     createPromptTemplate: (body) =>
       apiRequest('/bots/prompt-templates', { method: 'POST', body, auth: true }),

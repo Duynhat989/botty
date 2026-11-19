@@ -374,7 +374,7 @@ const quickLinks = computed(() => [
   { label: 'Gemini', to: props.tabRoute('setup', 'gemini') },
   { label: 'Kho hàng', to: props.tabRoute('inventory') },
   { label: 'Giọng điệu', to: props.tabRoute('setup', 'voice') },
-  { label: 'Chốt đơn', to: props.tabRoute('setup', 'orders') },
+  { label: 'Mục tiêu', to: props.tabRoute('setup', 'goals') },
 ])
 
 const copySessionOk = ref(false)
@@ -638,11 +638,13 @@ async function sendTest() {
   try {
     const sid = testSessionId.value || ensureTestSessionId()
     const data = await api.bots.test(props.bot.id, text, sid, images)
+    const prodImgs = Array.isArray(data.productImageUrls) ? data.productImageUrls : []
     chatMessages.value.push(
       withMessageKey({
         role: 'bot',
         text: data.reply || '—',
         qrImageUrl: data.paymentQrImageUrl || null,
+        imageUrls: prodImgs,
       }),
     )
     if (data.paymentQrImageUrl) startPaymentPoll()
