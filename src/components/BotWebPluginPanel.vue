@@ -48,16 +48,44 @@
         <input v-model="configModel.subtitle" class="b-input" type="text" maxlength="120" placeholder="Trả lời trong giờ hành chính" />
       </label>
 
-      <label class="b-field span-2">
-        <span>Tin chào khi mở chat</span>
-        <textarea
-          v-model="welcomeMessagesText"
-          class="b-textarea welcome-msgs"
-          rows="5"
-          placeholder="Xin chào! Mình có thể giúp gì cho bạn?&#10;Shop đang mở cửa 8h–21h."
-        />
-        <small class="b-micro">Mỗi dòng = một tin bot gửi liền khi khách mở hộp chat (tối đa 12 dòng).</small>
-      </label>
+      <div class="b-field span-2 welcome-block">
+        <span class="welcome-block-label">Tin chào khi mở chat</span>
+        <p class="b-micro welcome-block-hint">Mỗi ô = một tin bot gửi liền khi khách mở hộp chat (tối đa {{ WELCOME_MAX }} tin).</p>
+        <ul class="welcome-list" role="list">
+          <li
+            v-for="(_msg, idx) in configModel.welcomeMessages"
+            :key="'welcome-' + idx"
+            class="welcome-row"
+          >
+            <span class="welcome-idx" aria-hidden="true">{{ idx + 1 }}</span>
+            <input
+              v-model="configModel.welcomeMessages[idx]"
+              class="b-input welcome-input"
+              type="text"
+              maxlength="500"
+              :placeholder="idx === 0 ? 'Xin chào! Bạn cần hỗ trợ gì?' : 'Tin chào tiếp theo…'"
+              @input="syncWelcomeMeta"
+            />
+            <button
+              v-if="configModel.welcomeMessages.length > 1"
+              type="button"
+              class="b-btn b-btn--ghost b-btn--sm welcome-remove"
+              :aria-label="'Xóa tin chào ' + (idx + 1)"
+              @click="removeWelcomeMessage(idx)"
+            >
+              Xóa
+            </button>
+          </li>
+        </ul>
+        <button
+          v-if="configModel.welcomeMessages.length < WELCOME_MAX"
+          type="button"
+          class="b-btn b-btn--ghost b-btn--sm welcome-add"
+          @click="addWelcomeMessage"
+        >
+          + Thêm tin chào
+        </button>
+      </div>
 
       <fieldset class="launcher-fieldset span-2">
         <legend class="b-caption">Nút nổi (góc màn hình)</legend>
@@ -222,23 +250,41 @@ const configModel = computed(() => props.form.webWidgetConfig)
 
 const WELCOME_MAX = 12
 
-const welcomeMessagesText = computed({
-  get() {
-    const msgs = props.form.webWidgetConfig?.welcomeMessages
-    if (Array.isArray(msgs) && msgs.length) return msgs.join('\n')
-    return String(props.form.webWidgetConfig?.welcomeText || '').trim()
-  },
-  set(raw) {
-    const lines = String(raw || '')
-      .split(/\r?\n/)
-      .map((l) => l.trim())
-      .filter(Boolean)
-      .slice(0, WELCOME_MAX)
-      .map((l) => l.slice(0, 500))
-    props.form.webWidgetConfig.welcomeMessages = lines
-    props.form.webWidgetConfig.welcomeText = lines[0] || ''
-  },
-})
+function syncWelcomeMeta() {
+  const cfg = props.form.webWidgetConfig
+  if (!cfg) return
+  const lines = (Array.isArray(cfg.welcomeMessages) ? cfg.welcomeMessages : [])
+    .map((s) => String(s || '').trim())
+    .filter(Boolean)
+  cfg.welcomeText = lines[0] || ''
+}
+
+function ensureWelcomeInputs() {
+  const cfg = props.form.webWidgetConfig
+  if (!cfg) return
+  let msgs = Array.isArray(cfg.welcomeMessages) ? cfg.welcomeMessages.map((s) => String(s ?? '')) : []
+  if (!msgs.length) {
+    const legacy = String(cfg.welcomeText || '').trim()
+    msgs = legacy ? [legacy] : ['']
+  }
+  cfg.welcomeMessages = msgs.length > WELCOME_MAX ? msgs.slice(0, WELCOME_MAX) : msgs
+  syncWelcomeMeta()
+}
+
+function addWelcomeMessage() {
+  const list = props.form.webWidgetConfig?.welcomeMessages
+  if (!Array.isArray(list) || list.length >= WELCOME_MAX) return
+  list.push('')
+}
+
+function removeWelcomeMessage(idx) {
+  const list = props.form.webWidgetConfig?.welcomeMessages
+  if (!Array.isArray(list) || list.length <= 1) return
+  list.splice(idx, 1)
+  syncWelcomeMeta()
+}
+
+watch(() => props.bot?.id, ensureWelcomeInputs, { immediate: true })
 
 watch(
   () => props.form.webWidgetConfig?.launcherSize,
@@ -477,9 +523,52 @@ watch(
   cursor: pointer;
 }
 
-.welcome-msgs {
-  min-height: 108px;
-  resize: vertical;
+.welcome-block-label {
+  display: block;
+  font-weight: 600;
+  font-size: 14px;
+  margin-bottom: 4px;
+}
+
+.welcome-block-hint {
+  margin: 0 0 10px;
+}
+
+.welcome-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.welcome-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.welcome-idx {
+  flex-shrink: 0;
+  width: 1.5rem;
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--b-text-muted, #64748b);
+  text-align: center;
+}
+
+.welcome-input {
+  flex: 1;
+  min-width: 0;
+}
+
+.welcome-remove {
+  flex-shrink: 0;
+}
+
+.welcome-add {
+  margin-top: 8px;
 }
 
 .embed-pre {
