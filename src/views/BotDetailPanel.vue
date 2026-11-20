@@ -517,6 +517,12 @@ const panelTransition = computed(() =>
   slideDir.value >= 0 ? 'panel-slide-next' : 'panel-slide-prev'
 )
 
+function clampLauncherSize(raw) {
+  const n = Number.parseInt(String(raw ?? ''), 10)
+  if (!Number.isFinite(n)) return 3
+  return Math.min(5, Math.max(1, n))
+}
+
 function tabRoute(id, sectionId) {
   const link = { name: 'bot-detail', params: { id: props.bot.id, tab: id } }
   if (id === 'setup' && sectionId && SETUP_SECTION_IDS.includes(sectionId)) {
@@ -591,6 +597,7 @@ const form = reactive({
     welcomeText: 'Xin chào! Bạn cần hỗ trợ gì?',
     launcherLabel: 'Chat',
     launcherMode: 'icon',
+    launcherSize: 3,
     launcherIconUrl: '',
     allowedOrigins: [],
   },
@@ -722,6 +729,7 @@ function syncFromBot(b) {
     welcomeText: b.webWidgetConfig?.welcomeText || 'Xin chào! Bạn cần hỗ trợ gì?',
     launcherLabel: b.webWidgetConfig?.launcherLabel || 'Chat',
     launcherMode: b.webWidgetConfig?.launcherMode === 'text' ? 'text' : 'icon',
+    launcherSize: clampLauncherSize(b.webWidgetConfig?.launcherSize),
     launcherIconUrl: b.webWidgetConfig?.launcherIconUrl || '',
     allowedOrigins: Array.isArray(b.webWidgetConfig?.allowedOrigins)
       ? [...b.webWidgetConfig.allowedOrigins]

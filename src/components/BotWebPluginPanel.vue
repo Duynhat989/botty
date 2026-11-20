@@ -55,11 +55,27 @@
 
       <fieldset class="launcher-fieldset span-2">
         <legend class="b-caption">Nút nổi (góc màn hình)</legend>
+        <label class="b-field launcher-size-field">
+          <span>Kích thước nút</span>
+          <div class="size-pills" role="radiogroup" aria-label="Kích thước nút chat">
+            <label
+              v-for="opt in launcherSizeOptions"
+              :key="opt.value"
+              class="size-pill"
+              :class="{ on: Number(configModel.launcherSize) === opt.value }"
+            >
+              <input v-model.number="configModel.launcherSize" type="radio" :value="opt.value" />
+              <span class="size-pill__dot" :style="{ width: opt.dot + 'px', height: opt.dot + 'px' }" aria-hidden="true" />
+              <span class="size-pill__label">{{ opt.label }}</span>
+            </label>
+          </div>
+        </label>
+
         <div class="launcher-modes">
           <label class="b-choice-card" :class="{ on: configModel.launcherMode === 'icon' }">
             <input v-model="configModel.launcherMode" type="radio" value="icon" />
             <span class="b-choice-title">Icon ảnh</span>
-            <span class="b-micro b-choice-hint">Mặc định logo Botty</span>
+            <span class="b-micro b-choice-hint">Mặc định ảnh đại diện bot</span>
           </label>
           <label class="b-choice-card" :class="{ on: configModel.launcherMode === 'text' }">
             <input v-model="configModel.launcherMode" type="radio" value="text" />
@@ -77,23 +93,26 @@
 
         <div v-else class="launcher-icon-block">
           <div class="launcher-icon-row">
-            <img :src="launcherPreviewSrc" alt="" class="launcher-preview" width="56" height="56" />
+            <img
+              :src="launcherPreviewSrc"
+              alt=""
+              class="launcher-preview"
+              :width="launcherPreviewPx"
+              :height="launcherPreviewPx"
+            />
             <div class="launcher-icon-actions">
               <label class="b-btn b-btn--ghost b-btn--sm icon-pick">
                 <input type="file" class="b-file-input" accept="image/jpeg,image/png,image/webp,image/gif" :disabled="iconBusy" @change="onIconPick" />
                 {{ iconBusy ? 'Đang tải…' : 'Tải icon' }}
               </label>
               <button type="button" class="b-btn b-btn--ghost b-btn--sm" @click="useBotAvatar">
-                Ảnh đại diện bot
-              </button>
-              <button type="button" class="b-btn b-btn--ghost b-btn--sm" @click="useDefaultIcon">
-                Icon Botty
+                Dùng ảnh bot
               </button>
             </div>
           </div>
           <label class="b-field">
             <span>URL icon (tuỳ chọn)</span>
-            <input v-model="configModel.launcherIconUrl" class="b-input" type="url" placeholder="Để trống = icon Botty mặc định" />
+            <input v-model="configModel.launcherIconUrl" class="b-input" type="url" placeholder="Để trống = ảnh đại diện bot" />
           </label>
         </div>
       </fieldset>
@@ -135,6 +154,16 @@ const props = defineProps({
   tabRouteSetup: { type: Object, required: true },
 })
 
+const LAUNCHER_SIZE_PX = { 1: 48, 2: 56, 3: 64, 4: 72, 5: 80 }
+
+const launcherSizeOptions = [
+  { value: 1, label: 'Rất nhỏ', dot: 10 },
+  { value: 2, label: 'Nhỏ', dot: 12 },
+  { value: 3, label: 'Vừa', dot: 14 },
+  { value: 4, label: 'Lớn', dot: 16 },
+  { value: 5, label: 'Rất lớn', dot: 18 },
+]
+
 const copied = ref(false)
 const iconBusy = ref(false)
 let copyTimer
@@ -143,22 +172,22 @@ const apiOrigin = computed(() =>
   String(import.meta.env.VITE_API_URL || 'http://localhost:2053/api').replace(/\/api\/?$/, ''),
 )
 
+const launcherPreviewPx = computed(() => {
+  const n = Number(props.form.webWidgetConfig?.launcherSize)
+  return LAUNCHER_SIZE_PX[n] || LAUNCHER_SIZE_PX[3]
+})
+
 const launcherPreviewSrc = computed(() => {
   const custom = String(props.form.webWidgetConfig?.launcherIconUrl || '').trim()
   if (custom) {
     if (/^https?:\/\//i.test(custom)) return custom
     return `${apiOrigin.value}${custom.startsWith('/') ? '' : '/'}${custom}`
   }
-  return `${apiOrigin.value}/embed/botty-widget-icon.jpg`
+  return resolveBotAvatarUrl(props.bot)
 })
 
-function useDefaultIcon() {
-  props.form.webWidgetConfig.launcherIconUrl = ''
-}
-
 function useBotAvatar() {
-  const url = props.bot?.avatarUrl
-  props.form.webWidgetConfig.launcherIconUrl = url ? resolveBotAvatarUrl({ avatarUrl: url }) : ''
+  props.form.webWidgetConfig.launcherIconUrl = ''
 }
 
 async function onIconPick(ev) {
@@ -184,6 +213,17 @@ const enabledModel = computed({
 })
 
 const configModel = computed(() => props.form.webWidgetConfig)
+
+watch(
+  () => props.form.webWidgetConfig?.launcherSize,
+  (v) => {
+    const n = Number(v)
+    if (!Number.isFinite(n) || n < 1 || n > 5) {
+      props.form.webWidgetConfig.launcherSize = 3
+    }
+  },
+  { immediate: true },
+)
 
 const originsText = computed({
   get() {
@@ -300,6 +340,66 @@ watch(
   padding: 14px 14px 4px;
   border: 1px solid var(--b-border);
   border-radius: 12px;
+}
+
+.launcher-size-field {
+  margin: 10px 0 0;
+}
+
+.size-pills {
+  display: grid;
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+  gap: 6px;
+  margin-top: 6px;
+}
+
+@media (max-width: 620px) {
+  .size-pills {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+}
+
+.size-pill {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  padding: 10px 6px 8px;
+  border: 1px solid var(--b-border);
+  border-radius: 10px;
+  cursor: pointer;
+  background: var(--b-surface);
+  transition: border-color 0.15s, box-shadow 0.15s, background 0.15s;
+}
+
+.size-pill input {
+  position: absolute;
+  opacity: 0;
+  pointer-events: none;
+}
+
+.size-pill.on {
+  border-color: var(--b-accent, #2563eb);
+  box-shadow: 0 0 0 1px color-mix(in srgb, var(--b-accent, #2563eb) 35%, transparent);
+  background: color-mix(in srgb, var(--b-accent, #2563eb) 8%, var(--b-surface));
+}
+
+.size-pill__dot {
+  border-radius: 50%;
+  background: var(--b-accent, #2563eb);
+  opacity: 0.85;
+}
+
+.size-pill__label {
+  font-size: 11px;
+  font-weight: 600;
+  text-align: center;
+  line-height: 1.2;
+  color: var(--b-text-muted, #64748b);
+}
+
+.size-pill.on .size-pill__label {
+  color: var(--b-text, #0f172a);
 }
 
 .launcher-modes {
