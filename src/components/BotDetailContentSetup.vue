@@ -200,7 +200,7 @@
         <div class="bubble-settings">
           <p class="lang-block-title">Tin nhắn nhiều bubble</p>
           <p class="b-caption panel-intro">
-            Bot gửi từng ý một (giống chat thật). Tắt nếu muốn một tin dài như trước.
+            Bot gửi từng ý một (giống chat thật). Giảm ký tự/bubble (~150–180) để câu ngắn hơn.
           </p>
           <label class="b-switch order-toggle">
             <input
