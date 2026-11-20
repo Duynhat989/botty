@@ -523,21 +523,34 @@ function clampLauncherSize(raw) {
   return Math.min(5, Math.max(1, n))
 }
 
-const WELCOME_TEXT_JOIN = '\n---BOTTY_WELCOME---\n'
+const WELCOME_SPLIT_RE = /\s*---BOTTY_WELCOME---\s*/
+
+function splitWelcomeChunks(text) {
+  const s = String(text || '').trim()
+  if (!s) return []
+  if (s.includes('---BOTTY_WELCOME---')) {
+    return s
+      .split(WELCOME_SPLIT_RE)
+      .map((l) => l.trim())
+      .filter((l) => l && l !== '---BOTTY_WELCOME---')
+  }
+  return [s]
+}
 
 function hydrateWelcomeMessages(cfg) {
   const fallback = 'Xin chào! Bạn cần hỗ trợ gì?'
   if (Array.isArray(cfg?.welcomeMessages) && cfg.welcomeMessages.length) {
-    return cfg.welcomeMessages.map((s) => String(s || '').trim()).filter(Boolean).slice(0, 12)
+    const flat = []
+    for (const item of cfg.welcomeMessages) {
+      for (const part of splitWelcomeChunks(item)) {
+        flat.push(part)
+      }
+    }
+    if (flat.length) return flat.slice(0, 12)
   }
   const legacy = String(cfg?.welcomeText || fallback).trim()
-  if (legacy.includes(WELCOME_TEXT_JOIN)) {
-    return legacy
-      .split(WELCOME_TEXT_JOIN)
-      .map((l) => l.trim())
-      .filter(Boolean)
-      .slice(0, 12)
-  }
+  const fromJoin = splitWelcomeChunks(legacy)
+  if (fromJoin.length > 1) return fromJoin.slice(0, 12)
   const lines = legacy
     .split(/\r?\n/)
     .map((l) => l.trim())
@@ -547,9 +560,7 @@ function hydrateWelcomeMessages(cfg) {
 
 function packWebWidgetConfig(cfg) {
   const src = cfg && typeof cfg === 'object' ? { ...cfg } : {}
-  const msgs = Array.isArray(src.welcomeMessages)
-    ? src.welcomeMessages.map((s) => String(s || '').trim()).filter(Boolean).slice(0, 12)
-    : hydrateWelcomeMessages(src)
+  const msgs = hydrateWelcomeMessages(src)
   return {
     ...src,
     welcomeMessages: msgs,
