@@ -4,7 +4,7 @@
       <!-- BRAND LOGO -->
       <RouterLink to="/" class="brand" @click="closeMobile">
         <div class="brand-mark-box">
-          <img class="brand-mark" src="/logo.png" :alt="t('nav.brandAlt')" width="32" height="32" />
+          <img class="brand-mark" :src="brandLogo" :alt="t('nav.brandAlt')" width="32" height="32" />
         </div>
         <div class="brand-text">
           <span class="brand-title">Botty</span>
@@ -164,6 +164,9 @@ import { useAuthStore } from '@/stores/auth'
 import { useDrawSessionStore } from '@/stores/drawSession'
 import { useI18n } from '@/i18n'
 import NotificationBell from '@/components/NotificationBell.vue'
+import { BRAND_LOGO_SRC } from '@/constants/brand'
+
+const brandLogo = BRAND_LOGO_SRC
 
 const route = useRoute()
 const router = useRouter()
@@ -292,8 +295,8 @@ onUnmounted(() => {
 .brand-mark {
   width: 34px;
   height: 34px;
-  object-fit: contain;
-  border-radius: 0;
+  object-fit: cover;
+  border-radius: 10px;
 }
 
 .brand-text {

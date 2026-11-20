@@ -1,22 +1,26 @@
 <template>
   <div class="login-page">
     <div class="login-atmosphere" aria-hidden="true">
-      <div class="orb orb-a" />
-      <div class="orb orb-b" />
-      <div class="grid-fade" />
+      <span class="orb orb-a" />
+      <span class="orb orb-b" />
+      <span class="orb orb-c" />
     </div>
 
     <div class="login-shell">
       <aside class="login-aside">
         <RouterLink to="/" class="aside-brand">
-          <img src="/logo.png" alt="" width="40" height="40" class="aside-logo" />
-          <span>Botty</span>
+          <span class="brand-mark" aria-hidden="true">
+            <img :src="brandLogo" alt="" width="46" height="46" class="brand-mark-img" />
+          </span>
+          <span class="brand-name">Botty</span>
         </RouterLink>
 
-        <div class="aside-badges">
-          <span class="pill pill--accent">{{ t('login.badgeProduct') }}</span>
-          <span class="pill">{{ t('login.badgeMessenger') }}</span>
-        </div>
+        <ul class="aside-trust">
+          <li v-for="pill in trustPills" :key="pill">
+            <CircleCheck :size="16" aria-hidden="true" />
+            {{ pill }}
+          </li>
+        </ul>
 
         <h2 class="aside-title">
           {{ t('login.sideTitle') }}
@@ -24,7 +28,7 @@
         </h2>
         <p class="aside-lede">{{ t('login.sideLede') }}</p>
 
-        <ul class="aside-features">
+        <ul class="aside-features aside-features--desktop">
           <li v-for="feat in sideFeatures" :key="feat.label">
             <span class="feat-icon" aria-hidden="true">
               <component :is="feat.icon" :size="18" :stroke-width="2.2" />
@@ -35,23 +39,31 @@
             </span>
           </li>
         </ul>
-
-        <p class="aside-foot">
-          <Sparkles :size="14" :stroke-width="2" aria-hidden="true" />
-          {{ t('login.eyebrowCredits', { n: providers.signupCredits || 30 }) }}
-        </p>
       </aside>
 
       <div class="login-panel">
-        <div class="b-card login-card">
-          <header class="login-header">
-            <p class="b-kicker">
-              <template v-if="redirect && redirect !== '/'">{{ t('login.eyebrowCreate') }}</template>
-              <template v-else>Botty</template>
-            </p>
-            <h1 class="login-title">{{ t('login.title') }}</h1>
-            <p class="login-lede">{{ t('login.lede') }}</p>
-          </header>
+        <div class="login-card">
+          <div class="form-visual" aria-hidden="true">
+            <div class="visual-panel">
+              <div class="visual-glow" />
+              <img :src="brandLogo" alt="" width="96" height="96" class="visual-logo" />
+              <p class="visual-name">Botty</p>
+              <p class="visual-tag">Trợ lý bán hàng AI trên Messenger</p>
+              <div class="visual-chat">
+                <img :src="brandLogo" alt="" width="28" height="28" class="visual-chat-logo" />
+                <p>Chào shop — sẵn sàng trả lời &amp; chốt đơn cho bạn.</p>
+              </div>
+            </div>
+          </div>
+
+          <div class="login-form-body">
+            <header class="login-header">
+              <p v-if="redirectHint" class="login-redirect" role="status">{{ redirectHint }}</p>
+              <div class="login-brand-text">
+                <h1 class="login-title">{{ t('login.title') }}</h1>
+                <p class="login-lede">{{ t('login.lede') }}</p>
+              </div>
+            </header>
 
           <div v-if="message" class="login-alert" role="alert">
             <CircleAlert :size="16" :stroke-width="2.2" aria-hidden="true" />
@@ -105,9 +117,16 @@
           </label>
 
           <ul class="perks">
-            <li>{{ t('login.perkNoCard') }}</li>
-            <li>{{ t('login.perkCredits') }}</li>
+            <li>
+              <CircleCheck :size="14" aria-hidden="true" />
+              {{ t('login.perkNoCard') }}
+            </li>
+            <li>
+              <CircleCheck :size="14" aria-hidden="true" />
+              {{ t('login.perkCredits') }}
+            </li>
           </ul>
+          </div>
         </div>
 
         <p class="login-foot">
@@ -122,10 +141,13 @@
 <script setup>
 import { computed, onMounted, ref } from 'vue'
 import { useRoute, useRouter, RouterLink } from 'vue-router'
-import { Bot, Check, CircleAlert, MessageCircle, Package, Sparkles } from '@lucide/vue'
+import { Bot, Check, CircleAlert, CircleCheck, MessageCircle, Package } from '@lucide/vue'
 import { api } from '@/api'
 import { useAuthStore } from '@/stores/auth'
 import { useI18n } from '@/i18n'
+import { BRAND_LOGO_SRC } from '@/constants/brand'
+
+const brandLogo = BRAND_LOGO_SRC
 
 const auth = useAuthStore()
 const route = useRoute()
@@ -138,6 +160,16 @@ const loggingIn = ref('')
 const providers = ref({ google: true, facebook: false, signupCredits: 30, videoCost: 25 })
 
 const redirect = typeof route.query.redirect === 'string' ? route.query.redirect : '/'
+
+const trustPills = ['Miễn phí bắt đầu', 'Không cần thẻ tín dụng']
+
+const redirectHint = computed(() => {
+  if (!redirect || redirect === '/') return ''
+  if (redirect.includes('incident-report')) return 'Đăng nhập để gửi báo cáo sự cố.'
+  if (redirect.startsWith('/contact')) return 'Đăng nhập để tiếp tục tới Liên hệ.'
+  if (redirect.startsWith('/config')) return 'Đăng nhập để quản lý bot của bạn.'
+  return 'Đăng nhập để tiếp tục.'
+})
 
 const sideFeatures = computed(() => [
   { icon: MessageCircle, label: t('login.featureReply'), text: t('login.featureReplyHint') },
@@ -187,14 +219,14 @@ onMounted(async () => {
 <style scoped>
 .login-page {
   position: relative;
-  width: min(1040px, 100%);
+  width: min(1080px, 100%);
   margin: 0 auto;
   isolation: isolate;
 }
 
 .login-atmosphere {
   position: absolute;
-  inset: -120px -40px -80px;
+  inset: -100px -48px -64px;
   z-index: -1;
   pointer-events: none;
   overflow: hidden;
@@ -203,35 +235,32 @@ onMounted(async () => {
 .orb {
   position: absolute;
   border-radius: 50%;
-  filter: blur(72px);
-  opacity: 0.55;
+  filter: blur(64px);
+  opacity: 0.5;
 }
 
 .orb-a {
-  width: 340px;
-  height: 340px;
-  top: -40px;
-  left: -80px;
-  background: radial-gradient(circle, rgb(254 215 199 / 90%), transparent 70%);
+  width: 320px;
+  height: 320px;
+  top: -60px;
+  left: -100px;
+  background: #93c5fd;
 }
 
 .orb-b {
-  width: 280px;
-  height: 280px;
-  right: -60px;
-  bottom: 20%;
-  background: radial-gradient(circle, rgb(187 247 208 / 75%), transparent 70%);
+  width: 260px;
+  height: 260px;
+  right: -80px;
+  top: 18%;
+  background: #7dd3fc;
 }
 
-.grid-fade {
-  position: absolute;
-  inset: 0;
-  background-image:
-    linear-gradient(rgb(15 23 42 / 4%) 1px, transparent 1px),
-    linear-gradient(90deg, rgb(15 23 42 / 4%) 1px, transparent 1px);
-  background-size: 32px 32px;
-  mask-image: radial-gradient(ellipse 80% 70% at 50% 40%, #000 20%, transparent 72%);
-  opacity: 0.35;
+.orb-c {
+  width: 200px;
+  height: 200px;
+  left: 42%;
+  bottom: 0;
+  background: #bfdbfe;
 }
 
 .login-shell {
@@ -240,92 +269,217 @@ onMounted(async () => {
   align-items: center;
 }
 
-@media (min-width: 880px) {
+@media (min-width: 900px) {
   .login-shell {
-    grid-template-columns: minmax(0, 1.05fr) minmax(0, 0.95fr);
-    gap: clamp(32px, 4vw, 56px);
+    grid-template-columns: minmax(0, 1.02fr) minmax(0, 0.98fr);
+    gap: clamp(36px, 4vw, 56px);
   }
 }
 
 .login-aside {
   display: grid;
-  gap: 16px;
-  padding: clamp(8px, 2vw, 12px) clamp(4px, 2vw, 8px);
+  gap: 14px;
+  padding: clamp(4px, 2vw, 8px);
 }
 
 .aside-brand {
   display: inline-flex;
   align-items: center;
-  gap: 10px;
+  gap: 12px;
   width: fit-content;
   text-decoration: none;
-  font-size: 20px;
-  font-weight: 750;
+  color: #0f172a;
+}
+
+.brand-mark {
+  display: block;
+  border-radius: 14px;
+  overflow: hidden;
+  box-shadow: 0 12px 28px -14px rgba(37, 99, 235, 0.45);
+}
+
+.brand-mark-img {
+  display: block;
+  width: 46px;
+  height: 46px;
+  object-fit: cover;
+}
+
+.brand-name {
+  font-size: 1.35rem;
+  font-weight: 800;
   letter-spacing: -0.03em;
-  color: #0b1b13;
 }
 
-.aside-logo {
-  border-radius: 12px;
-  box-shadow: 0 8px 24px -12px rgb(15 23 42 / 25%);
-}
-
-.aside-badges {
+.aside-trust {
   display: flex;
   flex-wrap: wrap;
-  gap: 8px;
+  gap: 8px 16px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
 }
 
-.pill {
+.aside-trust li {
   display: inline-flex;
   align-items: center;
-  padding: 6px 11px;
-  border-radius: 999px;
-  font-size: 11px;
-  font-weight: 700;
-  letter-spacing: 0.04em;
-  text-transform: uppercase;
+  gap: 6px;
+  font-size: 13px;
+  font-weight: 600;
   color: #475569;
-  background: rgb(255 255 255 / 72%);
-  border: 1px solid #e2e8f0;
 }
 
-.pill--accent {
-  color: var(--b-accent-hover, #c2410c);
-  background: var(--b-accent-soft, #fff7ed);
-  border-color: var(--accent-border, #fed7aa);
-  text-transform: none;
-  letter-spacing: 0.02em;
+.aside-trust svg {
+  color: var(--b-accent);
+  flex-shrink: 0;
 }
 
 .aside-title {
-  margin: 4px 0 0;
-  font-size: clamp(1.85rem, 3.8vw, 2.35rem);
-  font-weight: 750;
+  margin: 2px 0 0;
+  font-size: clamp(1.75rem, 3.6vw, 2.25rem);
+  font-weight: 800;
   letter-spacing: -0.04em;
-  line-height: 1.15;
-  color: #0b1b13;
+  line-height: 1.12;
+  color: #0f172a;
 }
 
 .aside-highlight {
   display: block;
-  color: var(--b-accent, #ea580c);
+  color: #38bdf8;
 }
 
 .aside-lede {
   margin: 0;
   max-width: 42ch;
   font-size: 1rem;
-  line-height: 1.7;
-  color: #475569;
+  line-height: 1.65;
+  color: #64748b;
+}
+
+.form-visual {
+  width: 100%;
+  flex-shrink: 0;
+  order: 0;
+}
+
+.visual-panel {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  gap: 8px;
+  padding: clamp(22px, 4vw, 28px) clamp(16px, 4vw, 24px);
+  border-radius: 21px 21px 0 0;
+  background: linear-gradient(165deg, #dbeafe 0%, #eff6ff 48%, #f8fafc 100%);
+  border: none;
+  border-bottom: 1px solid var(--color-accent-border);
+  overflow: hidden;
+}
+
+.visual-glow {
+  position: absolute;
+  top: -40%;
+  left: 50%;
+  width: 140%;
+  height: 70%;
+  transform: translateX(-50%);
+  background: radial-gradient(closest-side, rgba(59, 130, 246, 0.35), transparent 70%);
+  pointer-events: none;
+}
+
+.visual-logo {
+  position: relative;
+  z-index: 1;
+  width: 88px;
+  height: 88px;
+  border-radius: 22px;
+  object-fit: cover;
+  box-shadow:
+    0 16px 40px -20px rgba(37, 99, 235, 0.55),
+    0 0 0 4px rgba(255, 255, 255, 0.85);
+}
+
+.visual-name {
+  position: relative;
+  z-index: 1;
+  margin: 6px 0 0;
+  font-size: 1.25rem;
+  font-weight: 800;
+  letter-spacing: -0.03em;
+  color: #0f172a;
+}
+
+.visual-tag {
+  position: relative;
+  z-index: 1;
+  margin: 0;
+  max-width: 22ch;
+  font-size: 13px;
+  line-height: 1.45;
+  font-weight: 500;
+  color: #64748b;
+}
+
+.visual-chat {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  margin-top: 12px;
+  padding: 11px 12px;
+  max-width: 100%;
+  border-radius: 12px;
+  text-align: left;
+  background: rgba(255, 255, 255, 0.92);
+  border: 1px solid rgba(255, 255, 255, 0.8);
+  box-shadow: 0 12px 28px -20px rgba(15, 23, 42, 0.2);
+}
+
+.visual-chat-logo {
+  flex-shrink: 0;
+  width: 28px;
+  height: 28px;
+  border-radius: 8px;
+  object-fit: cover;
+}
+
+.visual-chat p {
+  margin: 0;
+  font-size: 12px;
+  line-height: 1.45;
+  font-weight: 500;
+  color: #334155;
+}
+
+@media (min-width: 640px) {
+  .visual-logo {
+    width: 80px;
+    height: 80px;
+  }
+
+  .visual-chat {
+    max-width: 360px;
+  }
+}
+
+.aside-features--desktop {
+  display: none;
+}
+
+@media (min-width: 900px) {
+  .aside-features--desktop {
+    display: grid;
+  }
 }
 
 .aside-features {
-  margin: 8px 0 0;
+  margin: 4px 0 0;
   padding: 0;
   list-style: none;
   display: grid;
-  gap: 12px;
+  gap: 10px;
 }
 
 .aside-features li {
@@ -334,9 +488,9 @@ onMounted(async () => {
   align-items: flex-start;
   padding: 12px 14px;
   border-radius: 14px;
-  border: 1px solid rgb(254 215 199 / 55%);
-  background: rgb(255 255 255 / 78%);
-  box-shadow: 0 10px 28px -22px rgb(234 88 12 / 35%);
+  border: 1px solid var(--color-accent-border);
+  background: rgba(255, 255, 255, 0.82);
+  box-shadow: 0 12px 32px -26px rgba(37, 99, 235, 0.35);
 }
 
 .feat-icon {
@@ -346,9 +500,9 @@ onMounted(async () => {
   display: grid;
   place-items: center;
   border-radius: 10px;
-  color: var(--b-accent-hover, #c2410c);
-  background: var(--b-accent-soft, #fff7ed);
-  border: 1px solid var(--accent-border, #fed7aa);
+  color: var(--b-accent-hover);
+  background: var(--b-accent-soft);
+  border: 1px solid var(--color-accent-border);
 }
 
 .aside-features strong {
@@ -367,62 +521,76 @@ onMounted(async () => {
   color: #64748b;
 }
 
-.aside-foot {
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
-  margin: 4px 0 0;
-  font-size: 13px;
-  font-weight: 600;
-  color: var(--b-accent-hover, #c2410c);
+.login-form-body {
+  order: 1;
+  display: grid;
+  gap: 18px;
+  min-width: 0;
+  padding: clamp(20px, 4vw, 28px) clamp(18px, 4vw, 26px) clamp(22px, 4vw, 30px);
 }
 
 .login-panel {
   display: grid;
   gap: 14px;
   width: 100%;
-  max-width: 440px;
+  max-width: min(100%, 520px);
   justify-self: center;
 }
 
-@media (min-width: 880px) {
+@media (min-width: 900px) {
   .login-panel {
-    justify-self: stretch;
-    max-width: none;
+    justify-self: center;
+    max-width: min(100%, 480px);
   }
 }
 
 .login-card {
-  padding: clamp(22px, 4vw, 28px) clamp(20px, 4vw, 26px);
-  display: grid;
-  gap: 18px;
+  display: flex;
+  flex-direction: column;
+  padding: 0;
+  overflow: hidden;
   border-radius: 22px;
-  border: 1px solid rgb(254 215 199 / 70%);
-  background:
-    radial-gradient(120% 80% at 50% 0%, rgb(255 247 237 / 90%), #fff 55%),
-    #fff;
+  border: 1px solid var(--color-accent-border);
+  background: #fff;
   box-shadow:
-    0 1px 2px rgb(15 23 42 / 4%),
-    0 24px 48px -28px rgb(234 88 12 / 22%);
+    0 1px 2px rgba(15, 23, 42, 0.04),
+    0 32px 64px -36px rgba(37, 99, 235, 0.35);
+}
+
+.login-redirect {
+  margin: 0 0 10px;
+  padding: 10px 12px;
+  border-radius: 10px;
+  font-size: 13px;
+  font-weight: 600;
+  line-height: 1.4;
+  color: var(--b-accent-deep);
+  background: var(--b-accent-soft);
+  border: 1px solid var(--color-accent-border);
 }
 
 .login-header {
-  text-align: left;
+  margin: 0;
+}
+
+.login-brand-text {
+  min-width: 0;
 }
 
 .login-title {
-  margin: 6px 0 0;
-  font-size: clamp(1.65rem, 3vw, 1.9rem);
-  font-weight: 750;
+  margin: 0;
+  font-size: clamp(1.45rem, 2.8vw, 1.65rem);
+  font-weight: 800;
   letter-spacing: -0.03em;
+  line-height: 1.15;
   color: #0f172a;
 }
 
 .login-lede {
-  margin: 10px 0 0;
-  font-size: 14.5px;
-  line-height: 1.55;
-  color: var(--b-muted, #64748b);
+  margin: 6px 0 0;
+  font-size: 13.5px;
+  line-height: 1.5;
+  color: var(--b-muted);
 }
 
 .login-alert {
@@ -431,10 +599,10 @@ onMounted(async () => {
   gap: 0.5rem;
   padding: 0.75rem 0.85rem;
   border-radius: 12px;
-  border: 1px solid #fecdca;
-  background: var(--b-danger-soft, #fef2f2);
+  border: 1px solid #fecaca;
+  background: var(--b-danger-soft);
   font-size: 0.875rem;
-  color: var(--b-danger, #dc2626);
+  color: var(--b-danger);
 }
 
 .alert-close {
@@ -445,6 +613,10 @@ onMounted(async () => {
   line-height: 1;
   cursor: pointer;
   color: inherit;
+}
+
+.login-form-body > .oauth-stack {
+  margin-top: 4px;
 }
 
 .oauth-stack {
@@ -458,9 +630,9 @@ onMounted(async () => {
   justify-content: center;
   gap: 0.65rem;
   width: 100%;
-  min-height: 48px;
+  min-height: 50px;
   padding: 0.75rem 1rem;
-  border-radius: 14px;
+  border-radius: 12px;
   border: 1px solid #e2e8f0;
   background: #fff;
   font-family: inherit;
@@ -468,7 +640,7 @@ onMounted(async () => {
   font-weight: 600;
   color: #0f172a;
   cursor: pointer;
-  box-shadow: 0 1px 2px rgb(15 23 42 / 5%);
+  box-shadow: 0 1px 2px rgba(15, 23, 42, 0.05);
   transition:
     transform 0.15s ease,
     box-shadow 0.15s ease,
@@ -478,9 +650,9 @@ onMounted(async () => {
 
 .oauth:hover:not(:disabled) {
   transform: translateY(-1px);
-  background: #fafafa;
+  background: #f8fafc;
   border-color: #cbd5e1;
-  box-shadow: 0 8px 20px -14px rgb(15 23 42 / 35%);
+  box-shadow: 0 10px 24px -16px rgba(15, 23, 42, 0.2);
 }
 
 .oauth:disabled {
@@ -489,7 +661,7 @@ onMounted(async () => {
 }
 
 .oauth.google:focus-visible {
-  outline: 2px solid var(--b-accent, #ea580c);
+  outline: 2px solid var(--b-accent);
   outline-offset: 2px;
 }
 
@@ -506,8 +678,8 @@ onMounted(async () => {
 .spinner {
   width: 18px;
   height: 18px;
-  border: 2px solid var(--b-border, #e2e8f0);
-  border-top-color: var(--b-accent, #ea580c);
+  border: 2px solid var(--b-border);
+  border-top-color: var(--b-accent);
   border-radius: 50%;
   animation: spin 0.7s linear infinite;
 }
@@ -529,7 +701,7 @@ onMounted(async () => {
   gap: 0.6rem;
   font-size: 0.8125rem;
   line-height: 1.45;
-  color: var(--b-muted, #64748b);
+  color: var(--b-muted);
   cursor: pointer;
 }
 
@@ -549,58 +721,75 @@ onMounted(async () => {
   border: 1px solid #cbd5e1;
   border-radius: 5px;
   background: #fff;
-  color: var(--b-accent, #ea580c);
+  color: var(--b-accent);
 }
 
 .terms-input:checked + .terms-box {
-  border-color: var(--b-accent, #ea580c);
-  background: var(--b-accent-soft, #fff7ed);
+  border-color: var(--b-accent);
+  background: var(--b-accent-soft);
 }
 
 .terms-text a {
-  color: var(--b-accent, #ea580c);
+  color: var(--b-accent);
   font-weight: 600;
 }
 
 .perks {
   margin: 0;
-  padding: 12px 14px 12px 2.2rem;
+  padding: 0;
+  list-style: none;
+  display: grid;
+  gap: 8px;
   font-size: 0.8125rem;
   color: #64748b;
-  line-height: 1.55;
-  border-radius: 12px;
-  background: rgb(248 250 252 / 85%);
-  border: 1px solid #f1f5f9;
+  line-height: 1.45;
 }
+
+.perks li {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 12px;
+  border-radius: 10px;
+  background: var(--b-accent-soft);
+  border: 1px solid var(--color-accent-border);
+}
+
+.perks svg {
+  flex-shrink: 0;
+  color: var(--b-accent);
+}
+
 
 .login-foot {
   margin: 0;
   text-align: center;
   font-size: 0.875rem;
-  color: var(--b-muted, #64748b);
+  color: var(--b-muted);
 }
 
 .login-foot a {
-  color: var(--b-accent, #ea580c);
+  color: var(--b-accent);
   font-weight: 600;
 }
 
-@media (max-width: 879px) {
+@media (max-width: 899px) {
+  .login-shell {
+    gap: 20px;
+  }
+
   .login-aside {
     text-align: center;
     justify-items: center;
+    gap: 12px;
   }
 
   .aside-lede {
-    margin-inline: auto;
+    display: none;
   }
 
-  .aside-badges {
+  .aside-trust {
     justify-content: center;
-  }
-
-  .aside-features {
-    width: min(100%, 480px);
   }
 }
 </style>

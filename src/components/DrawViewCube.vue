@@ -176,8 +176,8 @@ function onPointerUp(e) {
 
 .face-right {
   transform: rotateY(90deg) translateZ(var(--half));
-  background: rgba(74, 222, 128, 0.14);
-  color: #15803d;
+  background: rgba(96, 165, 250, 0.14);
+  color: #1e40af;
 }
 
 .face-left {

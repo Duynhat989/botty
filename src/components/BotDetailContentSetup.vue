@@ -34,6 +34,15 @@
     </nav>
 
     <div class="setup-body">
+      <section class="setup-section setup-avatar-block">
+        <BotAvatarEditor
+          :bot-id="bot.id"
+          :bot-name="bot.name"
+          :avatar-url="bot.avatarUrl"
+          @updated="onAvatarUpdated"
+        />
+      </section>
+
       <section v-show="modelValue === 'gemini'" id="section-gemini" class="setup-section">
         <form class="setup-form-plain" @submit.prevent>
         <h3 class="setup-h">Gemini</h3>
@@ -734,6 +743,7 @@ import {
   defaultBankNameForCode,
 } from '@/constants/vietnamBanks'
 import { useAuthStore } from '@/stores/auth'
+import BotAvatarEditor from '@/components/BotAvatarEditor.vue'
 import { isValidGeminiPin } from '@/utils/geminiKeyCrypto'
 import { hasLocalGeminiPin, loadLocalGeminiPin } from '@/utils/geminiPinLocal'
 
@@ -938,6 +948,10 @@ const emit = defineEmits([
   'reload',
 ])
 
+function onAvatarUpdated() {
+  emit('reload')
+}
+
 const replyLanguageModes = REPLY_LANGUAGE_MODES
 const replyLanguageOptions = REPLY_LANGUAGE_OPTIONS
 const vietnamBanks = VIETNAM_BANKS
@@ -1026,6 +1040,12 @@ const docContentModel = computed({
 
 .setup-section {
   animation: setup-in 0.22s ease;
+}
+
+.setup-avatar-block {
+  margin-bottom: 1.25rem;
+  padding-bottom: 1.25rem;
+  border-bottom: 1px solid var(--b-border);
 }
 
 @keyframes setup-in {

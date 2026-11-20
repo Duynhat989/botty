@@ -1,3 +1,9 @@
+<script setup>
+import { BRAND_LOGO_SRC } from '@/constants/brand'
+
+const brandLogo = BRAND_LOGO_SRC
+</script>
+
 <template>
   <div class="mac" aria-hidden="true">
     <div class="mac-chrome">
@@ -12,7 +18,7 @@
     <div class="mac-body">
       <aside class="mac-sidebar">
         <div class="sb-brand">
-          <img src="/logo.png" alt="" width="22" height="22" />
+          <img :src="brandLogo" alt="" width="22" height="22" />
           <span>Botty</span>
         </div>
         <div class="sb-item on">Thử phản hồi</div>
@@ -46,13 +52,10 @@
       </div>
     </div>
     <div class="mac-dock">
-      <img src="/logo.png" alt="" width="28" height="28" loading="lazy" />
+      <img :src="brandLogo" alt="" width="28" height="28" loading="lazy" />
     </div>
   </div>
 </template>
-
-<script setup>
-</script>
 
 <style scoped>
 .mac {
@@ -127,7 +130,7 @@
   gap: 6px;
   font-size: 12px;
   font-weight: 700;
-  color: #14532d;
+  color: #1e3a8a;
   margin-bottom: 12px;
 }
 
@@ -140,7 +143,7 @@
 
 .sb-item.on {
   background: #ecfdf3;
-  color: #166534;
+  color: #1e40af;
   font-weight: 600;
 }
 
@@ -178,7 +181,7 @@
 .bubble.user {
   align-self: flex-end;
   background: #ecfdf3;
-  border: 1px solid #bbf7d0;
+  border: 1px solid #bfdbfe;
 }
 
 .bubble.bot {
@@ -202,7 +205,7 @@
   font-size: 10px;
   font-weight: 700;
   color: #fff;
-  background: #16a34a;
+  background: #1d4ed8;
   padding: 4px 10px;
   border-radius: 999px;
 }

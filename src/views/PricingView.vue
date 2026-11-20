@@ -218,7 +218,7 @@ onMounted(async () => {
   height: 500px;
   top: -100px;
   left: -150px;
-  background: radial-gradient(circle, rgba(34, 197, 94, 0.12) 0%, rgba(134, 239, 172, 0.06) 60%, transparent 100%);
+  background: radial-gradient(circle, rgba(37, 99, 235, 0.12) 0%, rgba(134, 239, 172, 0.06) 60%, transparent 100%);
   filter: blur(120px);
   pointer-events: none;
 }

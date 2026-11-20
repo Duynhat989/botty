@@ -200,7 +200,7 @@
         <div class="tools-popup-panel">
           <header class="tools-popup-head">
             <div class="side-brand">
-              <img src="/logo.png" alt="" width="28" height="28" />
+              <img :src="brandLogo" alt="" width="28" height="28" class="botty-mark" />
               <div>
                 <p id="tools-popup-title" class="side-title">Thử phản hồi</p>
                 <p class="side-sub">{{ bot.name }}</p>
@@ -279,6 +279,9 @@ import { RouterLink } from 'vue-router'
 import { ImagePlus, Loader2, Send } from '@lucide/vue'
 import { api } from '@/api'
 import { confirm as askConfirm } from '@/composables/useConfirm'
+import { BRAND_LOGO_SRC } from '@/constants/brand'
+
+const brandLogo = BRAND_LOGO_SRC
 const props = defineProps({
   bot: { type: Object, required: true },
   tabRoute: { type: Function, required: true },
@@ -1326,7 +1329,7 @@ onUnmounted(() => {
 }
 
 .chat-bubble.user {
-  border-color: #c6e9d4;
+  border-color: var(--color-accent-border);
   background: var(--b-accent-soft);
 }
 

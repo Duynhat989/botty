@@ -865,7 +865,7 @@ onUnmounted(() => {
 
 .dock-btn:hover {
   background: #fff7ed;
-  color: #ea580c;
+  color: #2563eb;
   transform: translateY(-1px);
 }
 
@@ -874,43 +874,43 @@ onUnmounted(() => {
 }
 
 .dock-btn.on {
-  background: #f97316;
+  background: #3b82f6;
   color: #ffffff;
   box-shadow: 0 2px 6px rgba(249, 115, 22, 0.35);
 }
 
 .dock-btn--ai.on {
-  background: #f97316;
+  background: #3b82f6;
   color: #ffffff;
   box-shadow: 0 2px 6px rgba(249, 115, 22, 0.35);
 }
 
 .dock-btn--wand.on {
-  background: #f97316;
+  background: #3b82f6;
   color: #ffffff;
   box-shadow: 0 2px 6px rgba(249, 115, 22, 0.35);
 }
 
 .dock-btn--laser.on {
-  background: #f97316;
+  background: #3b82f6;
   color: #ffffff;
   box-shadow: 0 2px 6px rgba(249, 115, 22, 0.35);
 }
 
 .dock-btn--ruler.on {
-  background: #f97316;
+  background: #3b82f6;
   color: #ffffff;
   box-shadow: 0 2px 6px rgba(249, 115, 22, 0.35);
 }
 
 .dock-btn--teaching.on {
-  background: #f97316;
+  background: #3b82f6;
   color: #ffffff;
   box-shadow: 0 2px 6px rgba(249, 115, 22, 0.35);
 }
 
 .dock-btn--composer.on {
-  background: #f97316;
+  background: #3b82f6;
   color: #ffffff;
   box-shadow: 0 2px 6px rgba(249, 115, 22, 0.35);
 }
@@ -974,7 +974,7 @@ onUnmounted(() => {
 
 .catalog-close-btn:hover {
   background: #ffedd5;
-  color: #ea580c;
+  color: #2563eb;
 }
 
 .catalog-header {
@@ -995,7 +995,7 @@ onUnmounted(() => {
   font-size: 10px;
   font-weight: 700;
   text-transform: uppercase;
-  color: #ea580c;
+  color: #2563eb;
   background: #ffedd5;
   padding: 2px 6px;
   border-radius: 4px;
@@ -1026,7 +1026,7 @@ onUnmounted(() => {
 }
 
 .catalog-hint strong {
-  color: #ea580c;
+  color: #2563eb;
 }
 
 .catalog-search-box {
@@ -1056,7 +1056,7 @@ onUnmounted(() => {
 }
 
 .catalog-search-input:focus {
-  border-color: #f97316;
+  border-color: #3b82f6;
   box-shadow: 0 0 0 2px rgba(249, 115, 22, 0.2);
 }
 
@@ -1072,7 +1072,7 @@ onUnmounted(() => {
 }
 
 .clear-search-btn:hover {
-  color: #ea580c;
+  color: #2563eb;
 }
 
 .catalog-tabs {
@@ -1104,7 +1104,7 @@ onUnmounted(() => {
 }
 
 .catalog-tab-btn.active {
-  background: #f97316;
+  background: #3b82f6;
   color: #ffffff;
   font-weight: 700;
 }
@@ -1138,7 +1138,7 @@ onUnmounted(() => {
 
 .shape-catalog-card:hover {
   background: #fff7ed;
-  border-color: #f97316;
+  border-color: #3b82f6;
   transform: translateY(-2px);
   box-shadow: 0 4px 14px rgba(249, 115, 22, 0.15);
 }
@@ -1183,7 +1183,7 @@ onUnmounted(() => {
   padding: 1px 4px;
   border-radius: 3px;
   background: #ffedd5;
-  color: #ea580c;
+  color: #2563eb;
   font-size: 9px;
   font-weight: 600;
   cursor: grab;
@@ -1191,7 +1191,7 @@ onUnmounted(() => {
 }
 
 .shape-catalog-card:hover .shape-drag-badge {
-  background: #f97316;
+  background: #3b82f6;
   color: #ffffff;
 }
 
@@ -1398,7 +1398,7 @@ onUnmounted(() => {
   font-size: 11px;
   font-weight: 700;
   letter-spacing: 0.5px;
-  color: #ea580c;
+  color: #2563eb;
 }
 
 .pen-hud-close {
@@ -1415,7 +1415,7 @@ onUnmounted(() => {
 
 .pen-hud-close:hover {
   background: #ffedd5;
-  color: #ea580c;
+  color: #2563eb;
 }
 
 /* KHUNG XEM TRƯỚC NIB BÚT */
@@ -1466,17 +1466,17 @@ onUnmounted(() => {
 .pen-hud-slider {
   flex: 1;
   height: 4px;
-  accent-color: #f97316;
+  accent-color: #3b82f6;
   cursor: pointer;
 }
 
 .pen-hud-slider--opacity {
-  accent-color: #ea580c;
+  accent-color: #2563eb;
 }
 
 .pen-hud-subval {
   font-size: 10.5px;
-  color: #ea580c;
+  color: #2563eb;
   font-weight: 600;
   width: 32px;
   text-align: right;
@@ -1517,11 +1517,11 @@ onUnmounted(() => {
 
 .pen-hud-style-btn:hover {
   background: #ffedd5;
-  color: #ea580c;
+  color: #2563eb;
 }
 
 .pen-hud-style-btn.active {
-  background: #f97316;
+  background: #3b82f6;
   color: #ffffff;
   box-shadow: 0 1px 4px rgba(249, 115, 22, 0.35);
 }
@@ -1546,12 +1546,12 @@ onUnmounted(() => {
 
 .pen-hud-color-swatch:hover {
   transform: scale(1.18);
-  border-color: #f97316;
+  border-color: #3b82f6;
 }
 
 .pen-hud-color-swatch.active {
   transform: scale(1.22);
-  border-color: #ea580c;
+  border-color: #2563eb;
   box-shadow: 0 0 0 2px rgba(249, 115, 22, 0.4);
 }
 

@@ -458,7 +458,7 @@ onMounted(load)
 }
 
 .ch-badge.test {
-  border-color: #c6e9d4;
+  border-color: var(--color-accent-border);
   background: var(--b-accent-soft);
   color: #0d5c36;
 }
@@ -558,7 +558,7 @@ onMounted(load)
 }
 
 .thread-bubble.user {
-  border-color: #c6e9d4;
+  border-color: var(--color-accent-border);
   background: var(--b-accent-soft);
 }
 

@@ -160,7 +160,7 @@ onMounted(load)
   font-weight: 700;
   letter-spacing: 0.06em;
   text-transform: uppercase;
-  color: #f97316;
+  color: #3b82f6;
 }
 
 .title {
@@ -269,7 +269,7 @@ onMounted(load)
 }
 
 .mode-3d {
-  background: #ecfdf5;
+  background: #eff6ff;
   color: #047857;
 }
 
@@ -293,7 +293,7 @@ onMounted(load)
 }
 
 .btn.primary {
-  background: linear-gradient(135deg, #f97316, #ea580c);
+  background: linear-gradient(135deg, #3b82f6, #2563eb);
   color: #fff;
 }
 

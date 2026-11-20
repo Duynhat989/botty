@@ -6,7 +6,7 @@
     <section class="workspace">
       <header class="page-head">
         <div class="brand">
-          <img src="/logo.png" alt="" width="120" height="120" class="logo" />
+          <img :src="brandLogo" alt="" width="120" height="120" class="logo" />
           <h1 class="title">Dyna<span class="accent">Geo</span></h1>
           <p class="lede">{{ t('home.sub') }}</p>
         </div>
@@ -30,6 +30,9 @@ import { useRouter } from 'vue-router'
 import { useDrawSessionStore } from '@/stores/drawSession'
 import { useI18n } from '@/i18n'
 import { api } from '@/api'
+import { BRAND_LOGO_SRC } from '@/constants/brand'
+
+const brandLogo = BRAND_LOGO_SRC
 import { apiMessage } from '@/api/messages'
 import { ApiError } from '@/api/client'
 import { getSpecParams } from '@/modules/draw.min.js'
@@ -174,7 +177,7 @@ async function analyze() {
 }
 
 .title .accent {
-  color: var(--accent, #f97316);
+  color: var(--accent, #3b82f6);
   text-shadow:
     0 1px 0 rgba(255, 255, 255, 0.9),
     0 0 24px rgba(249, 115, 22, 0.35);

@@ -300,7 +300,7 @@ async function copy(text) {
   width: 3px;
   height: 12px;
   border-radius: 999px;
-  background: linear-gradient(180deg, #fdba74, #f97316);
+  background: linear-gradient(180deg, #fdba74, #3b82f6);
   flex-shrink: 0;
 }
 
@@ -362,7 +362,7 @@ async function copy(text) {
 }
 
 .perm-choice.is-checked .perm-choice__bullet {
-  border-color: #f97316;
+  border-color: #3b82f6;
   background: #fff7ed;
 }
 
@@ -374,7 +374,7 @@ async function copy(text) {
   width: 8px;
   height: 8px;
   border-radius: 50%;
-  background: linear-gradient(180deg, #fb923c, #f97316);
+  background: linear-gradient(180deg, #fb923c, #3b82f6);
   transform: translate(-50%, -50%);
 }
 
@@ -481,7 +481,7 @@ async function copy(text) {
 }
 
 .btn.primary {
-  background: linear-gradient(135deg, #f97316, #ea580c);
+  background: linear-gradient(135deg, #3b82f6, #2563eb);
   color: #fff;
   box-shadow: 0 4px 14px rgba(234, 88, 12, 0.28);
 }
@@ -515,7 +515,7 @@ async function copy(text) {
 .copy-hint {
   margin: 0;
   font-size: 12px;
-  color: #16a34a;
+  color: #1d4ed8;
   font-weight: 600;
 }
 

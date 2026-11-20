@@ -71,9 +71,9 @@ watch(() => route.params.id, load)
   display: grid;
   gap: 12px;
   border-radius: 22px;
-  border: 1px solid var(--accent-border, #bbf7d0);
-  background: radial-gradient(120% 100% at 50% 0%, #ecfdf5 0%, #fff 55%, #f8fafc 100%);
-  box-shadow: 0 14px 40px -28px rgba(34, 197, 94, 0.18);
+  border: 1px solid var(--accent-border, #bfdbfe);
+  background: radial-gradient(120% 100% at 50% 0%, #eff6ff 0%, #fff 55%, #f8fafc 100%);
+  box-shadow: 0 14px 40px -28px rgba(37, 99, 235, 0.18);
 }
 
 .load-shimmer {

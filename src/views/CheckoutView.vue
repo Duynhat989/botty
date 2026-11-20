@@ -578,8 +578,8 @@ onBeforeUnmount(() => {
 }
 
 .status.paid {
-  background: #dcfce7;
-  color: #15803d;
+  background: #dbeafe;
+  color: #1e40af;
 }
 
 .status-dot {
@@ -861,8 +861,8 @@ onBeforeUnmount(() => {
   border-radius: 50%;
   display: grid;
   place-items: center;
-  background: #dcfce7;
-  color: #15803d;
+  background: #dbeafe;
+  color: #1e40af;
   font-size: 24px;
   font-weight: 450;
   animation: amountPop 0.5s cubic-bezier(0.16, 1, 0.3, 1);

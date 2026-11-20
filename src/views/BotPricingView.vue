@@ -578,7 +578,7 @@ onUnmounted(() => {
 }
 
 .plan-badge--hot {
-  background: #ecfdf5;
+  background: #eff6ff;
   color: #047857;
 }
 
@@ -644,7 +644,7 @@ onUnmounted(() => {
 
 .active-plan {
   margin-top: 28px;
-  border-color: #bbf7d0;
+  border-color: #bfdbfe;
   background: rgba(236, 253, 245, 0.7);
   backdrop-filter: blur(6px);
 }

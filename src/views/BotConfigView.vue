@@ -22,6 +22,17 @@
       </p>
     </header>
 
+    <Transition name="config-toast">
+      <p
+        v-if="toast && auth.isLoggedIn"
+        class="config-toast"
+        :class="`config-toast--${toast.type}`"
+        role="status"
+      >
+        {{ toast.text }}
+      </p>
+    </Transition>
+
     <div v-if="!auth.isLoggedIn" class="panel empty-panel">
       <div class="empty-art" aria-hidden="true" />
       <p class="empty-title">Đăng nhập để quản lý bot</p>
@@ -43,40 +54,136 @@
       </div>
 
       <ul v-else class="bot-list">
-        <li v-for="b in bots" :key="b.id">
-          <RouterLink :to="`/bots/${b.id}/test`" class="bot-tile">
-            <div class="tile-leading">
-              <span class="tile-avatar" aria-hidden="true">{{ botInitial(b.name) }}</span>
-              <span
-                class="status-dot"
-                :class="b.status === 'active' ? 'status-dot--on' : 'status-dot--off'"
-                :title="b.status === 'active' ? 'Đang chạy' : 'Tạm dừng'"
-              />
-            </div>
-            <div class="tile-main">
-              <div class="tile-head">
-                <h2 class="tile-name">{{ b.name }}</h2>
-                <span v-if="b.orderClosingEnabled" class="tile-tag">Chốt đơn</span>
+        <li v-for="b in bots" :key="b.id" class="bot-list-item">
+          <div
+            class="bot-card"
+            :class="{
+              'bot-card--active': b.status === 'active',
+              'bot-card--menu-open': openMenuId === b.id,
+            }"
+          >
+            <div class="bot-card-glow" aria-hidden="true" />
+            <div class="bot-card-bar" aria-hidden="true" />
+
+            <header class="bot-card-top">
+              <div class="bot-card-power" @click.stop>
+                <label class="b-switch bot-card-switch" :class="{ 'is-busy': statusBusyId === b.id }">
+                  <input
+                    type="checkbox"
+                    :checked="b.status === 'active'"
+                    :disabled="statusBusyId === b.id"
+                    :aria-label="b.status === 'active' ? `Tạm dừng ${b.name}` : `Bật ${b.name}`"
+                    @change="onToggleStatus(b, $event)"
+                  />
+                  <span class="b-switch-track" aria-hidden="true" />
+                </label>
+                <span
+                  class="bot-card-pill"
+                  :class="b.status === 'active' ? 'bot-card-pill--on' : 'bot-card-pill--off'"
+                >
+                  <span class="bot-card-pill-dot" aria-hidden="true" />
+                  {{ statusBusyId === b.id ? 'Đang lưu…' : b.status === 'active' ? 'Đang chạy' : 'Tạm dừng' }}
+                </span>
               </div>
-              <p class="tile-sub">{{ tileSubtitle(b) }}</p>
-            </div>
-            <ChevronRight :size="18" class="tile-chev" aria-hidden="true" />
-          </RouterLink>
+              <div class="card-menu" @click.stop>
+                <button
+                  type="button"
+                  class="card-menu-trigger"
+                  :aria-expanded="openMenuId === b.id"
+                  aria-haspopup="menu"
+                  :aria-label="`Tùy chọn ${b.name}`"
+                  @click.stop="toggleMenu(b.id)"
+                >
+                  <MoreVertical :size="18" aria-hidden="true" />
+                </button>
+                <div v-if="openMenuId === b.id" class="card-menu-pop" role="menu">
+                <RouterLink
+                  role="menuitem"
+                  class="card-menu-item"
+                  :to="`/bots/${b.id}/test`"
+                  @click="closeMenu"
+                >
+                  Thử bot
+                </RouterLink>
+                <RouterLink
+                  role="menuitem"
+                  class="card-menu-item"
+                  :to="`/bots/${b.id}/setup`"
+                  @click="closeMenu"
+                >
+                  Thiết lập
+                </RouterLink>
+                <RouterLink
+                  role="menuitem"
+                  class="card-menu-item"
+                  :to="`/bots/${b.id}/dashboard`"
+                  @click="closeMenu"
+                >
+                  Tổng quan
+                </RouterLink>
+                <button
+                  type="button"
+                  role="menuitem"
+                  class="card-menu-item"
+                  :title="canCreateMore ? '' : 'Đã đạt giới hạn bot'"
+                  @click="onMenuDuplicate(b)"
+                >
+                  Sao chép bot…
+                </button>
+                </div>
+              </div>
+            </header>
+
+            <RouterLink :to="`/bots/${b.id}/test`" class="bot-card-link">
+              <img
+                class="bot-card-avatar"
+                :src="resolveBotAvatarUrl(b)"
+                :alt="`Ảnh ${b.name}`"
+                width="72"
+                height="72"
+                loading="lazy"
+                decoding="async"
+              />
+              <div class="bot-card-main">
+                <div class="bot-card-copy">
+                  <h2 class="bot-card-name">{{ b.name }}</h2>
+                  <p v-if="botShopLine(b)" class="bot-card-shop">{{ botShopLine(b) }}</p>
+                  <p class="bot-card-hint">{{ botHint(b) }}</p>
+                  <ul v-if="botChips(b).length" class="bot-card-chips" aria-label="Tính năng">
+                    <li v-for="chip in botChips(b)" :key="chip" class="bot-card-chip">{{ chip }}</li>
+                  </ul>
+                </div>
+                <span class="bot-card-cta">
+                  Thử bot
+                  <ChevronRight :size="16" class="bot-card-cta-icon" aria-hidden="true" />
+                </span>
+              </div>
+            </RouterLink>
+          </div>
         </li>
       </ul>
     </template>
 
-    <BotCreateWizardModal v-model:open="wizardOpen" @created="loadBots" />
+    <BotCreateWizardModal v-model:open="wizardOpen" @created="onBotCreated" />
+    <BotDuplicateModal
+      v-model:open="dupOpen"
+      :source-id="dupSource?.id || ''"
+      :source-name="dupSource?.name || ''"
+      @duplicated="onDuplicated"
+      @failed="onDuplicateFailed"
+    />
   </div>
 </template>
 
 <script setup>
-import { computed, onMounted, ref, watch } from 'vue'
+import { computed, onMounted, onUnmounted, ref, watch } from 'vue'
 import { RouterLink, useRoute, useRouter } from 'vue-router'
-import { ChevronRight } from '@lucide/vue'
+import { ChevronRight, MoreVertical } from '@lucide/vue'
 import { api } from '@/api'
 import { useAuthStore } from '@/stores/auth'
 import BotCreateWizardModal from '@/components/BotCreateWizardModal.vue'
+import BotDuplicateModal from '@/components/BotDuplicateModal.vue'
+import { resolveBotAvatarUrl } from '@/utils/botAvatar'
 
 const auth = useAuthStore()
 const route = useRoute()
@@ -84,7 +191,13 @@ const router = useRouter()
 const bots = ref([])
 const loading = ref(false)
 const wizardOpen = ref(false)
+const dupOpen = ref(false)
+const dupSource = ref(null)
 const quota = ref(null)
+const openMenuId = ref(null)
+const statusBusyId = ref(null)
+const toast = ref(null)
+let toastTimer = null
 
 const canCreateMore = computed(() => {
   if (quota.value) return Boolean(quota.value.canCreateMore)
@@ -92,17 +205,89 @@ const canCreateMore = computed(() => {
   return bots.value.length < 1
 })
 
-function botInitial(name) {
-  return String(name || '?').trim().slice(0, 1).toUpperCase()
-}
-
-function tileSubtitle(b) {
+function botShopLine(b) {
   const shop = String(b.shopName || '').trim()
   if (shop && shop !== b.name) return shop
-  if (b.status !== 'active') return 'Đang tạm dừng'
-  if (!b.hasFacebookToken) return 'Chưa kết nối Facebook'
-  if (!b.hasGeminiKey && !b.usesBottyAi) return 'Chưa bật phản hồi tự động'
-  return 'Messenger'
+  return ''
+}
+
+async function onToggleStatus(b, ev) {
+  const wantActive = Boolean(ev.target.checked)
+  const next = wantActive ? 'active' : 'paused'
+  const prev = b.status
+  if (next === prev) return
+
+  statusBusyId.value = b.id
+  b.status = next
+
+  try {
+    const data = await api.bots.update(b.id, { status: next })
+    if (data?.bot?.status) b.status = data.bot.status
+    if (wantActive) {
+      if (!b.hasFacebookToken) {
+        showToast(`«${b.name}» đang chạy — chưa kết nối Facebook.`, 'warn')
+      } else if (!b.hasGeminiKey && !b.usesBottyAi) {
+        showToast(`«${b.name}» đang chạy — chưa bật phản hồi tự động.`, 'warn')
+      } else {
+        showToast(`«${b.name}» đang nhận tin Messenger.`, 'ok')
+      }
+    } else {
+      showToast(`«${b.name}» đã tạm dừng.`, 'ok')
+    }
+  } catch (e) {
+    b.status = prev
+    ev.target.checked = prev === 'active'
+    console.error(e)
+    showToast('Không đổi trạng thái bot được. Thử lại.', 'err')
+  } finally {
+    statusBusyId.value = null
+  }
+}
+
+function botHint(b) {
+  if (b.status !== 'active') return 'Bật công tắt phía trên khi sẵn sàng nhận tin.'
+  if (!b.hasFacebookToken) return 'Chưa kết nối Facebook Page.'
+  if (!b.hasGeminiKey && !b.usesBottyAi) return 'Chưa bật phản hồi tự động.'
+  return 'Sẵn sàng nhận tin Messenger.'
+}
+
+function botChips(b) {
+  const chips = []
+  if (b.orderClosingEnabled) chips.push('Chốt đơn')
+  if (b.usesBottyAi) chips.push('Botty AI')
+  else if (b.hasGeminiKey) chips.push('Gemini')
+  if (b.hasFacebookToken) chips.push('Messenger')
+  return chips
+}
+
+function showToast(text, type = 'ok') {
+  if (toastTimer) clearTimeout(toastTimer)
+  toast.value = { text, type }
+  toastTimer = setTimeout(() => {
+    toast.value = null
+    toastTimer = null
+  }, 4200)
+}
+
+function closeMenu() {
+  openMenuId.value = null
+}
+
+function toggleMenu(id) {
+  openMenuId.value = openMenuId.value === id ? null : id
+}
+
+function onMenuDuplicate(b) {
+  closeMenu()
+  openDuplicate(b)
+}
+
+function onDocClick() {
+  closeMenu()
+}
+
+function onKeydown(e) {
+  if (e.key === 'Escape') closeMenu()
 }
 
 async function loadBots() {
@@ -114,14 +299,45 @@ async function loadBots() {
     quota.value = data?.quota || null
   } catch (e) {
     console.error(e)
+    showToast('Không tải được danh sách bot.', 'err')
   } finally {
     loading.value = false
   }
 }
 
+async function onBotCreated() {
+  await loadBots()
+  showToast('Đã tạo bot — bạn có thể hoàn tất thiết lập trong wizard.', 'ok')
+}
+
 function openWizard() {
   if (!canCreateMore.value) return
   wizardOpen.value = true
+}
+
+function openDuplicate(b) {
+  if (!canCreateMore.value) {
+    showToast('Đã đạt giới hạn bot — nâng cấp gói để tạo thêm.', 'warn')
+    return
+  }
+  dupSource.value = b
+  dupOpen.value = true
+}
+
+function onDuplicateFailed(payload) {
+  const type = payload?.code === 'BOT_LIMIT_REACHED' ? 'warn' : 'err'
+  showToast(payload?.text || 'Không sao chép được bot.', type)
+}
+
+async function onDuplicated(payload) {
+  await loadBots()
+  const bot = payload?.bot
+  if (bot?.id) {
+    const docs = payload?.documentsCopied
+    const docHint = typeof docs === 'number' && docs > 0 ? ` (${docs} tài liệu)` : ''
+    showToast(`Đã sao chép «${bot.name}»${docHint}. Bot mới tạm dừng — gắn Facebook trong Thiết lập.`, 'ok')
+    router.push(`/bots/${bot.id}/setup`)
+  }
 }
 
 function clearCreateQuery() {
@@ -147,7 +363,17 @@ watch(wizardOpen, (v) => {
   if (!v) clearCreateQuery()
 })
 
-onMounted(loadBots)
+onMounted(() => {
+  loadBots()
+  document.addEventListener('click', onDocClick)
+  document.addEventListener('keydown', onKeydown)
+})
+
+onUnmounted(() => {
+  document.removeEventListener('click', onDocClick)
+  document.removeEventListener('keydown', onKeydown)
+  if (toastTimer) clearTimeout(toastTimer)
+})
 </script>
 
 <style scoped>
@@ -284,147 +510,389 @@ onMounted(loadBots)
   margin: 0;
   padding: 0;
   display: grid;
-  gap: 14px;
+  gap: 16px;
+}
+
+.bot-card {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  min-height: 100%;
+  border-radius: 18px;
+  border: 1px solid var(--b-border);
+  background: var(--color-surface);
+  box-shadow:
+    0 1px 2px rgba(15, 23, 42, 0.04),
+    0 8px 24px -20px rgba(15, 23, 42, 0.12);
+  overflow: hidden;
+  transition:
+    border-color 0.22s ease,
+    box-shadow 0.22s ease,
+    transform 0.22s ease;
+}
+
+.bot-card--active {
+  border-color: color-mix(in srgb, var(--b-accent) 18%, var(--b-border));
+}
+
+.bot-card--menu-open {
+  z-index: 3;
+  box-shadow: 0 16px 40px -24px rgba(15, 23, 42, 0.28);
+}
+
+.bot-card-glow {
+  pointer-events: none;
+  position: absolute;
+  top: -40%;
+  right: -20%;
+  width: 55%;
+  height: 70%;
+  border-radius: 50%;
+  background: radial-gradient(
+    closest-side,
+    color-mix(in srgb, var(--b-accent) 14%, transparent),
+    transparent 70%
+  );
+  opacity: 0.85;
+}
+
+.bot-card:not(.bot-card--active) .bot-card-glow {
+  opacity: 0;
+}
+
+.bot-card-bar {
+  height: 3px;
+  background: linear-gradient(
+    90deg,
+    color-mix(in srgb, var(--b-muted) 55%, transparent),
+    color-mix(in srgb, var(--b-muted) 25%, transparent)
+  );
+}
+
+.bot-card--active .bot-card-bar {
+  background: linear-gradient(
+    90deg,
+    var(--b-accent),
+    color-mix(in srgb, var(--b-accent) 45%, #fff)
+  );
+}
+
+.bot-card-top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  padding: 12px 12px 0 14px;
+}
+
+.bot-card-power {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-width: 0;
+}
+
+.bot-card-switch {
+  flex-shrink: 0;
+  margin: 0;
+}
+
+.bot-card-switch.is-busy {
+  opacity: 0.55;
+  pointer-events: none;
+}
+
+.bot-card-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 10px 4px 8px;
+  border-radius: 999px;
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.01em;
+  border: 1px solid var(--b-border);
+  background: var(--b-surface-2);
+  color: var(--b-muted);
+}
+
+.bot-card-pill-dot {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: var(--b-muted);
+}
+
+.bot-card-pill--on {
+  color: var(--b-accent-hover);
+  border-color: color-mix(in srgb, var(--b-accent) 22%, var(--b-border));
+  background: color-mix(in srgb, var(--b-accent-soft) 55%, var(--color-surface));
+}
+
+.bot-card-pill--on .bot-card-pill-dot {
+  background: var(--b-accent);
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--b-accent) 22%, transparent);
+}
+
+.card-menu {
+  position: relative;
+  flex-shrink: 0;
+  z-index: 2;
+}
+
+.card-menu-trigger {
+  display: grid;
+  place-items: center;
+  width: 34px;
+  height: 34px;
+  padding: 0;
+  border: 1px solid transparent;
+  border-radius: 10px;
+  background: color-mix(in srgb, var(--color-surface) 88%, transparent);
+  color: var(--b-muted);
+  cursor: pointer;
+  transition:
+    background 0.15s ease,
+    border-color 0.15s ease,
+    color 0.15s ease;
+}
+
+.card-menu-trigger:hover,
+.card-menu-trigger[aria-expanded='true'] {
+  border-color: var(--b-border);
+  background: var(--b-surface-2);
+  color: var(--b-ink);
+}
+
+.card-menu-pop {
+  position: absolute;
+  top: calc(100% + 4px);
+  right: 0;
+  min-width: 168px;
+  padding: 6px;
+  border-radius: 12px;
+  border: 1px solid var(--b-border);
+  background: var(--color-surface);
+  box-shadow: 0 12px 32px rgba(15, 23, 42, 0.12);
+}
+
+.card-menu-item {
+  display: block;
+  width: 100%;
+  padding: 9px 12px;
+  border: 0;
+  border-radius: 8px;
+  font-size: 13px;
+  font-weight: 500;
+  text-align: left;
+  text-decoration: none;
+  color: var(--b-ink);
+  background: transparent;
+  cursor: pointer;
+}
+
+.card-menu-item:hover:not(:disabled) {
+  background: var(--b-accent-soft);
+  color: var(--b-accent-hover);
+}
+
+.card-menu-item:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+
+.config-toast {
+  position: fixed;
+  top: calc(env(safe-area-inset-top, 0px) + 12px);
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 1400;
+  margin: 0;
+  max-width: min(92vw, 420px);
+  padding: 10px 16px;
+  border-radius: 12px;
+  font-size: 13px;
+  line-height: 1.4;
+  text-align: center;
+  border: 1px solid var(--b-border);
+  box-shadow: 0 12px 28px rgba(15, 23, 42, 0.14);
+}
+
+.config-toast--ok {
+  background: color-mix(in srgb, var(--b-accent-soft) 70%, var(--color-surface));
+  color: var(--b-ink);
+}
+
+.config-toast--err {
+  background: var(--b-danger-soft, #fef2f2);
+  color: var(--b-danger, #b91c1c);
+  border-color: #fecaca;
+}
+
+.config-toast--warn {
+  background: #fffbeb;
+  color: #92400e;
+  border-color: #fde68a;
+}
+
+.config-toast-enter-active,
+.config-toast-leave-active {
+  transition:
+    opacity 0.2s ease,
+    transform 0.2s ease;
+}
+
+.config-toast-enter-from,
+.config-toast-leave-to {
+  opacity: 0;
+  transform: translateX(-50%) translateY(-8px);
+}
+
+.bot-card-link {
+  display: flex;
+  flex-direction: row;
+  align-items: flex-start;
+  flex: 1;
+  gap: 12px;
+  margin-top: 10px;
+  padding: 4px 14px 14px;
+  text-decoration: none;
+  color: inherit;
+  border-radius: 0 0 17px 17px;
+  transition: background 0.2s ease;
+}
+
+.bot-card-link:hover {
+  background: color-mix(in srgb, var(--b-accent-soft) 28%, var(--color-surface));
+}
+
+.bot-card:has(.bot-card-link:hover),
+.bot-card:has(.bot-card-link:focus-visible) {
+  border-color: color-mix(in srgb, var(--b-accent) 32%, var(--b-border));
+  box-shadow:
+    0 4px 12px rgba(15, 23, 42, 0.06),
+    0 20px 40px -28px color-mix(in srgb, var(--b-accent) 35%, transparent);
+  transform: translateY(-2px);
+}
+
+.bot-card-avatar {
+  width: 72px;
+  height: 72px;
+  flex-shrink: 0;
+  border-radius: 16px;
+  object-fit: cover;
+  background: var(--b-surface-2);
+  border: 1px solid color-mix(in srgb, var(--b-accent) 12%, var(--b-border));
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.35),
+    0 10px 20px -14px color-mix(in srgb, var(--b-accent) 35%, transparent);
+}
+
+.bot-card-main {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  min-width: 0;
+  gap: 8px;
+}
+
+.bot-card-copy {
+  min-width: 0;
+  flex: 1;
+}
+
+.bot-card-name {
+  margin: 0;
+  font-size: 1.0625rem;
+  font-weight: 700;
+  letter-spacing: -0.025em;
+  line-height: 1.25;
+  color: var(--b-ink);
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.bot-card-shop {
+  margin: 4px 0 0;
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--b-ink-secondary);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.bot-card-hint {
+  margin: 6px 0 0;
+  font-size: 12px;
+  line-height: 1.45;
+  color: var(--b-muted);
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.bot-card-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin: 10px 0 0;
+  padding: 0;
+  list-style: none;
+}
+
+.bot-card-chip {
+  padding: 3px 8px;
+  border-radius: 7px;
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+  text-transform: uppercase;
+  color: var(--b-ink-secondary);
+  background: var(--b-surface-2);
+  border: 1px solid var(--b-border);
+}
+
+.bot-card-cta {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  margin-top: auto;
+  padding-top: 12px;
+  border-top: 1px solid color-mix(in srgb, var(--b-border) 85%, transparent);
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--b-accent-hover);
+}
+
+.bot-card-cta-icon {
+  flex-shrink: 0;
+  opacity: 0.75;
+  transition:
+    transform 0.2s ease,
+    opacity 0.2s ease;
+}
+
+.bot-card-link:hover .bot-card-cta-icon {
+  opacity: 1;
+  transform: translateX(3px);
 }
 
 @media (min-width: 768px) {
   .bot-list {
     grid-template-columns: repeat(2, minmax(0, 1fr));
-    gap: 16px;
+    gap: 18px;
   }
 }
 
 @media (min-width: 1100px) {
   .bot-list {
     grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 20px;
   }
-}
-
-.bot-tile {
-  display: flex;
-  align-items: center;
-  gap: 14px;
-  min-height: 100%;
-  padding: 14px 16px;
-  border-radius: 14px;
-  border: 1px solid var(--b-border);
-  background: var(--color-surface);
-  text-decoration: none;
-  color: inherit;
-  box-shadow: 0 1px 2px rgba(15, 23, 42, 0.04);
-  transition:
-    border-color 0.18s ease,
-    box-shadow 0.18s ease,
-    background 0.18s ease;
-}
-
-.bot-tile:hover {
-  border-color: color-mix(in srgb, var(--b-accent) 28%, var(--b-border));
-  background: color-mix(in srgb, var(--b-accent-soft) 35%, var(--color-surface));
-  box-shadow: 0 6px 18px -12px rgba(15, 23, 42, 0.18);
-}
-
-.tile-leading {
-  position: relative;
-  flex-shrink: 0;
-}
-
-.tile-avatar {
-  width: 42px;
-  height: 42px;
-  display: grid;
-  place-items: center;
-  border-radius: 12px;
-  font-size: 16px;
-  font-weight: 700;
-  color: var(--b-ink-secondary);
-  background: var(--b-surface-2);
-  border: 1px solid var(--b-border);
-}
-
-.status-dot {
-  position: absolute;
-  right: -2px;
-  bottom: -2px;
-  width: 11px;
-  height: 11px;
-  border-radius: 50%;
-  border: 2px solid var(--color-surface);
-  box-sizing: border-box;
-}
-
-.status-dot--on {
-  background: var(--b-accent);
-}
-
-.status-dot--off {
-  background: var(--b-muted);
-}
-
-.bot-tile:hover .status-dot--on {
-  box-shadow: 0 0 0 3px color-mix(in srgb, var(--b-accent) 25%, transparent);
-}
-
-.tile-main {
-  min-width: 0;
-  flex: 1;
-}
-
-.tile-head {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  min-width: 0;
-}
-
-.tile-name {
-  margin: 0;
-  font-size: 1rem;
-  font-weight: 600;
-  letter-spacing: -0.02em;
-  color: var(--b-ink);
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-}
-
-.tile-tag {
-  flex-shrink: 0;
-  padding: 2px 8px;
-  border-radius: 6px;
-  font-size: 10px;
-  font-weight: 600;
-  letter-spacing: 0.02em;
-  text-transform: uppercase;
-  color: var(--b-accent-hover);
-  background: color-mix(in srgb, var(--b-accent-soft) 80%, var(--color-surface));
-  border: 1px solid color-mix(in srgb, var(--b-accent) 12%, var(--b-border));
-}
-
-.tile-sub {
-  margin: 3px 0 0;
-  font-size: 12px;
-  line-height: 1.4;
-  color: var(--b-muted);
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-}
-
-.tile-chev {
-  flex-shrink: 0;
-  color: var(--b-border-strong, var(--b-muted));
-  opacity: 0.6;
-  transition:
-    color 0.18s ease,
-    transform 0.18s ease,
-    opacity 0.18s ease;
-}
-
-.bot-tile:hover .tile-chev {
-  color: var(--b-muted);
-  opacity: 1;
-  transform: translateX(2px);
 }
 
 @media (max-width: 520px) {

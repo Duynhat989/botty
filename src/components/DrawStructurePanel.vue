@@ -578,7 +578,7 @@ const viewPresetList = computed(() => {
 
 const planeList = computed(() => [
   { which: 'xy', label: 'XY', swatch: '#38bdf8' },
-  { which: 'xz', label: 'XZ', swatch: '#4ade80' },
+  { which: 'xz', label: 'XZ', swatch: '#60a5fa' },
   { which: 'yz', label: 'YZ', swatch: '#f472b6' },
 ])
 
@@ -891,7 +891,7 @@ function drawSelectionHighlight(points) {
   if (!ctx) return
   if (sel.type === 'point' && points[sel.id]) {
     const p = points[sel.id]
-    ctx.strokeStyle = '#22c55e'
+    ctx.strokeStyle = '#2563eb'
     ctx.lineWidth = 3
     ctx.beginPath()
     ctx.arc(p.x, p.y, 16, 0, Math.PI * 2)
@@ -899,7 +899,7 @@ function drawSelectionHighlight(points) {
   } else if (sel.type === 'edge' && points[sel.from] && points[sel.to]) {
     const a = points[sel.from]
     const b = points[sel.to]
-    ctx.strokeStyle = 'rgba(34, 197, 94, 0.9)'
+    ctx.strokeStyle = 'rgba(37, 99, 235, 0.9)'
     ctx.lineWidth = 5
     ctx.lineCap = 'round'
     ctx.beginPath()
@@ -1392,7 +1392,7 @@ defineExpose({
 
 .side-splitter:hover .side-splitter-grip,
 .panel-body.side-resizing .side-splitter-grip {
-  background: #f97316;
+  background: #3b82f6;
   height: 72px;
 }
 
@@ -1424,7 +1424,7 @@ defineExpose({
 
 .side-rail-btn:hover {
   border-color: #fdba74;
-  color: #c2410c;
+  color: #1d4ed8;
   background: #fff7ed;
 }
 
@@ -1559,7 +1559,7 @@ defineExpose({
   width: 3px;
   height: 13px;
   border-radius: 999px;
-  background: linear-gradient(180deg, #fdba74 0%, #f97316 100%);
+  background: linear-gradient(180deg, #fdba74 0%, #3b82f6 100%);
   flex-shrink: 0;
 }
 
@@ -1640,7 +1640,7 @@ defineExpose({
 
 .reset-view:hover {
   border-color: #fdba74;
-  color: #c2410c;
+  color: #1d4ed8;
 }
 
 .controls {
@@ -1679,7 +1679,7 @@ defineExpose({
 
 .control input[type='range'] {
   width: 100%;
-  accent-color: #f97316;
+  accent-color: #3b82f6;
 }
 
 .panel-side .tool-block {
@@ -1721,7 +1721,7 @@ defineExpose({
 
 .preset-btn:hover {
   border-color: #fdba74;
-  color: #c2410c;
+  color: #1d4ed8;
   background: #fff7ed;
   transform: translateY(-1px);
   box-shadow: 0 4px 14px rgba(249, 115, 22, 0.1);
@@ -1769,12 +1769,12 @@ defineExpose({
 .plane-opt:has(input:checked) {
   border-color: rgba(249, 115, 22, 0.45);
   background: linear-gradient(180deg, #fffbeb 0%, #fff7ed 100%);
-  color: #c2410c;
+  color: #1d4ed8;
   box-shadow: 0 2px 10px rgba(249, 115, 22, 0.12);
 }
 
 .plane-opt input {
-  accent-color: #f97316;
+  accent-color: #3b82f6;
 }
 
 .rules-list {
@@ -1843,9 +1843,9 @@ defineExpose({
 }
 
 .mini-btn:hover {
-  border-color: #f97316;
+  border-color: #3b82f6;
   border-style: solid;
-  color: #c2410c;
+  color: #1d4ed8;
   background: #fff7ed;
   box-shadow: 0 4px 12px rgba(249, 115, 22, 0.08);
 }
@@ -1937,7 +1937,7 @@ defineExpose({
 
 .select-mode-toggle.is-on .select-mode-toggle__track,
 .select-mode-toggle:has(.select-mode-toggle__input:checked) .select-mode-toggle__track {
-  background: linear-gradient(180deg, #fb923c 0%, #f97316 100%);
+  background: linear-gradient(180deg, #fb923c 0%, #3b82f6 100%);
 }
 
 .select-mode-toggle__thumb {
@@ -2012,9 +2012,9 @@ defineExpose({
 
 .mini-btn.primary {
   border-style: solid;
-  border-color: #f97316;
+  border-color: #3b82f6;
   background: #fff7ed;
-  color: #c2410c;
+  color: #1d4ed8;
 }
 
 .canvas-wrap.select-mode {

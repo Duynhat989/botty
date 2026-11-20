@@ -201,7 +201,7 @@ onMounted(load)
   padding: 4px 10px;
   border-radius: 999px;
   background: #fff7ed;
-  color: #c2410c;
+  color: #1d4ed8;
   font-size: 12px;
   font-weight: 650;
 }
@@ -251,7 +251,7 @@ onMounted(load)
 }
 
 .btn.primary {
-  background: linear-gradient(135deg, #f97316, #ea580c);
+  background: linear-gradient(135deg, #3b82f6, #2563eb);
   color: #fff;
 }
 
@@ -263,7 +263,7 @@ onMounted(load)
 .hint {
   margin: 4px 0 0;
   font-size: 12px;
-  color: #16a34a;
+  color: #1d4ed8;
 }
 
 .spin {

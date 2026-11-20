@@ -6,14 +6,14 @@
 :root[data-theme='light'] {
   color-scheme: light;
 
-  /* Brand */
-  --color-accent: #22c55e;
-  --color-accent-hover: #16a34a;
-  --color-accent-muted: #ecfdf5;
-  --color-accent-border: #bbf7d0;
-  --color-accent-deep: #15803d;
-  --color-accent-dark: #14532d;
-  --color-accent-rgb: 34, 197, 94;
+  /* Brand — xanh dương (đồng bộ landing) */
+  --color-accent: #2563eb;
+  --color-accent-hover: #1d4ed8;
+  --color-accent-muted: #eff6ff;
+  --color-accent-border: #bfdbfe;
+  --color-accent-deep: #1e40af;
+  --color-accent-dark: #1e3a8a;
+  --color-accent-rgb: 37, 99, 235;
 
   /* Text */
   --color-ink: #0f172a;
@@ -23,18 +23,18 @@
 
   /* Surfaces */
   --color-bg: #ffffff;
-  --color-bg-muted: #f6f8f7;
+  --color-bg-muted: #f8fafc;
   --color-bg-subtle: #f1f5f9;
   --color-surface: #ffffff;
-  --color-surface-2: #f8faf9;
+  --color-surface-2: #f1f5f9;
   --color-card: #ffffff;
   --color-glass: rgba(255, 255, 255, 0.88);
 
   /* Borders */
   --color-border: #e2e8f0;
   --color-border-strong: #cbd5e1;
-  --color-border-soft: #e6ebe8;
-  --color-border-bot: #cfd8d3;
+  --color-border-soft: #e2e8f0;
+  --color-border-bot: #dbeafe;
 
   /* Status */
   --color-ok: var(--color-accent);
@@ -45,8 +45,8 @@
   --color-warn-ink: #854d0e;
 
   /* Misc */
-  --color-highlight: #86efac;
-  --color-highlight-soft: #ecfdf5;
+  --color-highlight: #60a5fa;
+  --color-highlight-soft: #dbeafe;
   --color-focus-ring: 0 0 0 3px rgba(var(--color-accent-rgb), 0.22);
   --color-shadow: 15, 23, 42;
 
@@ -96,13 +96,13 @@
 :root[data-theme='dark'] {
   color-scheme: dark;
 
-  --color-accent: #4ade80;
-  --color-accent-hover: #22c55e;
-  --color-accent-muted: #052e16;
-  --color-accent-border: #166534;
-  --color-accent-deep: #86efac;
-  --color-accent-dark: #bbf7d0;
-  --color-accent-rgb: 74, 222, 128;
+  --color-accent: #60a5fa;
+  --color-accent-hover: #3b82f6;
+  --color-accent-muted: #172554;
+  --color-accent-border: #1e40af;
+  --color-accent-deep: #93c5fd;
+  --color-accent-dark: #bfdbfe;
+  --color-accent-rgb: 96, 165, 250;
 
   --color-ink: #f1f5f9;
   --color-ink-secondary: #cbd5e1;
@@ -120,7 +120,7 @@
   --color-border: #334155;
   --color-border-strong: #475569;
   --color-border-soft: #2d3a4d;
-  --color-border-bot: #3d4f66;
+  --color-border-bot: #1e3a8a;
 
   --color-danger: #f87171;
   --color-danger-soft: #450a0a;
@@ -128,7 +128,7 @@
   --color-warn-soft: #422006;
   --color-warn-ink: #fcd34d;
 
-  --color-highlight: #4ade80;
-  --color-highlight-soft: #052e16;
+  --color-highlight: #60a5fa;
+  --color-highlight-soft: #172554;
   --color-shadow: 0, 0, 0;
 }

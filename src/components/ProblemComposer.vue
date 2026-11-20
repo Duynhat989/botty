@@ -235,7 +235,7 @@ onMounted(() => {
   position: absolute;
   inset: -3px;
   border-radius: 25px;
-  background: conic-gradient(from 120deg, #f97316, #fde68a, #fff7ed, #fb923c, #f97316);
+  background: conic-gradient(from 120deg, #3b82f6, #fde68a, #fff7ed, #fb923c, #3b82f6);
   animation: composer-orbit 2.4s linear infinite;
   z-index: 0;
 }
@@ -257,7 +257,7 @@ onMounted(() => {
 
 .composer.loading .ico-submit:not(:disabled) {
   background: linear-gradient(135deg, #fff7ed, #ffedd5);
-  color: #ea580c;
+  color: #2563eb;
 }
 
 .composer-top {
@@ -390,13 +390,13 @@ onMounted(() => {
 
 .ico-submit:not(:disabled) {
   background: linear-gradient(145deg, #fff7ed, #ffedd5);
-  color: #ea580c;
+  color: #2563eb;
   border-color: rgba(249, 115, 22, 0.15);
 }
 
 .ico-submit:not(:disabled):hover {
   background: linear-gradient(145deg, #ffedd5, #fed7aa);
-  color: #c2410c;
+  color: #1d4ed8;
   box-shadow: 0 6px 18px rgba(249, 115, 22, 0.2);
 }
 

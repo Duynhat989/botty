@@ -224,8 +224,8 @@ onMounted(load)
 }
 
 .radio-card.on {
-  border-color: #16a34a;
-  background: #f0fdf4;
+  border-color: #1d4ed8;
+  background: #eff6ff;
 }
 
 .radio-card input {

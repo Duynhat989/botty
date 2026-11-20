@@ -131,6 +131,7 @@ export const api = {
   bots: {
     list: () => apiRequest('/bots', { auth: true }),
     create: (body) => apiRequest('/bots', { method: 'POST', body, auth: true }),
+    duplicate: (id, body) => apiRequest(`/bots/${id}/duplicate`, { method: 'POST', body, auth: true }),
     get: (id) => apiRequest(`/bots/${id}`, { auth: true }),
     update: (id, body) => apiRequest(`/bots/${id}`, { method: 'PATCH', body, auth: true }),
     remove: (id) => apiRequest(`/bots/${id}`, { method: 'DELETE', auth: true }),
@@ -142,6 +143,11 @@ export const api = {
       const fd = new FormData()
       fd.append('file', file)
       return apiUpload(`/bots/${id}/greeting-image`, fd, { auth: true })
+    },
+    uploadAvatar: (id, file) => {
+      const fd = new FormData()
+      fd.append('file', file)
+      return apiUpload(`/bots/${id}/avatar`, fd, { auth: true })
     },
     uploadInventoryImage: (id, file) => {
       const fd = new FormData()

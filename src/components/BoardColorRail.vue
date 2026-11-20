@@ -268,13 +268,13 @@ const historyItems = computed(() => {
 .rail-tool-btn:hover:not(:disabled) {
   background: #fff7ed;
   border-color: #fdba74;
-  color: #ea580c;
+  color: #2563eb;
   transform: translateY(-1px);
 }
 
 .rail-tool-btn.active {
-  background: #f97316;
-  border-color: #ea580c;
+  background: #3b82f6;
+  border-color: #2563eb;
   color: #ffffff;
   box-shadow: 0 2px 6px rgba(249, 115, 22, 0.35);
 }
@@ -287,14 +287,14 @@ const historyItems = computed(() => {
 }
 
 .rail-tool-btn--history {
-  color: #ea580c;
+  color: #2563eb;
 }
 
 .history-step-badge {
   position: absolute;
   top: -4px;
   right: -4px;
-  background: #f97316;
+  background: #3b82f6;
   color: #ffffff;
   font-size: 9px;
   font-weight: 700;
@@ -328,7 +328,7 @@ const historyItems = computed(() => {
 }
 
 .swatch.on {
-  outline: 2px solid #f97316;
+  outline: 2px solid #3b82f6;
   outline-offset: 2px;
 }
 
@@ -390,7 +390,7 @@ const historyItems = computed(() => {
 }
 
 .rail-zoom-btn:hover {
-  color: #ea580c;
+  color: #2563eb;
 }
 
 /* ==========================================================================
@@ -430,7 +430,7 @@ const historyItems = computed(() => {
 }
 
 .history-icon {
-  color: #ea580c;
+  color: #2563eb;
 }
 
 .history-title {
@@ -442,7 +442,7 @@ const historyItems = computed(() => {
 .history-count {
   font-size: 11px;
   font-weight: 600;
-  color: #ea580c;
+  color: #2563eb;
   background: #ffedd5;
   padding: 2px 6px;
   border-radius: 6px;
@@ -487,15 +487,15 @@ const historyItems = computed(() => {
   border-radius: 7px;
   border: 1px solid #fed7aa;
   background: #ffffff;
-  color: #ea580c;
+  color: #2563eb;
   cursor: pointer;
   transition: all 0.15s ease;
 }
 
 .history-action-btn:hover:not(:disabled) {
   background: #fff7ed;
-  border-color: #f97316;
-  color: #c2410c;
+  border-color: #3b82f6;
+  color: #1d4ed8;
 }
 
 .history-action-btn:disabled {
@@ -541,7 +541,7 @@ const historyItems = computed(() => {
 
 .history-item.is-current {
   background: #ffedd5;
-  border-color: #f97316;
+  border-color: #3b82f6;
 }
 
 .history-item.is-undone {
@@ -568,12 +568,12 @@ const historyItems = computed(() => {
   width: 6px;
   height: 6px;
   border-radius: 50%;
-  background: #ea580c;
+  background: #2563eb;
   flex-shrink: 0;
 }
 
 .history-item.is-current .history-dot {
-  background: #f97316;
+  background: #3b82f6;
   box-shadow: 0 0 6px #fb923c;
 }
 
@@ -605,7 +605,7 @@ const historyItems = computed(() => {
 .current-badge {
   font-size: 10px;
   font-weight: 700;
-  color: #ea580c;
+  color: #2563eb;
   background: #ffedd5;
   padding: 2px 6px;
   border-radius: 999px;
@@ -622,7 +622,7 @@ const historyItems = computed(() => {
 }
 
 .history-footer strong {
-  color: #ea580c;
+  color: #2563eb;
 }
 
 /* Hiệu ứng trượt xuất hiện của bảng lịch sử */

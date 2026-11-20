@@ -1317,7 +1317,7 @@ tbody tr:hover {
 
 .status.completed,
 .status.paid {
-  background: #ecfdf5;
+  background: #eff6ff;
   border-color: #a7f3d0;
   color: #047857;
 }

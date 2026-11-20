@@ -7,7 +7,13 @@
       </RouterLink>
 
       <div class="side-hero">
-        <span class="side-avatar" aria-hidden="true">{{ botInitial }}</span>
+        <BotAvatarEditor
+          compact
+          :bot-id="bot.id"
+          :bot-name="bot.name"
+          :avatar-url="bot.avatarUrl"
+          @updated="onAvatarUpdated"
+        />
         <p class="side-kicker">Workspace bot</p>
         <h1 class="side-title">{{ bot.name }}</h1>
         <div class="head-badges">
@@ -417,6 +423,7 @@ import BotDetailTestPanel from '@/components/BotDetailTestPanel.vue'
 import BotDetailContentSetup from '@/components/BotDetailContentSetup.vue'
 import BotDetailSchedules from '@/components/BotDetailSchedules.vue'
 import BotDetailGoalRecords from '@/components/BotDetailGoalRecords.vue'
+import BotAvatarEditor from '@/components/BotAvatarEditor.vue'
 import { fillInstructionTemplate } from '@/constants/instructionTemplates'
 import { DEFAULT_CHAT_STYLE } from '@/constants/chatStyles'
 import {
@@ -466,13 +473,6 @@ const tabs = [
   { id: 'setup', label: 'Nội dung' },
   { id: 'inventory', label: 'Kho hàng' },
 ]
-
-const botInitial = computed(() =>
-  String(props.bot?.name || '?')
-    .trim()
-    .slice(0, 1)
-    .toUpperCase(),
-)
 
 const shortBotId = computed(() => {
   const id = String(props.bot?.id || '')
@@ -854,6 +854,10 @@ async function deleteDoc(docId) {
   emit('reload')
 }
 
+function onAvatarUpdated() {
+  emit('reload')
+}
+
 async function removeBot() {
   const ok = await askConfirm({
     title: 'Xóa bot',
@@ -1081,9 +1085,9 @@ async function applyInstructionTemplate(tpl) {
   gap: 14px;
   padding: 18px 16px 20px;
   border-radius: 22px;
-  border: 1px solid var(--accent-border, #bbf7d0);
-  background: radial-gradient(120% 100% at 50% 0%, #ecfdf5 0%, #fff 58%, #f8fafc 100%);
-  box-shadow: 0 14px 40px -28px rgba(34, 197, 94, 0.22);
+  border: 1px solid var(--accent-border, #bfdbfe);
+  background: radial-gradient(120% 100% at 50% 0%, #eff6ff 0%, #fff 58%, #f8fafc 100%);
+  box-shadow: 0 14px 40px -28px rgba(37, 99, 235, 0.22);
   position: sticky;
   top: 76px;
   align-self: start;
@@ -1095,20 +1099,6 @@ async function applyInstructionTemplate(tpl) {
   display: grid;
   gap: 6px;
   padding-bottom: 4px;
-}
-
-.side-avatar {
-  width: 48px;
-  height: 48px;
-  display: grid;
-  place-items: center;
-  border-radius: 14px;
-  font-size: 18px;
-  font-weight: 750;
-  color: var(--b-accent-hover);
-  background: #fff;
-  border: 1px solid color-mix(in srgb, var(--b-accent) 22%, #e2e8f0);
-  box-shadow: 0 8px 20px -14px rgba(34, 197, 94, 0.45);
 }
 
 .side-kicker {
@@ -1144,7 +1134,7 @@ async function applyInstructionTemplate(tpl) {
 
 .status-pill--on {
   color: var(--b-accent-hover);
-  border-color: var(--accent-border, #bbf7d0);
+  border-color: var(--accent-border, #bfdbfe);
   background: var(--b-accent-soft);
 }
 
@@ -1275,7 +1265,7 @@ async function applyInstructionTemplate(tpl) {
 
 .back-pill:hover {
   color: var(--b-accent-hover);
-  border-color: var(--accent-border, #bbf7d0);
+  border-color: var(--accent-border, #bfdbfe);
   transform: translateX(-2px);
 }
 
@@ -1314,7 +1304,7 @@ async function applyInstructionTemplate(tpl) {
 }
 
 .btn-glow {
-  box-shadow: 0 8px 24px -8px rgba(34, 197, 94, 0.4);
+  box-shadow: 0 8px 24px -8px rgba(37, 99, 235, 0.4);
   transition:
     transform 0.2s ease,
     box-shadow 0.2s ease;
@@ -1322,7 +1312,7 @@ async function applyInstructionTemplate(tpl) {
 
 .btn-glow:hover:not(:disabled) {
   transform: translateY(-1px);
-  box-shadow: 0 14px 30px -9px rgba(34, 197, 94, 0.48);
+  box-shadow: 0 14px 30px -9px rgba(37, 99, 235, 0.48);
 }
 
 .page-panel {
@@ -1519,8 +1509,8 @@ async function applyInstructionTemplate(tpl) {
 }
 
 .fb-checklist li.ok {
-  background: #ecfdf5;
-  color: #166534;
+  background: #eff6ff;
+  color: #1e40af;
 }
 
 .fb-test-actions {
@@ -1536,8 +1526,8 @@ async function applyInstructionTemplate(tpl) {
 .fb-test-ok {
   padding: 12px 14px;
   border-radius: 12px;
-  border: 1px solid #bbf7d0;
-  background: #f0fdf4;
+  border: 1px solid #bfdbfe;
+  background: #eff6ff;
   display: grid;
   gap: 8px;
 }
@@ -1545,7 +1535,7 @@ async function applyInstructionTemplate(tpl) {
 .fb-test-ok-title {
   margin: 0;
   font-weight: 700;
-  color: #166534;
+  color: #1e40af;
 }
 
 .fb-page-id {
@@ -1631,7 +1621,7 @@ async function applyInstructionTemplate(tpl) {
 }
 
 .fb-gs-ok {
-  color: #166534;
+  color: #1e40af;
 }
 
 .fb-gs-warn {
@@ -1779,7 +1769,7 @@ async function applyInstructionTemplate(tpl) {
 }
 
 .test-pill:hover {
-  border-color: #bbf7d0;
+  border-color: #bfdbfe;
   background: var(--b-accent-soft);
 }
 
@@ -1875,7 +1865,7 @@ async function applyInstructionTemplate(tpl) {
 }
 
 .chat-bubble.user {
-  border-color: #c6e9d4;
+  border-color: var(--color-accent-border);
   background: var(--b-accent-soft);
 }
 

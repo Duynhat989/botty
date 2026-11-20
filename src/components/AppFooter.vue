@@ -3,7 +3,7 @@
     <div class="foot-inner">
       <div class="foot-brand">
         <RouterLink to="/" class="brand">
-          <img class="brand-mark" src="/logo.png" alt="" width="28" height="28" />
+          <img class="brand-mark" :src="brandLogo" alt="" width="32" height="32" />
           <span class="brand-title">Botty</span>
         </RouterLink>
         <p class="foot-tagline">{{ t('footer.tagline') }}</p>
@@ -41,6 +41,9 @@ import { computed } from 'vue'
 import { RouterLink } from 'vue-router'
 import { useAuthStore } from '@/stores/auth'
 import { useI18n } from '@/i18n'
+import { BRAND_LOGO_SRC } from '@/constants/brand'
+
+const brandLogo = BRAND_LOGO_SRC
 
 const auth = useAuthStore()
 const { t } = useI18n()
@@ -59,9 +62,9 @@ const siteHost = computed(() => {
 <style scoped>
 .site-foot--botty {
   display: block;
-  border-top: 1px solid rgb(254 215 199 / 65%);
+  border-top: 1px solid rgba(191, 219, 254, 0.7);
   background:
-    linear-gradient(180deg, rgb(255 247 237 / 55%) 0%, #fff 38%),
+    linear-gradient(180deg, rgba(239, 246, 255, 0.85) 0%, #fff 38%),
     #fff;
   padding: 0;
   margin: 0;
@@ -91,11 +94,11 @@ const siteHost = computed(() => {
   margin-top: 10px;
   font-size: 13px;
   font-weight: 600;
-  color: var(--b-accent, #ea580c);
+  color: var(--b-accent);
 }
 
 .foot-site:hover {
-  color: var(--b-accent-hover, #c2410c);
+  color: var(--b-accent-hover);
 }
 
 .foot-brand .brand {
@@ -110,10 +113,10 @@ const siteHost = computed(() => {
 }
 
 .foot-brand .brand-mark {
-  width: 30px;
-  height: 30px;
-  object-fit: contain;
-  border-radius: 8px;
+  width: 32px;
+  height: 32px;
+  object-fit: cover;
+  border-radius: 10px;
 }
 
 .foot-col {
@@ -139,7 +142,7 @@ const siteHost = computed(() => {
 }
 
 .foot-col a:hover {
-  color: var(--b-accent-hover, #c2410c);
+  color: var(--b-accent-hover);
 }
 
 .foot-copy {

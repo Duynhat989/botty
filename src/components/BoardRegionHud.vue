@@ -1102,7 +1102,7 @@ function closeAll() {
   padding: 6px 12px;
   border: none;
   border-radius: 7px;
-  background: #f97316;
+  background: #3b82f6;
   color: #ffffff;
   font-size: 12px;
   font-weight: 700;
@@ -1177,7 +1177,7 @@ function closeAll() {
   border-radius: 50%;
   border: 1.5px solid #fed7aa;
   background: #fff7ed;
-  color: #ea580c;
+  color: #2563eb;
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -1189,7 +1189,7 @@ function closeAll() {
 }
 
 .puck-center-btn:hover {
-  border-color: #f97316;
+  border-color: #3b82f6;
   box-shadow: 0 3px 10px rgba(249, 115, 22, 0.25);
 }
 
@@ -1198,7 +1198,7 @@ function closeAll() {
 }
 
 .puck-center-icon {
-  color: #ea580c;
+  color: #2563eb;
   transition: transform 0.2s ease;
 }
 
@@ -1211,7 +1211,7 @@ function closeAll() {
   font-weight: 800;
   line-height: 1;
   letter-spacing: 0.5px;
-  color: #c2410c;
+  color: #1d4ed8;
 }
 
 .puck-ring-btn {
@@ -1243,7 +1243,7 @@ function closeAll() {
 
 .puck-ring-btn:hover {
   background: #fff7ed;
-  color: #ea580c;
+  color: #2563eb;
   border-color: #fdba74;
   box-shadow: 0 4px 12px rgba(249, 115, 22, 0.2);
 }
@@ -1253,9 +1253,9 @@ function closeAll() {
 }
 
 .puck-ring-btn.active {
-  background: #f97316;
+  background: #3b82f6;
   color: #ffffff;
-  border-color: #ea580c;
+  border-color: #2563eb;
   box-shadow:
     0 4px 12px rgba(249, 115, 22, 0.4),
     inset 0 1px 1px rgba(255, 255, 255, 0.35);
@@ -1263,7 +1263,7 @@ function closeAll() {
 
 .puck-ring-btn.active:hover {
   color: #ffffff;
-  border-color: #c2410c;
+  border-color: #1d4ed8;
 }
 
 .pop-bar-enter-active,
@@ -1280,7 +1280,7 @@ function closeAll() {
 .pts-transform-frame {
   position: absolute;
   pointer-events: auto;
-  border: 1.5px solid #f97316;
+  border: 1.5px solid #3b82f6;
   background: rgba(249, 115, 22, 0.05);
   box-shadow: 0 0 0 1px rgba(255, 255, 255, 0.4), inset 0 0 16px rgba(249, 115, 22, 0.06);
   z-index: 15;
@@ -1310,7 +1310,7 @@ function closeAll() {
   width: 9px;
   height: 9px;
   background: #ffffff;
-  border: 1.5px solid #ea580c;
+  border: 1.5px solid #2563eb;
   border-radius: 2px;
   box-shadow: 0 1px 4px rgba(0, 0, 0, 0.25);
   z-index: 4;
@@ -1318,7 +1318,7 @@ function closeAll() {
   transition: transform 0.1s ease, background 0.1s ease;
 }
 .pts-handle:hover {
-  background: #f97316;
+  background: #3b82f6;
   transform: scale(1.25);
 }
 
@@ -1336,7 +1336,7 @@ function closeAll() {
   top: -26px;
   left: 0;
   background: #ffffff;
-  color: #ea580c;
+  color: #2563eb;
   font-size: 11px;
   font-weight: 700;
   padding: 1px 7px;

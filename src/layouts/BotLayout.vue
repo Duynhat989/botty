@@ -1,13 +1,19 @@
 <template>
   <div
     class="shell bot-shell"
-    :class="{ 'shell--bot-test': isBotTestTab, 'shell--home': isHome }"
+    :class="{
+      'shell--bot-test': isBotTestTab,
+      'shell--home': isHome,
+      'shell--marketing': isMarketing,
+    }"
     ref="shellRef"
   >
     <header class="topbar" :class="{ scrolled: isScrolled }">
       <div class="topbar-inner">
         <RouterLink to="/" class="brand" @click="closeMenus">
-          <img class="brand-mark" src="/logo.png" alt="" width="34" height="34" />
+          <span class="brand-mark-wrap" aria-hidden="true">
+            <img class="brand-mark" :src="brandLogo" alt="" width="36" height="36" />
+          </span>
           <span class="brand-title">Botty</span>
         </RouterLink>
 
@@ -64,9 +70,27 @@
               </div>
             </div>
           </template>
-          <RouterLink v-else-if="!isLogin" to="/login" class="b-btn b-btn--primary b-btn--sm" @click="closeMenus">
-            Đăng nhập
-          </RouterLink>
+          <template v-else-if="!isLogin">
+            <RouterLink to="/login" class="top-trial-link" @click="closeMenus">
+              Dùng thử miễn phí
+            </RouterLink>
+            <RouterLink
+              v-if="isMarketing"
+              to="/contact"
+              class="b-btn b-btn--primary b-btn--sm btn-marketing"
+              @click="closeMenus"
+            >
+              Liên hệ
+            </RouterLink>
+            <RouterLink
+              v-else
+              to="/login"
+              class="b-btn b-btn--primary b-btn--sm"
+              @click="closeMenus"
+            >
+              Đăng nhập
+            </RouterLink>
+          </template>
 
           <button
             type="button"
@@ -130,6 +154,9 @@ import { ChevronDown } from '@lucide/vue'
 import { useAuthStore } from '@/stores/auth'
 import { geminiPinGateState, openGeminiPinSetup } from '@/composables/useGeminiPinGate'
 import AppFooter from '@/components/AppFooter.vue'
+import { BRAND_LOGO_SRC } from '@/constants/brand'
+
+const brandLogo = BRAND_LOGO_SRC
 
 const auth = useAuthStore()
 const router = useRouter()
@@ -140,6 +167,9 @@ const userMenuOpen = ref(false)
 const mobileNavOpen = ref(false)
 
 const isHome = computed(() => route.name === 'home')
+const isMarketing = computed(() =>
+  ['home', 'pricing', 'contact', 'terms', 'privacy'].includes(String(route.name || '')),
+)
 const isLogin = computed(() => route.name === 'login')
 const isPinReset = computed(() => route.name === 'pin-reset')
 watch(
@@ -169,12 +199,22 @@ const showSiteFooter = computed(
   () => !isLogin.value && !isPinReset.value && !isBotTestTab.value,
 )
 
-const navItems = [
-  { to: '/', label: 'Trang chủ', names: ['home'] },
-  { to: '/config', label: 'Cấu hình', names: ['config', 'bot-detail'] },
-  { to: '/pricing', label: 'Gói cước', names: ['pricing'] },
-  { to: '/contact', label: 'Liên hệ', names: ['contact'] },
-]
+const navItems = computed(() => {
+  if (isMarketing.value) {
+    return [
+      { to: '/', label: 'Trang chủ', names: ['home'] },
+      { to: { path: '/', hash: '#features' }, label: 'Tính năng', names: [] },
+      { to: '/pricing', label: 'Gói cước', names: ['pricing'] },
+      { to: '/contact', label: 'Liên hệ', names: ['contact'] },
+    ]
+  }
+  return [
+    { to: '/', label: 'Trang chủ', names: ['home'] },
+    { to: '/config', label: 'Cấu hình', names: ['config', 'bot-detail'] },
+    { to: '/pricing', label: 'Gói cước', names: ['pricing'] },
+    { to: '/contact', label: 'Liên hệ', names: ['contact'] },
+  ]
+})
 
 const userInitial = computed(() => {
   const n = auth.user?.name || auth.user?.email || 'U'
@@ -183,8 +223,9 @@ const userInitial = computed(() => {
 
 function isNavActive(item) {
   const name = route.name
-  if (item.names.includes(name)) return true
+  if (item.names?.length && item.names.includes(name)) return true
   if (item.to === '/config' && name === 'bot-detail') return true
+  if (item.label === 'Tính năng' && isHome.value && route.hash === '#features') return true
   return false
 }
 
@@ -237,6 +278,53 @@ onUnmounted(() => {
   background: #ffffff;
 }
 
+.shell--marketing {
+  background:
+    radial-gradient(90% 80% at 12% 8%, rgba(59, 130, 246, 0.18), transparent 55%),
+    radial-gradient(70% 60% at 88% 18%, rgba(56, 189, 248, 0.16), transparent 50%),
+    radial-gradient(60% 50% at 50% 100%, rgba(219, 234, 254, 0.9), transparent 70%),
+    linear-gradient(180deg, #eff6ff 0%, #f8fafc 42%, #ffffff 100%);
+}
+
+.shell--marketing .topbar {
+  background: rgba(255, 255, 255, 0.72);
+  border-bottom-color: rgba(148, 163, 184, 0.2);
+}
+
+.shell--marketing .topnav-link.on {
+  color: var(--b-accent);
+}
+
+.shell--marketing .topnav-link.on::after {
+  background: var(--b-accent);
+}
+
+.top-trial-link {
+  font-size: 13px;
+  font-weight: 600;
+  color: #334155;
+  text-decoration: none;
+  padding: 8px 10px;
+  border-radius: 8px;
+  transition: color 0.15s ease, background 0.15s ease;
+}
+
+.top-trial-link:hover {
+  color: #0f172a;
+  background: rgba(255, 255, 255, 0.65);
+}
+
+.btn-marketing {
+  background: var(--b-accent) !important;
+  border-color: var(--b-accent) !important;
+  box-shadow: 0 8px 20px -10px rgba(var(--color-accent-rgb), 0.55);
+}
+
+.btn-marketing:hover {
+  background: var(--b-accent-hover) !important;
+  border-color: var(--b-accent-hover) !important;
+}
+
 .shell--bot-test {
   height: 100dvh;
   max-height: 100dvh;
@@ -287,10 +375,18 @@ onUnmounted(() => {
   }
 }
 
+.brand-mark-wrap {
+  flex-shrink: 0;
+  border-radius: 11px;
+  overflow: hidden;
+  box-shadow: 0 8px 20px -12px rgba(37, 99, 235, 0.45);
+}
+
 .brand-mark {
-  width: 34px;
-  height: 34px;
-  object-fit: contain;
+  display: block;
+  width: 36px;
+  height: 36px;
+  object-fit: cover;
 }
 
 .brand-title {
@@ -644,7 +740,10 @@ onUnmounted(() => {
   align-items: center;
   justify-content: center;
   padding: clamp(32px, 6vw, 56px) clamp(16px, 4vw, 28px);
-  background: linear-gradient(180deg, rgb(255 237 229 / 45%) 0%, #fff 42%, #fff 100%);
+  background:
+    radial-gradient(80% 60% at 15% 10%, rgba(59, 130, 246, 0.14), transparent 55%),
+    radial-gradient(70% 55% at 90% 20%, rgba(56, 189, 248, 0.12), transparent 50%),
+    linear-gradient(180deg, #eff6ff 0%, #f8fafc 38%, #ffffff 100%);
 }
 
 </style>

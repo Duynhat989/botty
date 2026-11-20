@@ -1,47 +1,60 @@
 <template>
   <div class="landing">
+    <div class="landing-bg" aria-hidden="true">
+      <span class="landing-orb landing-orb--a" />
+      <span class="landing-orb landing-orb--b" />
+      <span class="landing-orb landing-orb--c" />
+    </div>
+
     <section class="hero">
       <div class="hero-inner">
         <div class="hero-copy reveal">
-          <div class="badge-row">
-            <span class="badge">Trợ lý bán hàng AI</span>
-            <span class="badge badge--soft">Dành cho Facebook Messenger</span>
-          </div>
+          <ul class="hero-trust">
+            <li v-for="pill in trustPills" :key="pill">
+              <CircleCheck :size="16" class="hero-trust-icon" aria-hidden="true" />
+              {{ pill }}
+            </li>
+          </ul>
           <h1 class="hero-title">
-            Chăm khách tự động.
-            <span class="hero-highlight">Chốt đơn dễ dàng.</span>
+            Tăng hội thoại với nền tảng
+            <span class="hero-highlight">Botty thông minh</span>
           </h1>
           <p class="hero-lede">
-            Botty tự động trả lời tin nhắn, tra cứu sản phẩm và hỗ trợ ghi nhận đơn hàng cho shop.
+            Tạo chatbot giống người cho Facebook Messenger — trả lời khách, tra sản phẩm và hỗ trợ chốt đơn trong vài phút.
           </p>
           <div class="hero-actions">
             <RouterLink
-              v-if="auth.isLoggedIn"
-              class="b-btn b-btn--primary btn-glow"
-              to="/config?create=1"
+              class="b-btn btn-primary-blue"
+              :to="auth.isLoggedIn ? '/config?create=1' : '/login'"
             >
-              Tạo bot miễn phí
+              Bắt đầu ngay
             </RouterLink>
-            <RouterLink v-else class="b-btn b-btn--primary btn-glow" to="/login">
-              Đăng nhập để bắt đầu
+            <RouterLink class="b-btn btn-demo" :to="auth.isLoggedIn ? '/config' : '/login'">
+              Xem demo
             </RouterLink>
-            <RouterLink class="b-btn b-btn--ghost" to="/pricing">Xem gói cước</RouterLink>
           </div>
-          <ul class="hero-stats">
-            <li v-for="stat in stats" :key="stat.label">
-              <strong>{{ stat.value }}</strong>
-              <span>{{ stat.label }}</span>
-            </li>
-          </ul>
         </div>
 
         <div class="hero-visual reveal reveal-delay">
-          <div class="visual-frame">
-            <div class="hero-brand-panel" aria-hidden="true">
-              <img class="hero-brand-logo" src="/logo.png" alt="" width="240" height="240" loading="eager" />
+          <div class="hero-scene" aria-hidden="true">
+            <span class="hero-bubble hero-bubble--lg" />
+            <span class="hero-bubble hero-bubble--sm" />
+            <img
+              class="hero-robot"
+              src="/bot-default-avatar.jpg"
+              alt=""
+              width="420"
+              height="420"
+              loading="eager"
+              decoding="async"
+            />
+            <div class="hero-chat-card hero-chat-card--top">
+              <img class="hero-chat-ava" src="/bot-default-avatar.jpg" alt="" width="32" height="32" />
+              <p>Chào shop, Botty có thể hỗ trợ gì ạ?</p>
             </div>
-            <div class="visual-float">
-              <MacAppMockup />
+            <div class="hero-chat-card hero-chat-card--bottom">
+              <img class="hero-chat-ava" :src="brandLogo" alt="" width="32" height="32" />
+              <p>Giúp mình tạo bot chốt đơn Messenger nhé!</p>
             </div>
           </div>
         </div>
@@ -49,7 +62,7 @@
     </section>
 
     <div class="page-container">
-      <section class="section features reveal">
+      <section id="features" class="section features reveal">
         <p class="b-kicker">Tính năng</p>
         <h2 class="b-section-title section-head">Tính năng chính</h2>
         <div
@@ -152,10 +165,13 @@
             <p class="b-muted">Tạo bot và bắt đầu trả lời khách tự động.</p>
           </div>
           <div class="cta-actions">
-            <RouterLink class="b-btn b-btn--primary btn-glow" :to="auth.isLoggedIn ? '/config?create=1' : '/login'">
-              {{ auth.isLoggedIn ? 'Tạo bot ngay' : 'Đăng nhập' }}
+            <RouterLink
+              class="b-btn btn-primary-blue"
+              :to="auth.isLoggedIn ? '/config?create=1' : '/login'"
+            >
+              {{ auth.isLoggedIn ? 'Tạo bot ngay' : 'Bắt đầu ngay' }}
             </RouterLink>
-            <RouterLink class="b-btn b-btn--ghost" to="/config">Danh sách bot</RouterLink>
+            <RouterLink class="b-btn btn-demo" to="/pricing">Xem gói cước</RouterLink>
           </div>
         </div>
       </section>
@@ -169,6 +185,7 @@ import { RouterLink } from 'vue-router'
 import {
   ChevronLeft,
   ChevronRight,
+  CircleCheck,
   FileText,
   MessageCircle,
   ShoppingBag,
@@ -176,8 +193,10 @@ import {
   Webhook,
   Zap,
 } from '@lucide/vue'
-import MacAppMockup from '@/components/MacAppMockup.vue'
 import { useAuthStore } from '@/stores/auth'
+import { BRAND_LOGO_SRC } from '@/constants/brand'
+
+const brandLogo = BRAND_LOGO_SRC
 
 const auth = useAuthStore()
 
@@ -254,11 +273,7 @@ onUnmounted(() => {
   clearFeatAutoplay()
 })
 
-const stats = [
-  { value: 'Tự động', label: 'Trả lời tin nhắn' },
-  { value: 'Chính xác', label: 'Tra cứu sản phẩm' },
-  { value: 'Dễ quản lý', label: 'Theo dõi đơn hàng' },
-]
+const trustPills = ['Dùng thử miễn phí', 'Không cần thẻ tín dụng']
 
 const features = [
   {
@@ -327,15 +342,59 @@ const steps = [
 
 <style scoped>
 .landing {
+  --mk-blue: var(--b-accent);
+  --mk-blue-hover: var(--b-accent-hover);
+  --mk-sky: #38bdf8;
+  --mk-blue-soft: var(--b-accent-soft);
   position: relative;
   overflow: hidden;
   isolation: isolate;
-  background: #fff;
+  background: transparent;
+}
+
+.landing-bg {
+  pointer-events: none;
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  overflow: hidden;
+}
+
+.landing-orb {
+  position: absolute;
+  border-radius: 50%;
+  filter: blur(48px);
+  opacity: 0.55;
+}
+
+.landing-orb--a {
+  width: min(42vw, 360px);
+  height: min(42vw, 360px);
+  top: -8%;
+  left: -6%;
+  background: #93c5fd;
+}
+
+.landing-orb--b {
+  width: min(36vw, 300px);
+  height: min(36vw, 300px);
+  top: 8%;
+  right: -4%;
+  background: #7dd3fc;
+}
+
+.landing-orb--c {
+  width: min(50vw, 420px);
+  height: min(50vw, 420px);
+  bottom: -18%;
+  left: 35%;
+  background: #bfdbfe;
 }
 
 .hero {
   position: relative;
-  padding: clamp(3.25rem, 7.5vw, 6.5rem) clamp(1.25rem, 4vw, 2.5rem) clamp(3rem, 6vw, 5rem);
+  z-index: 1;
+  padding: clamp(2.75rem, 6.5vw, 5.5rem) clamp(1.25rem, 4vw, 2.5rem) clamp(2.5rem, 5vw, 4rem);
 }
 
 .hero-inner {
@@ -348,11 +407,20 @@ const steps = [
 }
 
 @media (min-width: 980px) {
-  .hero-copy { text-align: left; }
-  .badge-row, .hero-actions { justify-content: flex-start; }
-  .hero-title { max-width: 20ch; font-size: clamp(2.8rem, 4.4vw, 3.5rem); }
-  .hero-lede { margin-inline: 0; }
-  .hero-stats { justify-content: flex-start; }
+  .hero-copy {
+    text-align: left;
+  }
+  .hero-trust,
+  .hero-actions {
+    justify-content: flex-start;
+  }
+  .hero-title {
+    max-width: 12ch;
+    font-size: clamp(2.65rem, 4.2vw, 3.55rem);
+  }
+  .hero-lede {
+    margin-inline: 0;
+  }
 }
 
 @media (min-width: 980px) {
@@ -361,53 +429,42 @@ const steps = [
   }
 }
 
-.badge-row {
+.hero-trust {
   display: flex;
   flex-wrap: wrap;
-  gap: 9px;
-  margin-bottom: 1.4rem;
+  gap: 10px 18px;
+  margin: 0 0 1.35rem;
+  padding: 0;
+  list-style: none;
 }
 
-.badge-row .badge {
-  position: static;
+.hero-trust li {
   display: inline-flex;
   align-items: center;
-  gap: 7px;
-  padding: 7px 12px;
-  border-radius: 999px;
-  font-size: 11px;
-  font-weight: 700;
-  letter-spacing: 0.055em;
-  text-transform: uppercase;
-  color: var(--b-accent-hover);
-  background: var(--b-accent-soft);
-  border: 1px solid var(--accent-border, #bbf7d0);
-  backdrop-filter: blur(8px);
+  gap: 6px;
+  font-size: 13px;
+  font-weight: 600;
+  color: #475569;
 }
 
-.badge--soft {
-  color: #475569;
-  border-color: #e2e8f0;
-  background: rgba(255, 255, 255, 0.76);
-  text-transform: none;
-  letter-spacing: 0;
-  font-weight: 600;
+.hero-trust-icon {
+  color: var(--mk-blue);
 }
 
 .hero-title {
-  max-width: 15ch;
+  max-width: 16ch;
   margin: 0;
-  font-size: clamp(2.55rem, 4vw, 3.15rem);
-  font-weight: 750;
-  letter-spacing: -0.045em;
-  line-height: 1.12;
-  color: #0b1b13;
+  font-size: clamp(2.35rem, 4.8vw, 3.45rem);
+  font-weight: 800;
+  letter-spacing: -0.04em;
+  line-height: 1.08;
+  color: #0f172a;
 }
 
 .hero-highlight {
   display: block;
-  padding-bottom: 0.06em;
-  color: var(--b-accent);
+  margin-top: 0.08em;
+  color: var(--mk-sky);
 }
 
 .hero-lede {
@@ -427,45 +484,41 @@ const steps = [
 
 .hero-actions .b-btn {
   min-height: 48px;
-  padding-inline: 22px;
+  padding-inline: 24px;
+  border-radius: 10px;
+  font-weight: 600;
 }
 
-.btn-glow {
-  box-shadow: 0 8px 24px -8px rgba(34, 197, 94, 0.4);
-  transition: transform 0.2s ease, box-shadow 0.2s ease;
+.btn-primary-blue {
+  border: 1px solid var(--mk-blue);
+  background: var(--mk-blue);
+  color: #fff;
+  box-shadow: 0 12px 28px -14px rgba(37, 99, 235, 0.75);
+  transition:
+    transform 0.2s ease,
+    box-shadow 0.2s ease,
+    background 0.2s ease;
 }
 
-.btn-glow:hover {
+.btn-primary-blue:hover {
+  background: var(--mk-blue-hover);
+  border-color: var(--mk-blue-hover);
   transform: translateY(-2px);
-  box-shadow: 0 14px 30px -9px rgba(34, 197, 94, 0.48);
 }
 
-.hero-stats {
-  list-style: none;
-  margin: 2.1rem 0 0;
-  padding: 1.25rem 0 0;
-  display: flex;
-  flex-wrap: wrap;
-  gap: 1rem 1.8rem;
-  border-top: 1px solid rgba(148, 163, 184, 0.25);
+.btn-demo {
+  border: 1px solid #cbd5e1;
+  background: rgba(255, 255, 255, 0.92);
+  color: #0f172a;
+  transition:
+    border-color 0.2s ease,
+    background 0.2s ease,
+    transform 0.2s ease;
 }
 
-.hero-stats li {
-  display: flex;
-  flex-direction: column;
-  gap: 3px;
-}
-
-.hero-stats strong {
-  font-size: 1rem;
-  font-weight: 750;
-  color: #17251c;
-  letter-spacing: -0.025em;
-}
-
-.hero-stats span {
-  font-size: 12px;
-  color: #64756b;
+.btn-demo:hover {
+  border-color: #94a3b8;
+  transform: translateY(-1px);
 }
 
 .hero-visual {
@@ -474,63 +527,144 @@ const steps = [
   min-width: 0;
 }
 
-.visual-frame {
+.hero-scene {
   position: relative;
-  width: min(100%, 590px);
-  padding: 0 1rem 2.2rem 0;
+  width: min(100%, 520px);
+  margin-inline: auto;
+  min-height: clamp(300px, 42vw, 440px);
 }
 
-.hero-brand-panel {
-  display: grid;
-  place-items: center;
-  width: 100%;
-  aspect-ratio: 1.1;
-  border-radius: 26px;
-  border: 1px solid #bbf7d0;
-  background: radial-gradient(120% 100% at 50% 0%, #ecfdf5 0%, #ffffff 55%, #f8fafc 100%);
-  box-shadow: 0 28px 70px -32px rgba(34, 197, 94, 0.22);
-}
-
-.hero-brand-logo {
-  width: min(58%, 240px);
-  height: auto;
-  object-fit: contain;
-}
-
-.visual-float {
-  position: absolute;
+.hero-robot {
+  position: relative;
   z-index: 2;
-  right: -1%;
-  bottom: 0;
-  width: min(84%, 430px);
-  filter: drop-shadow(0 18px 28px rgba(15, 23, 42, 0.18));
-  animation: float-y 5s ease-in-out infinite;
+  display: block;
+  width: min(78%, 380px);
+  margin: 0 auto;
+  border-radius: 28px;
+  object-fit: cover;
+  box-shadow: 0 28px 60px -28px rgba(37, 99, 235, 0.45);
+  animation: float-y 5.5s ease-in-out infinite;
+}
+
+.hero-bubble {
+  position: absolute;
+  z-index: 1;
+  border-radius: 50%;
+  background: linear-gradient(145deg, #3b82f6, #2563eb);
+  box-shadow: 0 16px 32px -18px rgba(37, 99, 235, 0.55);
+}
+
+.hero-bubble--lg {
+  width: 54px;
+  height: 54px;
+  top: 16%;
+  right: 14%;
+  animation: float-y 4s ease-in-out infinite;
+}
+
+.hero-bubble--sm {
+  width: 36px;
+  height: 36px;
+  bottom: 22%;
+  left: 10%;
+  animation: float-y 4.8s ease-in-out 0.4s infinite;
+}
+
+.hero-chat-card {
+  position: absolute;
+  z-index: 3;
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  max-width: min(240px, 62%);
+  padding: 12px 14px;
+  border-radius: 14px;
+  background: rgba(255, 255, 255, 0.94);
+  border: 1px solid rgba(226, 232, 240, 0.9);
+  box-shadow: 0 18px 40px -24px rgba(15, 23, 42, 0.28);
+  backdrop-filter: blur(10px);
+}
+
+.hero-chat-card p {
+  margin: 0;
+  font-size: 12px;
+  line-height: 1.45;
+  color: #334155;
+  font-weight: 500;
+}
+
+.hero-chat-ava {
+  width: 32px;
+  height: 32px;
+  border-radius: 10px;
+  object-fit: cover;
+  flex-shrink: 0;
+}
+
+.hero-chat-card--top {
+  top: 4%;
+  left: 0;
+  animation: float-y 6s ease-in-out 0.2s infinite;
+}
+
+.hero-chat-card--bottom {
+  right: 0;
+  bottom: 6%;
+  animation: float-y 5.2s ease-in-out 0.6s infinite;
 }
 
 @keyframes float-y {
-  0%, 100% { transform: translateY(0); }
-  50% { transform: translateY(-8px); }
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-10px);
+  }
 }
 
 @media (max-width: 979px) {
-  .hero-copy { max-width: 680px; margin-inline: auto; text-align: center; }
-  .badge-row, .hero-actions, .hero-stats { justify-content: center; }
-  .hero-title { max-width: 13ch; margin-inline: auto; }
-  .hero-lede { margin-inline: auto; }
-  .visual-frame { width: min(100%, 640px); }
-  .visual-float { right: 2%; width: min(88%, 480px); }
+  .hero-copy {
+    max-width: 680px;
+    margin-inline: auto;
+    text-align: center;
+  }
+  .hero-trust,
+  .hero-actions {
+    justify-content: center;
+  }
+  .hero-title {
+    max-width: 18ch;
+    margin-inline: auto;
+  }
+  .hero-lede {
+    margin-inline: auto;
+  }
+  .hero-chat-card--top {
+    left: 2%;
+  }
+  .hero-chat-card--bottom {
+    right: 2%;
+  }
 }
 
 @media (max-width: 620px) {
-  .hero { padding-top: 2.8rem; }
-  .hero-title { font-size: clamp(2.45rem, 11vw, 3.6rem); }
-  .hero-actions { flex-direction: column; align-items: stretch; }
-  .hero-actions .b-btn { width: 100%; }
-  .hero-stats { gap: 1rem 1.25rem; }
-  .hero-stats li { min-width: 27%; }
-  .visual-frame { padding: 0 0.35rem 1.2rem 0; }
-  .hero-brand-panel { border-radius: 20px; }
-  .visual-float { position: relative; right: auto; bottom: auto; width: 100%; margin-top: -1.5rem; }
+  .hero {
+    padding-top: 2.2rem;
+  }
+  .hero-title {
+    font-size: clamp(2.1rem, 9.5vw, 2.85rem);
+  }
+  .hero-actions {
+    flex-direction: column;
+    align-items: stretch;
+  }
+  .hero-actions .b-btn {
+    width: 100%;
+  }
+  .hero-chat-card {
+    max-width: 78%;
+  }
 }
 
 .page-container {
@@ -626,10 +760,10 @@ const steps = [
 }
 
 .feat-slide--center .feat-slide-inner {
-  border-color: var(--accent-border, #bbf7d0);
+  border-color: #bfdbfe;
   box-shadow:
-    0 24px 48px -28px rgba(34, 197, 94, 0.4),
-    0 0 0 1px rgba(34, 197, 94, 0.08);
+    0 24px 48px -28px rgba(37, 99, 235, 0.4),
+    0 0 0 1px rgba(37, 99, 235, 0.08);
 }
 
 .feat-nav {
@@ -653,14 +787,14 @@ const steps = [
 }
 
 .feat-nav:hover {
-  border-color: var(--accent-border, #bbf7d0);
-  color: var(--b-accent-hover);
+  border-color: #bfdbfe;
+  color: var(--mk-blue-hover);
   transform: translateY(-1px);
-  box-shadow: 0 10px 22px -12px rgba(34, 197, 94, 0.35);
+  box-shadow: 0 10px 22px -12px rgba(37, 99, 235, 0.35);
 }
 
 .feat-nav:focus-visible {
-  outline: 2px solid var(--b-accent);
+  outline: 2px solid var(--mk-blue);
   outline-offset: 2px;
 }
 
@@ -687,11 +821,11 @@ const steps = [
 
 .feat-dot--on {
   width: 22px;
-  background: var(--b-accent);
+  background: var(--mk-blue);
 }
 
 .feat-dot:focus-visible {
-  outline: 2px solid var(--b-accent);
+  outline: 2px solid var(--mk-blue);
   outline-offset: 2px;
 }
 
@@ -744,16 +878,16 @@ const steps = [
 
 .feat-slide--center .bento-card:hover {
   transform: translateY(-4px);
-  border-color: var(--accent-border, #bbf7d0);
-  box-shadow: 0 22px 44px -28px rgba(34, 197, 94, 0.35);
+  border-color: #bfdbfe;
+  box-shadow: 0 22px 44px -28px rgba(37, 99, 235, 0.35);
 }
 
 .bento-icon {
   display: inline-flex;
   padding: 10px;
   border-radius: 12px;
-  background: var(--b-accent-soft);
-  color: var(--b-accent);
+  background: var(--mk-blue-soft);
+  color: var(--mk-blue);
   margin-bottom: 12px;
 }
 
@@ -990,7 +1124,7 @@ const steps = [
   font-weight: 700;
   letter-spacing: 0.08em;
   text-transform: uppercase;
-  color: var(--b-accent);
+  color: var(--mk-blue);
   margin-bottom: 4px;
 }
 
@@ -1029,7 +1163,7 @@ const steps = [
   gap: 1.25rem;
   padding: clamp(1.5rem, 3vw, 2rem) clamp(1.25rem, 3vw, 2rem);
   border-radius: 20px;
-  border: 1px solid var(--accent-border, #bbf7d0);
+  border: 1px solid #bfdbfe;
   background: #fff;
 }
 

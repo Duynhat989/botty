@@ -254,7 +254,7 @@ body {
 
 .b-badge--ok {
   background: var(--b-accent-soft);
-  border-color: #c6e9d4;
+  border-color: var(--color-accent-border);
   color: var(--b-accent-hover);
 }
 

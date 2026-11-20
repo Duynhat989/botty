@@ -120,7 +120,7 @@ const currentTool = computed(() => board.writingTool)
 .writing-tool-btn.on {
   border-color: rgba(249, 115, 22, 0.5);
   background: linear-gradient(180deg, #fffbeb, #fff7ed);
-  color: #c2410c;
+  color: #1d4ed8;
   box-shadow: inset 0 0 0 1px rgba(249, 115, 22, 0.12);
 }
 
@@ -142,7 +142,7 @@ const currentTool = computed(() => board.writingTool)
 
 .writing-pen input[type='range'] {
   width: 100%;
-  accent-color: #f97316;
+  accent-color: #3b82f6;
 }
 
 .writing-hint {
@@ -181,8 +181,8 @@ const currentTool = computed(() => board.writingTool)
 
 .writing-element.on .writing-element-btn {
   border-color: #93c5fd;
-  background: #ecfdf5;
-  color: #16a34a;
+  background: #eff6ff;
+  color: #1d4ed8;
 }
 
 .writing-element-swatch {
