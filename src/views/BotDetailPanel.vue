@@ -523,6 +523,19 @@ function clampLauncherSize(raw) {
   return Math.min(5, Math.max(1, n))
 }
 
+function hydrateWelcomeMessages(cfg) {
+  const fallback = 'Xin chào! Bạn cần hỗ trợ gì?'
+  if (Array.isArray(cfg?.welcomeMessages) && cfg.welcomeMessages.length) {
+    return cfg.welcomeMessages.map((s) => String(s || '').trim()).filter(Boolean).slice(0, 12)
+  }
+  const legacy = String(cfg?.welcomeText || fallback).trim()
+  const lines = legacy
+    .split(/\r?\n/)
+    .map((l) => l.trim())
+    .filter(Boolean)
+  return lines.length ? lines : [fallback]
+}
+
 function tabRoute(id, sectionId) {
   const link = { name: 'bot-detail', params: { id: props.bot.id, tab: id } }
   if (id === 'setup' && sectionId && SETUP_SECTION_IDS.includes(sectionId)) {
@@ -595,6 +608,7 @@ const form = reactive({
     title: '',
     subtitle: '',
     welcomeText: 'Xin chào! Bạn cần hỗ trợ gì?',
+    welcomeMessages: ['Xin chào! Bạn cần hỗ trợ gì?'],
     launcherLabel: 'Chat',
     launcherMode: 'icon',
     launcherSize: 3,
@@ -726,7 +740,11 @@ function syncFromBot(b) {
     position: b.webWidgetConfig?.position || 'bottom-right',
     title: b.webWidgetConfig?.title || '',
     subtitle: b.webWidgetConfig?.subtitle || '',
-    welcomeText: b.webWidgetConfig?.welcomeText || 'Xin chào! Bạn cần hỗ trợ gì?',
+    welcomeMessages: hydrateWelcomeMessages(b.webWidgetConfig),
+    welcomeText:
+      (Array.isArray(b.webWidgetConfig?.welcomeMessages) && b.webWidgetConfig.welcomeMessages[0]) ||
+      b.webWidgetConfig?.welcomeText ||
+      'Xin chào! Bạn cần hỗ trợ gì?',
     launcherLabel: b.webWidgetConfig?.launcherLabel || 'Chat',
     launcherMode: b.webWidgetConfig?.launcherMode === 'text' ? 'text' : 'icon',
     launcherSize: clampLauncherSize(b.webWidgetConfig?.launcherSize),

@@ -50,7 +50,13 @@
 
       <label class="b-field span-2">
         <span>Tin chào khi mở chat</span>
-        <input v-model="configModel.welcomeText" class="b-input" type="text" maxlength="500" />
+        <textarea
+          v-model="welcomeMessagesText"
+          class="b-textarea welcome-msgs"
+          rows="5"
+          placeholder="Xin chào! Mình có thể giúp gì cho bạn?&#10;Shop đang mở cửa 8h–21h."
+        />
+        <small class="b-micro">Mỗi dòng = một tin bot gửi liền khi khách mở hộp chat (tối đa 12 dòng).</small>
       </label>
 
       <fieldset class="launcher-fieldset span-2">
@@ -213,6 +219,26 @@ const enabledModel = computed({
 })
 
 const configModel = computed(() => props.form.webWidgetConfig)
+
+const WELCOME_MAX = 12
+
+const welcomeMessagesText = computed({
+  get() {
+    const msgs = props.form.webWidgetConfig?.welcomeMessages
+    if (Array.isArray(msgs) && msgs.length) return msgs.join('\n')
+    return String(props.form.webWidgetConfig?.welcomeText || '').trim()
+  },
+  set(raw) {
+    const lines = String(raw || '')
+      .split(/\r?\n/)
+      .map((l) => l.trim())
+      .filter(Boolean)
+      .slice(0, WELCOME_MAX)
+      .map((l) => l.slice(0, 500))
+    props.form.webWidgetConfig.welcomeMessages = lines
+    props.form.webWidgetConfig.welcomeText = lines[0] || ''
+  },
+})
 
 watch(
   () => props.form.webWidgetConfig?.launcherSize,
@@ -449,6 +475,11 @@ watch(
   position: relative;
   overflow: hidden;
   cursor: pointer;
+}
+
+.welcome-msgs {
+  min-height: 108px;
+  resize: vertical;
 }
 
 .embed-pre {
