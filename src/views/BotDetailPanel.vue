@@ -523,17 +523,38 @@ function clampLauncherSize(raw) {
   return Math.min(5, Math.max(1, n))
 }
 
+const WELCOME_TEXT_JOIN = '\n---BOTTY_WELCOME---\n'
+
 function hydrateWelcomeMessages(cfg) {
   const fallback = 'Xin chào! Bạn cần hỗ trợ gì?'
   if (Array.isArray(cfg?.welcomeMessages) && cfg.welcomeMessages.length) {
     return cfg.welcomeMessages.map((s) => String(s || '').trim()).filter(Boolean).slice(0, 12)
   }
   const legacy = String(cfg?.welcomeText || fallback).trim()
+  if (legacy.includes(WELCOME_TEXT_JOIN)) {
+    return legacy
+      .split(WELCOME_TEXT_JOIN)
+      .map((l) => l.trim())
+      .filter(Boolean)
+      .slice(0, 12)
+  }
   const lines = legacy
     .split(/\r?\n/)
     .map((l) => l.trim())
     .filter(Boolean)
   return lines.length ? lines : [fallback]
+}
+
+function packWebWidgetConfig(cfg) {
+  const src = cfg && typeof cfg === 'object' ? { ...cfg } : {}
+  const msgs = Array.isArray(src.welcomeMessages)
+    ? src.welcomeMessages.map((s) => String(s || '').trim()).filter(Boolean).slice(0, 12)
+    : hydrateWelcomeMessages(src)
+  return {
+    ...src,
+    welcomeMessages: msgs,
+    welcomeText: msgs[0] || '',
+  }
 }
 
 function tabRoute(id, sectionId) {
@@ -845,7 +866,7 @@ async function save() {
     orderClosingNote: form.orderClosingNote,
     orderClosingPayment: cloneOrderClosingPayment(form.orderClosingPayment),
     webWidgetEnabled: form.webWidgetEnabled,
-    webWidgetConfig: { ...form.webWidgetConfig },
+    webWidgetConfig: packWebWidgetConfig(form.webWidgetConfig),
   }
   if (form.facebookAppSecret.trim()) {
     body.facebookAppSecret = form.facebookAppSecret.trim()

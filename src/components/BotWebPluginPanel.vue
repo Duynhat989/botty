@@ -253,9 +253,8 @@ const WELCOME_MAX = 12
 function syncWelcomeMeta() {
   const cfg = props.form.webWidgetConfig
   if (!cfg) return
-  const lines = (Array.isArray(cfg.welcomeMessages) ? cfg.welcomeMessages : [])
-    .map((s) => String(s || '').trim())
-    .filter(Boolean)
+  if (!Array.isArray(cfg.welcomeMessages)) cfg.welcomeMessages = ['']
+  const lines = cfg.welcomeMessages.map((s) => String(s || '').trim()).filter(Boolean)
   cfg.welcomeText = lines[0] || ''
 }
 
