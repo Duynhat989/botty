@@ -563,6 +563,10 @@ const form = reactive({
   outsideHoursMessage: '',
   schedulesEnabled: true,
   schedulesRestockMessage: '',
+  replyBubblesEnabled: true,
+  replyBubbleMaxChars: 240,
+  replyBubbleMax: 5,
+  replyBubbleDelayMs: 650,
   sessionGreetingEnabled: false,
   sessionGreetings: [{ _key: 'g-default', text: '', imageUrl: '' }],
   messengerIceBreakers: [{ _key: 'ib-1', question: '' }],
@@ -678,6 +682,10 @@ function syncFromBot(b) {
   form.outsideHoursMessage = b.outsideHoursMessage || ''
   form.schedulesEnabled = b.schedulesEnabled !== false
   form.schedulesRestockMessage = b.schedulesRestockMessage || ''
+  form.replyBubblesEnabled = b.replyBubblesEnabled !== false
+  form.replyBubbleMaxChars = Number(b.replyBubbleMaxChars) || 240
+  form.replyBubbleMax = Number(b.replyBubbleMax) || 5
+  form.replyBubbleDelayMs = Number(b.replyBubbleDelayMs) || 650
   form.sessionGreetingEnabled = Boolean(b.sessionGreetingEnabled)
   form.sessionGreetings = hydrateSessionGreetings(b.sessionGreetings)
   form.messengerIceBreakers = hydrateIceBreakers(b.messengerIceBreakers)
@@ -764,6 +772,10 @@ async function save() {
     businessHoursSchedule: form.businessHoursSchedule,
     schedulesEnabled: form.schedulesEnabled,
     schedulesRestockMessage: form.schedulesRestockMessage.trim(),
+    replyBubblesEnabled: form.replyBubblesEnabled,
+    replyBubbleMaxChars: Math.min(500, Math.max(80, Number(form.replyBubbleMaxChars) || 240)),
+    replyBubbleMax: Math.min(8, Math.max(1, Number(form.replyBubbleMax) || 5)),
+    replyBubbleDelayMs: Math.min(4000, Math.max(150, Number(form.replyBubbleDelayMs) || 650)),
     outsideHoursMessage: form.outsideHoursMessage.trim(),
     sessionGreetingEnabled: form.sessionGreetingEnabled,
     sessionGreetings: sessionGreetingsPayload(),

@@ -639,14 +639,31 @@ async function sendTest() {
     const sid = testSessionId.value || ensureTestSessionId()
     const data = await api.bots.test(props.bot.id, text, sid, images)
     const prodImgs = Array.isArray(data.productImageUrls) ? data.productImageUrls : []
-    chatMessages.value.push(
-      withMessageKey({
-        role: 'bot',
-        text: data.reply || '—',
-        qrImageUrl: data.paymentQrImageUrl || null,
-        imageUrls: prodImgs,
-      }),
-    )
+    const bubbles = Array.isArray(data.bubbles) && data.bubbles.length ? data.bubbles : null
+    if (bubbles) {
+      for (let i = 0; i < bubbles.length; i++) {
+        chatMessages.value.push(
+          withMessageKey({
+            role: 'bot',
+            text: bubbles[i] || '—',
+            qrImageUrl: i === bubbles.length - 1 ? data.paymentQrImageUrl || null : null,
+            imageUrls: i === bubbles.length - 1 ? prodImgs : [],
+          }),
+        )
+        const bubbleMs = Math.min(4000, Math.max(150, Number(props.bot.replyBubbleDelayMs) || 650))
+        await new Promise((r) => setTimeout(r, i === 0 ? 0 : bubbleMs))
+        scrollChatToBottom('smooth')
+      }
+    } else {
+      chatMessages.value.push(
+        withMessageKey({
+          role: 'bot',
+          text: data.reply || '—',
+          qrImageUrl: data.paymentQrImageUrl || null,
+          imageUrls: prodImgs,
+        }),
+      )
+    }
     if (data.paymentQrImageUrl) startPaymentPoll()
   } catch (e) {
     const code = e?.messageCode || e?.code

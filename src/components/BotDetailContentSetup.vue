@@ -197,6 +197,58 @@
           </label>
         </div>
 
+        <div class="bubble-settings">
+          <p class="lang-block-title">Tin nhắn nhiều bubble</p>
+          <p class="b-caption panel-intro">
+            Bot gửi từng ý một (giống chat thật). Tắt nếu muốn một tin dài như trước.
+          </p>
+          <label class="b-switch order-toggle">
+            <input
+              type="checkbox"
+              :checked="form.replyBubblesEnabled"
+              @change="form.replyBubblesEnabled = $event.target.checked"
+            />
+            <span class="b-switch-track" aria-hidden="true" />
+            Bật chia nhiều tin (bubble)
+          </label>
+          <div v-if="form.replyBubblesEnabled" class="bubble-settings-fields">
+            <label class="b-field">
+              <span>Độ dài tối đa mỗi tin (ký tự)</span>
+              <input
+                v-model.number="form.replyBubbleMaxChars"
+                class="b-input"
+                type="number"
+                min="80"
+                max="500"
+                step="10"
+              />
+            </label>
+            <label class="b-field">
+              <span>Số tin tối đa / lượt trả lời</span>
+              <input
+                v-model.number="form.replyBubbleMax"
+                class="b-input"
+                type="number"
+                min="1"
+                max="8"
+                step="1"
+              />
+            </label>
+            <label class="b-field">
+              <span>Khoảng cách giữa các tin (ms)</span>
+              <input
+                v-model.number="form.replyBubbleDelayMs"
+                class="b-input"
+                type="number"
+                min="150"
+                max="4000"
+                step="50"
+              />
+              <small class="b-micro">Messenger: ~650ms thường tự nhiên; tab Thử cũng dùng để hiện lần lượt.</small>
+            </label>
+          </div>
+        </div>
+
         <slot name="templates" />
         <label class="b-field">
           <span>Instruction chi tiết</span>
@@ -1224,12 +1276,20 @@ const docContentModel = computed({
   font-size: 13px;
 }
 
-.lang-block {
+.lang-block,
+.bubble-settings {
   margin: 8px 0 18px;
   padding: 14px 14px 6px;
   border-radius: 12px;
   border: 1px solid var(--b-border);
   background: var(--b-surface-2);
+}
+
+.bubble-settings-fields {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin: 10px 0 8px;
 }
 
 .lang-block-title {
