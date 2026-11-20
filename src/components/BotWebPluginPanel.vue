@@ -1,0 +1,367 @@
+<template>
+  <div class="b-card b-card-pad-lg panel page-panel web-plugin-panel">
+    <h2 class="b-title-sm panel-title">Plugin chat website</h2>
+    <p class="b-caption panel-intro">
+      Gắn một dòng script vào website — khách chat với bot ở góc màn hình (giống widget Messenger).
+      Dùng chung cấu hình AI, tài liệu và kho hàng như Facebook. Lịch sử lưu kênh <strong>web</strong>.
+    </p>
+
+    <label class="b-switch order-toggle">
+      <input
+        v-model="enabledModel"
+        type="checkbox"
+      />
+      <span class="b-switch-track" aria-hidden="true" />
+      Bật plugin trên website
+    </label>
+
+    <p v-if="!bot.hasGeminiKey" class="b-msg-warn plugin-warn">
+      Cần cấu hình Gemini hoặc gói Botty AI (
+      <RouterLink :to="tabRouteSetup">Nội dung → Gemini</RouterLink>
+      ) trước khi widget trả lời khách.
+    </p>
+
+    <div class="plugin-grid">
+      <label class="b-field">
+        <span>Màu chủ đạo</span>
+        <div class="color-row">
+          <input v-model="configModel.accentColor" class="b-input color-hex" type="text" maxlength="7" placeholder="#2563eb" />
+          <input v-model="configModel.accentColor" class="color-swatch" type="color" aria-label="Chọn màu" />
+        </div>
+      </label>
+
+      <label class="b-field">
+        <span>Vị trí nút chat</span>
+        <select v-model="configModel.position" class="b-input">
+          <option value="bottom-right">Góc dưới — phải</option>
+          <option value="bottom-left">Góc dưới — trái</option>
+        </select>
+      </label>
+
+      <label class="b-field">
+        <span>Tiêu đề hộp chat</span>
+        <input v-model="configModel.title" class="b-input" type="text" maxlength="80" :placeholder="bot.name" />
+      </label>
+
+      <label class="b-field">
+        <span>Phụ đề (tuỳ chọn)</span>
+        <input v-model="configModel.subtitle" class="b-input" type="text" maxlength="120" placeholder="Trả lời trong giờ hành chính" />
+      </label>
+
+      <label class="b-field span-2">
+        <span>Tin chào khi mở chat</span>
+        <input v-model="configModel.welcomeText" class="b-input" type="text" maxlength="500" />
+      </label>
+
+      <fieldset class="launcher-fieldset span-2">
+        <legend class="b-caption">Nút nổi (góc màn hình)</legend>
+        <div class="launcher-modes">
+          <label class="b-choice-card" :class="{ on: configModel.launcherMode === 'icon' }">
+            <input v-model="configModel.launcherMode" type="radio" value="icon" />
+            <span class="b-choice-title">Icon ảnh</span>
+            <span class="b-micro b-choice-hint">Mặc định logo Botty</span>
+          </label>
+          <label class="b-choice-card" :class="{ on: configModel.launcherMode === 'text' }">
+            <input v-model="configModel.launcherMode" type="radio" value="text" />
+            <span class="b-choice-title">Chữ</span>
+            <span class="b-micro b-choice-hint">VD: Chat, Hỗ trợ</span>
+          </label>
+        </div>
+
+        <div v-if="configModel.launcherMode === 'text'" class="launcher-text-field">
+          <label class="b-field">
+            <span>Nhãn nút</span>
+            <input v-model="configModel.launcherLabel" class="b-input" type="text" maxlength="40" placeholder="Chat" />
+          </label>
+        </div>
+
+        <div v-else class="launcher-icon-block">
+          <div class="launcher-icon-row">
+            <img :src="launcherPreviewSrc" alt="" class="launcher-preview" width="56" height="56" />
+            <div class="launcher-icon-actions">
+              <label class="b-btn b-btn--ghost b-btn--sm icon-pick">
+                <input type="file" class="b-file-input" accept="image/jpeg,image/png,image/webp,image/gif" :disabled="iconBusy" @change="onIconPick" />
+                {{ iconBusy ? 'Đang tải…' : 'Tải icon' }}
+              </label>
+              <button type="button" class="b-btn b-btn--ghost b-btn--sm" @click="useBotAvatar">
+                Ảnh đại diện bot
+              </button>
+              <button type="button" class="b-btn b-btn--ghost b-btn--sm" @click="useDefaultIcon">
+                Icon Botty
+              </button>
+            </div>
+          </div>
+          <label class="b-field">
+            <span>URL icon (tuỳ chọn)</span>
+            <input v-model="configModel.launcherIconUrl" class="b-input" type="url" placeholder="Để trống = icon Botty mặc định" />
+          </label>
+        </div>
+      </fieldset>
+
+      <label class="b-field span-2">
+        <span>Domain được phép (tuỳ chọn)</span>
+        <textarea
+          v-model="originsText"
+          class="b-textarea"
+          rows="3"
+          placeholder="shop.example.com&#10;*.myshop.com&#10;Để trống = mọi website"
+        />
+        <small class="b-micro">Một domain mỗi dòng. Hỗ trợ <code>*.tenmien.com</code>.</small>
+      </label>
+    </div>
+
+    <section class="embed-block">
+      <div class="embed-head">
+        <h3 class="setup-h">Mã nhúng</h3>
+        <button type="button" class="b-btn b-btn--ghost b-btn--sm" @click="copySnippet">
+          {{ copied ? 'Đã sao chép' : 'Sao chép' }}
+        </button>
+      </div>
+      <p class="b-micro">Dán vào <code>&lt;/body&gt;</code> trên mọi trang cần hiện chat.</p>
+      <pre class="embed-pre" tabindex="0">{{ embedSnippet }}</pre>
+    </section>
+  </div>
+</template>
+
+<script setup>
+import { computed, ref, watch } from 'vue'
+import { RouterLink } from 'vue-router'
+import { api } from '@/api'
+import { resolveBotAvatarUrl } from '@/utils/botAvatar'
+
+const props = defineProps({
+  bot: { type: Object, required: true },
+  form: { type: Object, required: true },
+  tabRouteSetup: { type: Object, required: true },
+})
+
+const copied = ref(false)
+const iconBusy = ref(false)
+let copyTimer
+
+const apiOrigin = computed(() =>
+  String(import.meta.env.VITE_API_URL || 'http://localhost:2053/api').replace(/\/api\/?$/, ''),
+)
+
+const launcherPreviewSrc = computed(() => {
+  const custom = String(props.form.webWidgetConfig?.launcherIconUrl || '').trim()
+  if (custom) {
+    if (/^https?:\/\//i.test(custom)) return custom
+    return `${apiOrigin.value}${custom.startsWith('/') ? '' : '/'}${custom}`
+  }
+  return `${apiOrigin.value}/embed/botty-widget-icon.jpg`
+})
+
+function useDefaultIcon() {
+  props.form.webWidgetConfig.launcherIconUrl = ''
+}
+
+function useBotAvatar() {
+  const url = props.bot?.avatarUrl
+  props.form.webWidgetConfig.launcherIconUrl = url ? resolveBotAvatarUrl({ avatarUrl: url }) : ''
+}
+
+async function onIconPick(ev) {
+  const file = ev.target?.files?.[0]
+  ev.target.value = ''
+  if (!file || iconBusy.value) return
+  iconBusy.value = true
+  try {
+    const data = await api.bots.uploadWebWidgetIcon(props.bot.id, file)
+    props.form.webWidgetConfig.launcherIconUrl = data?.launcherIconUrl || data?.url || ''
+  } catch (e) {
+    console.error(e)
+  } finally {
+    iconBusy.value = false
+  }
+}
+
+const enabledModel = computed({
+  get: () => Boolean(props.form.webWidgetEnabled),
+  set: (v) => {
+    props.form.webWidgetEnabled = v
+  },
+})
+
+const configModel = computed(() => props.form.webWidgetConfig)
+
+const originsText = computed({
+  get() {
+    const list = props.form.webWidgetConfig?.allowedOrigins
+    return Array.isArray(list) ? list.join('\n') : ''
+  },
+  set(raw) {
+    const lines = String(raw || '')
+      .split(/\r?\n/)
+      .map((l) => l.trim())
+      .filter(Boolean)
+    props.form.webWidgetConfig.allowedOrigins = lines
+  },
+})
+
+const embedSnippet = computed(() => {
+  if (props.bot.embedSnippet) return props.bot.embedSnippet
+  const base = String(import.meta.env.VITE_API_URL || 'http://localhost:2053/api').replace(/\/api\/?$/, '')
+  return `<script src="${base}/embed/botty-widget.js" data-bot="${props.bot.id}" async><\/script>`
+})
+
+async function copySnippet() {
+  try {
+    await navigator.clipboard.writeText(embedSnippet.value)
+    copied.value = true
+    clearTimeout(copyTimer)
+    copyTimer = setTimeout(() => {
+      copied.value = false
+    }, 2000)
+  } catch {
+    copied.value = false
+  }
+}
+
+watch(
+  () => props.bot?.embedSnippet,
+  () => {
+    copied.value = false
+  },
+)
+</script>
+
+<style scoped>
+.web-plugin-panel {
+  max-width: 720px;
+}
+
+.plugin-warn {
+  margin: 12px 0 0;
+}
+
+.plugin-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0 14px;
+  margin-top: 18px;
+}
+
+.span-2 {
+  grid-column: 1 / -1;
+}
+
+@media (max-width: 600px) {
+  .plugin-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+.color-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.color-hex {
+  flex: 1;
+  font-family: ui-monospace, Menlo, monospace;
+  font-size: 14px;
+}
+
+.color-swatch {
+  width: 44px;
+  height: 44px;
+  padding: 0;
+  border: 1px solid var(--b-border);
+  border-radius: 12px;
+  cursor: pointer;
+  background: transparent;
+}
+
+.embed-block {
+  margin-top: 22px;
+  padding-top: 18px;
+  border-top: 1px solid var(--b-border);
+}
+
+.embed-head {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  margin-bottom: 8px;
+}
+
+.setup-h {
+  margin: 0;
+  font-size: 16px;
+  font-weight: 700;
+}
+
+.launcher-fieldset {
+  margin: 4px 0 0;
+  padding: 14px 14px 4px;
+  border: 1px solid var(--b-border);
+  border-radius: 12px;
+}
+
+.launcher-modes {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+  margin: 10px 0 12px;
+}
+
+@media (max-width: 520px) {
+  .launcher-modes {
+    grid-template-columns: 1fr;
+  }
+}
+
+.launcher-text-field {
+  margin-bottom: 4px;
+}
+
+.launcher-icon-block {
+  margin-bottom: 4px;
+}
+
+.launcher-icon-row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 12px;
+}
+
+.launcher-preview {
+  border-radius: 50%;
+  object-fit: cover;
+  box-shadow: 0 8px 20px -12px rgba(15, 23, 42, 0.35);
+  border: 2px solid var(--b-border);
+  background: var(--b-surface-2);
+}
+
+.launcher-icon-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.icon-pick {
+  position: relative;
+  overflow: hidden;
+  cursor: pointer;
+}
+
+.embed-pre {
+  margin: 10px 0 0;
+  padding: 14px 16px;
+  border-radius: 12px;
+  border: 1px solid var(--b-border);
+  background: var(--b-surface-2);
+  font-family: ui-monospace, Menlo, monospace;
+  font-size: 12.5px;
+  line-height: 1.5;
+  overflow-x: auto;
+  white-space: pre-wrap;
+  word-break: break-all;
+}
+</style>

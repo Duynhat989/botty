@@ -8,15 +8,18 @@
       <p class="b-micro bot-avatar-hint">JPG, PNG, WebP hoặc GIF. Dùng mặc định Botty hoặc ảnh riêng.</p>
     </div>
     <div class="bot-avatar-actions">
-      <label class="b-btn b-btn--ghost b-btn--sm bot-avatar-btn">
-        {{ busy ? 'Đang tải…' : compact ? 'Đổi ảnh' : 'Tải ảnh lên' }}
+      <label
+        class="b-btn b-btn--ghost b-btn--sm bot-avatar-btn"
+        :class="{ 'is-disabled': busy }"
+      >
         <input
           type="file"
-          class="sr-only"
+          class="b-file-input"
           :accept="imageAccept"
           :disabled="busy"
           @change="onPick"
         />
+        {{ busy ? 'Đang tải…' : compact ? 'Đổi ảnh' : 'Tải ảnh lên' }}
       </label>
       <button
         type="button"
@@ -163,7 +166,14 @@ async function useDefault() {
 }
 
 .bot-avatar-btn {
+  position: relative;
+  overflow: hidden;
   cursor: pointer;
+}
+
+.bot-avatar-btn.is-disabled {
+  opacity: 0.55;
+  pointer-events: none;
 }
 
 .bot-avatar-err {

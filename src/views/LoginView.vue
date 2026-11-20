@@ -46,9 +46,8 @@
           <div class="form-visual" aria-hidden="true">
             <div class="visual-panel">
               <div class="visual-glow" />
-              <img :src="brandLogo" alt="" width="96" height="96" class="visual-logo" />
+              <img :src="brandLogo" alt="" width="64" height="64" class="visual-logo" />
               <p class="visual-name">Botty</p>
-              <p class="visual-tag">Trợ lý bán hàng AI trên Messenger</p>
               <div class="visual-chat">
                 <img :src="brandLogo" alt="" width="28" height="28" class="visual-chat-logo" />
                 <p>Chào shop — sẵn sàng trả lời &amp; chốt đơn cho bạn.</p>
@@ -368,8 +367,8 @@ onMounted(async () => {
   flex-direction: column;
   align-items: center;
   text-align: center;
-  gap: 8px;
-  padding: clamp(22px, 4vw, 28px) clamp(16px, 4vw, 24px);
+  gap: 4px;
+  padding: 14px 16px 12px;
   border-radius: 21px 21px 0 0;
   background: linear-gradient(165deg, #dbeafe 0%, #eff6ff 48%, #f8fafc 100%);
   border: none;
@@ -379,62 +378,52 @@ onMounted(async () => {
 
 .visual-glow {
   position: absolute;
-  top: -40%;
+  top: -55%;
   left: 50%;
-  width: 140%;
-  height: 70%;
+  width: 120%;
+  height: 55%;
   transform: translateX(-50%);
-  background: radial-gradient(closest-side, rgba(59, 130, 246, 0.35), transparent 70%);
+  background: radial-gradient(closest-side, rgba(59, 130, 246, 0.28), transparent 72%);
   pointer-events: none;
 }
 
 .visual-logo {
   position: relative;
   z-index: 1;
-  width: 88px;
-  height: 88px;
-  border-radius: 22px;
+  width: 56px;
+  height: 56px;
+  border-radius: 16px;
   object-fit: cover;
   box-shadow:
-    0 16px 40px -20px rgba(37, 99, 235, 0.55),
-    0 0 0 4px rgba(255, 255, 255, 0.85);
+    0 10px 24px -16px rgba(37, 99, 235, 0.5),
+    0 0 0 3px rgba(255, 255, 255, 0.85);
 }
 
 .visual-name {
   position: relative;
   z-index: 1;
-  margin: 6px 0 0;
-  font-size: 1.25rem;
+  margin: 4px 0 0;
+  font-size: 1.05rem;
   font-weight: 800;
   letter-spacing: -0.03em;
   color: #0f172a;
-}
-
-.visual-tag {
-  position: relative;
-  z-index: 1;
-  margin: 0;
-  max-width: 22ch;
-  font-size: 13px;
-  line-height: 1.45;
-  font-weight: 500;
-  color: #64748b;
 }
 
 .visual-chat {
   position: relative;
   z-index: 1;
   display: flex;
-  align-items: flex-start;
-  gap: 10px;
-  margin-top: 12px;
-  padding: 11px 12px;
+  align-items: center;
+  gap: 8px;
+  margin-top: 8px;
+  padding: 8px 10px;
+  width: 100%;
   max-width: 100%;
-  border-radius: 12px;
+  border-radius: 10px;
   text-align: left;
   background: rgba(255, 255, 255, 0.92);
   border: 1px solid rgba(255, 255, 255, 0.8);
-  box-shadow: 0 12px 28px -20px rgba(15, 23, 42, 0.2);
+  box-shadow: 0 8px 20px -18px rgba(15, 23, 42, 0.2);
 }
 
 .visual-chat-logo {
@@ -447,20 +436,41 @@ onMounted(async () => {
 
 .visual-chat p {
   margin: 0;
-  font-size: 12px;
-  line-height: 1.45;
+  font-size: 11px;
+  line-height: 1.4;
   font-weight: 500;
   color: #334155;
 }
 
 @media (min-width: 640px) {
+  .visual-panel {
+    flex-direction: row;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: center;
+    gap: 10px 14px;
+    padding: 16px 18px 14px;
+    text-align: left;
+  }
+
   .visual-logo {
-    width: 80px;
-    height: 80px;
+    width: 60px;
+    height: 60px;
+    margin: 0;
+  }
+
+  .visual-name {
+    text-align: left;
+    flex: 1 1 140px;
+    max-width: calc(100% - 76px);
+    margin-top: 0;
+    font-size: 1.08rem;
   }
 
   .visual-chat {
-    max-width: 360px;
+    flex: 1 1 100%;
+    margin-top: 2px;
+    max-width: none;
   }
 }
 

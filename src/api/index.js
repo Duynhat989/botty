@@ -149,6 +149,11 @@ export const api = {
       fd.append('file', file)
       return apiUpload(`/bots/${id}/avatar`, fd, { auth: true })
     },
+    uploadWebWidgetIcon: (id, file) => {
+      const fd = new FormData()
+      fd.append('file', file)
+      return apiUpload(`/bots/${id}/web-widget-icon`, fd, { auth: true })
+    },
     uploadInventoryImage: (id, file) => {
       const fd = new FormData()
       fd.append('file', file)

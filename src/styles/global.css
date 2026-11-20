@@ -786,11 +786,20 @@ input, textarea, select {
 
 input[type='checkbox'],
 input[type='radio'],
-input[type='range'],
-input[type='file'] {
+input[type='range'] {
   font-size: inherit;
   width: auto;
   max-width: none;
+  min-height: 0;
+  padding: 0;
+  border-radius: 0;
+  background: transparent;
+}
+
+input[type='file']:not(.b-file-input) {
+  font-size: inherit;
+  width: auto;
+  max-width: 100%;
   min-height: 0;
   padding: 0;
   border-radius: 0;

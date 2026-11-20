@@ -303,6 +303,14 @@
       </form>
     </div>
 
+    <BotWebPluginPanel
+      v-else-if="tab === 'web'"
+      key="web"
+      :bot="bot"
+      :form="form"
+      :tab-route-setup="tabRoute('setup', 'gemini')"
+    />
+
     <BotDetailContentSetup
       v-else-if="tab === 'setup'"
       key="setup"
@@ -421,6 +429,7 @@ import BotDetailDashboard from '@/components/BotDetailDashboard.vue'
 import BotDetailActivityHistory from '@/components/BotDetailActivityHistory.vue'
 import BotDetailTestPanel from '@/components/BotDetailTestPanel.vue'
 import BotDetailContentSetup from '@/components/BotDetailContentSetup.vue'
+import BotWebPluginPanel from '@/components/BotWebPluginPanel.vue'
 import BotDetailSchedules from '@/components/BotDetailSchedules.vue'
 import BotDetailGoalRecords from '@/components/BotDetailGoalRecords.vue'
 import BotAvatarEditor from '@/components/BotAvatarEditor.vue'
@@ -451,7 +460,7 @@ const isAdmin = computed(() => auth.isAdmin)
 const saving = ref(false)
 const message = ref('')
 const saveError = ref('')
-const TAB_IDS = ['test', 'dashboard', 'goal-records', 'schedules', 'history', 'facebook', 'setup', 'inventory']
+const TAB_IDS = ['test', 'dashboard', 'goal-records', 'schedules', 'history', 'facebook', 'web', 'setup', 'inventory']
 const SETUP_SECTION_IDS = ['gemini', 'docs', 'voice', 'greeting', 'goals', 'ops']
 const LEGACY_SETUP_HASH_MAP = {
   orders: 'goals',
@@ -470,6 +479,7 @@ const tabs = [
   { id: 'schedules', label: 'Lịch' },
   { id: 'history', label: 'Lịch sử phản hồi' },
   { id: 'facebook', label: 'Facebook' },
+  { id: 'web', label: 'Plugin web' },
   { id: 'setup', label: 'Nội dung' },
   { id: 'inventory', label: 'Kho hàng' },
 ]
@@ -572,6 +582,18 @@ const form = reactive({
   messengerIceBreakers: [{ _key: 'ib-1', question: '' }],
   orderClosingNote: '',
   orderClosingPayment: cloneOrderClosingPayment(),
+  webWidgetEnabled: false,
+  webWidgetConfig: {
+    accentColor: '#2563eb',
+    position: 'bottom-right',
+    title: '',
+    subtitle: '',
+    welcomeText: 'Xin chào! Bạn cần hỗ trợ gì?',
+    launcherLabel: 'Chat',
+    launcherMode: 'icon',
+    launcherIconUrl: '',
+    allowedOrigins: [],
+  },
 })
 
 const inventory = ref({ mode: 'manual', products: [], api: {}, links: { urls: [], sourceText: '' } })
@@ -691,6 +713,20 @@ function syncFromBot(b) {
   form.messengerIceBreakers = hydrateIceBreakers(b.messengerIceBreakers)
   form.orderClosingNote = b.orderClosingNote || ''
   form.orderClosingPayment = cloneOrderClosingPayment(b.orderClosingPayment)
+  form.webWidgetEnabled = Boolean(b.webWidgetEnabled)
+  form.webWidgetConfig = {
+    accentColor: b.webWidgetConfig?.accentColor || '#2563eb',
+    position: b.webWidgetConfig?.position || 'bottom-right',
+    title: b.webWidgetConfig?.title || '',
+    subtitle: b.webWidgetConfig?.subtitle || '',
+    welcomeText: b.webWidgetConfig?.welcomeText || 'Xin chào! Bạn cần hỗ trợ gì?',
+    launcherLabel: b.webWidgetConfig?.launcherLabel || 'Chat',
+    launcherMode: b.webWidgetConfig?.launcherMode === 'text' ? 'text' : 'icon',
+    launcherIconUrl: b.webWidgetConfig?.launcherIconUrl || '',
+    allowedOrigins: Array.isArray(b.webWidgetConfig?.allowedOrigins)
+      ? [...b.webWidgetConfig.allowedOrigins]
+      : [],
+  }
   inventory.value = b.inventory
     ? JSON.parse(JSON.stringify(b.inventory))
     : { mode: 'manual', products: [], api: {}, links: { urls: [], sourceText: '' } }
@@ -782,6 +818,8 @@ async function save() {
     messengerIceBreakers: messengerIceBreakersPayload(),
     orderClosingNote: form.orderClosingNote,
     orderClosingPayment: cloneOrderClosingPayment(form.orderClosingPayment),
+    webWidgetEnabled: form.webWidgetEnabled,
+    webWidgetConfig: { ...form.webWidgetConfig },
   }
   if (form.facebookAppSecret.trim()) {
     body.facebookAppSecret = form.facebookAppSecret.trim()
@@ -1359,6 +1397,16 @@ async function applyInstructionTemplate(tpl) {
 .detail-main :deep(.setup-tab.on) {
   background: #fff;
   box-shadow: 0 4px 14px -12px rgba(15, 23, 42, 0.25);
+}
+
+.detail-main :deep(.panel-form-plain) {
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+  min-width: 0;
+  margin: 0;
+  border: 0;
+  padding: 0;
 }
 
 .panel-slide-next-enter-active,

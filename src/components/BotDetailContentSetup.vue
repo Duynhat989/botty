@@ -12,7 +12,7 @@
           </button>
           <label class="b-btn b-btn--ghost b-btn--sm port-import">
             Nhập cấu hình
-            <input type="file" accept="application/json,.json" class="sr-only" @change="importConfigFile" />
+            <input type="file" accept="application/json,.json" class="b-file-input" @change="importConfigFile" />
           </label>
         </div>
       </div>
@@ -319,17 +319,18 @@
             <div class="greeting-image-field">
               <span class="b-field-label">Ảnh khuyến mãi (tuỳ chọn)</span>
               <div class="greeting-image-actions">
-                <label class="greeting-pick">
+                <label
+                  class="b-btn b-btn--ghost b-btn--sm greeting-pick"
+                  :class="{ 'is-disabled': greetingUploading === idx }"
+                >
                   <input
                     type="file"
-                    class="sr-only"
+                    class="b-file-input"
                     :accept="greetingImageAccept"
                     :disabled="greetingUploading === idx"
                     @change="onGreetingImagePick(idx, $event)"
                   />
-                  <span class="b-btn b-btn--ghost b-btn--sm">
-                    {{ greetingUploading === idx ? 'Đang tải…' : item.imageUrl ? 'Đổi ảnh' : 'Chọn ảnh' }}
-                  </span>
+                  {{ greetingUploading === idx ? 'Đang tải…' : item.imageUrl ? 'Đổi ảnh' : 'Chọn ảnh' }}
                 </label>
                 <button
                   v-if="item.imageUrl"
@@ -1038,8 +1039,16 @@ const docContentModel = computed({
   box-shadow: 0 2px 8px rgba(15, 23, 42, 0.06);
 }
 
+.setup-body {
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+  min-width: 0;
+}
+
 .setup-section {
   animation: setup-in 0.22s ease;
+  min-width: 0;
 }
 
 .setup-avatar-block {
@@ -1165,9 +1174,17 @@ const docContentModel = computed({
   gap: 8px;
 }
 
-.port-import {
+.port-import,
+.greeting-pick {
+  position: relative;
+  overflow: hidden;
   cursor: pointer;
   margin: 0;
+}
+
+.greeting-pick.is-disabled {
+  opacity: 0.55;
+  pointer-events: none;
 }
 
 .port-msg {
@@ -1202,10 +1219,6 @@ const docContentModel = computed({
   flex-direction: column;
   gap: 12px;
   margin-top: 8px;
-}
-
-.greeting-item-form {
-  margin: 0;
 }
 
 .greeting-item-head {
@@ -1244,11 +1257,6 @@ const docContentModel = computed({
   flex-wrap: wrap;
   align-items: center;
   gap: 10px;
-}
-
-.greeting-pick {
-  display: inline-block;
-  cursor: pointer;
 }
 
 .greeting-image-hint {
@@ -1335,8 +1343,26 @@ const docContentModel = computed({
   margin: 0;
 }
 
-.setup-form-plain {
-  display: contents;
+.setup-form-plain,
+.greeting-item-form {
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+  min-width: 0;
+  margin: 0;
+  border: 0;
+  padding: 0;
+}
+
+.setup-panel :deep(.b-input),
+.setup-panel :deep(.b-textarea),
+.setup-panel :deep(select.b-input) {
+  box-sizing: border-box;
+  max-width: 100%;
+}
+
+.setup-panel :deep(.b-btn) {
+  box-sizing: border-box;
 }
 
 .ai-mode-fieldset {

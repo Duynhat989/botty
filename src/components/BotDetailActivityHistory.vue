@@ -40,6 +40,14 @@
         >
           Thử
         </button>
+        <button
+          type="button"
+          class="filter-btn"
+          :class="{ on: channelFilter === 'web' }"
+          @click="setChannel('web')"
+        >
+          Website
+        </button>
       </div>
 
       <p v-if="!sessions.length" class="b-caption">Chưa có tin nhắn.</p>
@@ -278,6 +286,7 @@ async function sendOutbound(s, useReminderTemplate) {
 function channelLabel(ch) {
   if (ch === 'facebook') return 'Messenger'
   if (ch === 'test') return 'Thử'
+  if (ch === 'web') return 'Website'
   return ch
 }
 
@@ -461,6 +470,12 @@ onMounted(load)
   border-color: var(--color-accent-border);
   background: var(--b-accent-soft);
   color: #0d5c36;
+}
+
+.ch-badge.web {
+  border-color: #bfdbfe;
+  background: #eff6ff;
+  color: #1d4ed8;
 }
 
 .trunc-badge {
