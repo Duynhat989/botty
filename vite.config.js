@@ -27,8 +27,10 @@ export default defineConfig(({ mode }) => {
     resolve: {
       alias: {
         '@': fileURLToPath(new URL('./src', import.meta.url)),
+        '@botty-docs': fileURLToPath(new URL('../docs', import.meta.url)),
       },
     },
+    assetsInclude: ['**/*.md'],
     server: {
       port: 1111,
       allowedHosts: ['sb-79sharlrcxac.vercel.run'],

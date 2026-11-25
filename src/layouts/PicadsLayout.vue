@@ -6,13 +6,20 @@
         <span>PicAds Console</span>
       </RouterLink>
       <nav class="nav" aria-label="PicAds">
-        <RouterLink :to="{ name: 'picads-extensions' }" active-class="on">Extension</RouterLink>
-        <RouterLink :to="{ name: 'picads-keys' }" active-class="on">API keys</RouterLink>
+        <RouterLink v-if="picads.isLoggedIn" :to="{ name: 'picads-extensions' }" active-class="on">
+          Extension
+        </RouterLink>
+        <RouterLink v-if="picads.isLoggedIn" :to="{ name: 'picads-keys' }" active-class="on">
+          API keys
+        </RouterLink>
         <RouterLink :to="{ name: 'picads-docs' }" active-class="on">Tài liệu API</RouterLink>
       </nav>
       <div class="top-actions">
-        <span class="user-chip">{{ picads.user?.name || picads.user?.email }}</span>
-        <button type="button" class="btn-ghost" @click="signOut">Đăng xuất</button>
+        <template v-if="picads.isLoggedIn">
+          <span class="user-chip">{{ picads.user?.name || picads.user?.email }}</span>
+          <button type="button" class="btn-ghost" @click="signOut">Đăng xuất</button>
+        </template>
+        <RouterLink v-else :to="{ name: 'picads-login' }" class="btn-ghost link-inherit">Đăng nhập</RouterLink>
       </div>
     </header>
     <main class="picads-main" :class="{ 'picads-main--auth': !showChrome }">
@@ -30,7 +37,10 @@ const picads = usePicadsAuthStore()
 const route = useRoute()
 const router = useRouter()
 
-const showChrome = computed(() => route.name !== 'picads-login' && picads.isLoggedIn)
+const showChrome = computed(() => {
+  if (route.name === 'picads-docs') return true
+  return route.name !== 'picads-login' && picads.isLoggedIn
+})
 
 function signOut() {
   picads.logout()
@@ -119,6 +129,13 @@ function signOut() {
   padding: 7px 12px;
   font-size: 13px;
   cursor: pointer;
+}
+
+.link-inherit {
+  text-decoration: none;
+  color: inherit;
+  display: inline-flex;
+  align-items: center;
 }
 
 .picads-main {

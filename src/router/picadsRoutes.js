@@ -31,7 +31,6 @@ const picadsRoutes = {
       path: 'docs',
       name: 'picads-docs',
       component: PicadsDocsView,
-      meta: { requiresPicadsAuth: true },
     },
     {
       path: 'keys',

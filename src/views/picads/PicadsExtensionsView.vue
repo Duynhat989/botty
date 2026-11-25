@@ -1,5 +1,10 @@
 <template>
   <PicadsPage title="Phát hành extension" lede="Tải file .zip / .crx / .xpi và gắn số phiên bản semver.">
+    <section class="card api-hint">
+      <h2>API công khai (check &amp; tải)</h2>
+      <p class="hint-lede">Extension client gọi không cần đăng nhập.</p>
+      <pre class="code">{{ publicApiSnippet }}</pre>
+    </section>
     <section class="card upload-card">
       <h2>Tải lên bản mới</h2>
       <form class="upload-form" @submit.prevent="upload">
@@ -64,7 +69,7 @@
 </template>
 
 <script setup>
-import { onMounted, ref } from 'vue'
+import { computed, onMounted, ref } from 'vue'
 import { api, ApiError } from '@/api'
 import { getApiBaseUrl } from '@/api/client'
 import PicadsPage from '@/components/picads/PicadsPage.vue'
@@ -78,6 +83,16 @@ const uploadErr = ref('')
 const loading = ref(false)
 const loadErr = ref('')
 const releases = ref([])
+
+const publicApiSnippet = computed(() => {
+  const base = getApiBaseUrl().replace(/\/$/, '')
+  return [
+    `GET ${base}/v3/picads/extensions/check?version=1.0.0`,
+    `GET ${base}/v3/picads/extensions/latest`,
+    `GET ${base}/v3/picads/extensions/download?latest=1`,
+    `GET ${base}/v3/picads/extensions/download?version=1.2.0`,
+  ].join('\n')
+})
 
 function onFile(ev) {
   file.value = ev.target.files?.[0] || null
@@ -264,5 +279,27 @@ onMounted(load)
 .empty {
   color: #64748b;
   font-size: 14px;
+}
+
+.api-hint h2 {
+  margin: 0 0 8px;
+  font-size: 16px;
+}
+
+.hint-lede {
+  margin: 0 0 10px;
+  font-size: 13px;
+  color: #64748b;
+}
+
+.code {
+  margin: 0;
+  padding: 12px;
+  border-radius: 10px;
+  background: #0f172a;
+  color: #e2e8f0;
+  font-size: 12px;
+  overflow: auto;
+  line-height: 1.5;
 }
 </style>

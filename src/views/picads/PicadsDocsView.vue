@@ -1,48 +1,22 @@
 <template>
-  <PicadsPage title="Tài liệu API" lede="Nội dung đồng bộ từ docs/picads.md trên server.">
-    <p v-if="err" class="err">{{ err }}</p>
-    <p v-if="loading" class="muted">Đang tải tài liệu…</p>
-    <article v-if="html" class="md" v-html="html" />
+  <PicadsPage title="Tài liệu API" :lede="lede">
+    <article class="md" v-html="html" />
   </PicadsPage>
 </template>
 
 <script setup>
-import { computed, onMounted, ref } from 'vue'
-import { api, ApiError } from '@/api'
+import { computed } from 'vue'
 import { markdownToHtml } from '@/utils/simpleMarkdown'
 import PicadsPage from '@/components/picads/PicadsPage.vue'
+import picadsMarkdown from '@botty-docs/picads.md?raw'
 
-const markdown = ref('')
-const loading = ref(false)
-const err = ref('')
+const lede =
+  'Tài liệu đóng gói trong frontend (import từ docs/picads.md khi build — không phụ thuộc API server).'
 
-const html = computed(() => (markdown.value ? markdownToHtml(markdown.value) : ''))
-
-async function load() {
-  err.value = ''
-  loading.value = true
-  try {
-    const data = await api.picads.docs()
-    markdown.value = data.markdown || ''
-  } catch (e) {
-    err.value = e instanceof ApiError ? 'Không tải được tài liệu.' : 'Lỗi mạng.'
-  } finally {
-    loading.value = false
-  }
-}
-
-onMounted(load)
+const html = computed(() => markdownToHtml(picadsMarkdown))
 </script>
 
 <style scoped>
-.err {
-  color: #b91c1c;
-}
-
-.muted {
-  color: #64748b;
-}
-
 .md :deep(h1) {
   font-size: 24px;
   margin: 20px 0 10px;
