@@ -2,6 +2,8 @@ import { decryptPayload, encryptPayload, isEncryptionEnabled } from './crypto'
 
 const TOKEN_KEY = 'dynageo-token'
 const LEGACY_TOKEN_KEY = 'clipstory-token'
+const PICADS_TOKEN_KEY = 'picads-token'
+const PICADS_USER_KEY = 'picads-user'
 
 export function getApiBaseUrl() {
   return (import.meta.env.VITE_API_URL || 'http://localhost:2053/api').replace(/\/$/, '')
@@ -25,6 +27,29 @@ export function setToken(token) {
     localStorage.removeItem(TOKEN_KEY)
     localStorage.removeItem(LEGACY_TOKEN_KEY)
   }
+}
+
+export function getPicadsToken() {
+  return localStorage.getItem(PICADS_TOKEN_KEY)
+}
+
+export function setPicadsToken(token) {
+  if (token) localStorage.setItem(PICADS_TOKEN_KEY, token)
+  else localStorage.removeItem(PICADS_TOKEN_KEY)
+}
+
+export function getPicadsUser() {
+  try {
+    const raw = localStorage.getItem(PICADS_USER_KEY)
+    return raw ? JSON.parse(raw) : null
+  } catch {
+    return null
+  }
+}
+
+export function setPicadsUser(user) {
+  if (user) localStorage.setItem(PICADS_USER_KEY, JSON.stringify(user))
+  else localStorage.removeItem(PICADS_USER_KEY)
 }
 
 export class ApiError extends Error {
@@ -112,6 +137,74 @@ export async function apiUpload(path, formData, { auth = false } = {}) {
     const token = getToken()
     if (token) headers.Authorization = `Bearer ${token}`
   }
+
+  const response = await fetch(`${getApiBaseUrl()}${path}`, {
+    method: 'POST',
+    headers,
+    body: formData,
+  })
+
+  let payload = null
+  try {
+    payload = await response.json()
+  } catch {
+    payload = null
+  }
+
+  if (!response.ok || payload?.success === false) {
+    const err = new ApiError(
+      payload?.code || 'SERVER_ERROR',
+      response.status,
+      payload?.messageCode || payload?.code,
+      payload?.messageParams,
+    )
+    if (payload?.message) err.message = payload.message
+    throw err
+  }
+
+  return payload?.data
+}
+
+export async function picadsRequest(path, options = {}) {
+  const { method = 'GET', body, auth = false } = options
+  const headers = { Accept: 'application/json' }
+  if (body !== undefined) headers['Content-Type'] = 'application/json'
+  if (auth) {
+    const token = getPicadsToken()
+    if (token) headers.Authorization = `Bearer ${token}`
+  }
+
+  const response = await fetch(`${getApiBaseUrl()}${path}`, {
+    method,
+    headers,
+    body: body !== undefined ? JSON.stringify(body) : undefined,
+  })
+
+  let payload = null
+  try {
+    payload = await response.json()
+  } catch {
+    payload = null
+  }
+
+  if (!response.ok || payload?.success === false) {
+    const err = new ApiError(
+      payload?.code || 'SERVER_ERROR',
+      response.status,
+      payload?.messageCode || payload?.code,
+      payload?.messageParams,
+    )
+    if (payload?.message) err.message = payload.message
+    throw err
+  }
+
+  return payload?.data
+}
+
+export async function picadsUpload(path, formData) {
+  const headers = { Accept: 'application/json' }
+  const token = getPicadsToken()
+  if (token) headers.Authorization = `Bearer ${token}`
 
   const response = await fetch(`${getApiBaseUrl()}${path}`, {
     method: 'POST',

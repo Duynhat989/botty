@@ -19,11 +19,14 @@ import AdminOrdersView from '@/views/admin/AdminOrdersView.vue'
 import AdminPackagesView from '@/views/admin/AdminPackagesView.vue'
 import AdminSettingsView from '@/views/admin/AdminSettingsView.vue'
 import AdminNotificationsView from '@/views/admin/AdminNotificationsView.vue'
+import picadsRoutes from '@/router/picadsRoutes'
+import { usePicadsAuthStore } from '@/stores/picadsAuth'
 import { api } from '@/api'
 
 const router = createRouter({
   history: createWebHistory(),
   routes: [
+    picadsRoutes,
     {
       path: '/',
       component: BotLayout,
@@ -83,6 +86,20 @@ router.beforeEach(async (to) => {
   const auth = useAuthStore()
   if (!auth.initialized) await auth.restoreSession()
 
+  const inPicadsApp = to.matched.some((r) => r.meta.picadsApp)
+  if (inPicadsApp) {
+    const picads = usePicadsAuthStore()
+    if (!picads.initialized) await picads.restoreSession()
+    if (to.meta.requiresPicadsAuth && !picads.isLoggedIn) {
+      return { name: 'picads-login', query: { redirect: to.fullPath } }
+    }
+    if (to.name === 'picads-login' && picads.isLoggedIn) {
+      const redirect = typeof to.query.redirect === 'string' ? to.query.redirect : '/picads/extensions'
+      return redirect.startsWith('/picads') ? redirect : '/picads/extensions'
+    }
+    return true
+  }
+
   if (to.meta.requiresAuth && !auth.isLoggedIn) {
     auth.saveRedirect(to.fullPath)
     return { name: 'login', query: { redirect: to.fullPath } }
@@ -100,7 +117,7 @@ router.beforeEach(async (to) => {
 })
 
 router.afterEach((to) => {
-  if (to.path.startsWith('/login')) return
+  if (to.path.startsWith('/login') || to.path.startsWith('/picads')) return
   api.analytics.hit(to.fullPath).catch(() => {})
 })
 

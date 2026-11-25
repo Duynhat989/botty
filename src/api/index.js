@@ -1,4 +1,4 @@
-import { apiRequest, apiUpload } from './client'
+import { apiRequest, apiUpload, picadsRequest, picadsUpload } from './client'
 
 export { apiMessage } from './messages'
 export { ApiError } from './client'
@@ -239,5 +239,16 @@ export const api = {
       apiRequest(`/bots/prompt-templates/${templateId}`, { method: 'PATCH', body, auth: true }),
     deletePromptTemplate: (templateId) =>
       apiRequest(`/bots/prompt-templates/${templateId}`, { method: 'DELETE', auth: true }),
+  },
+  picads: {
+    login: (body) => picadsRequest('/v3/picads/login', { method: 'POST', body }),
+    register: (body) => picadsRequest('/v3/picads/register', { method: 'POST', body }),
+    keys: (params) =>
+      picadsRequest(`/v3/picads/keys${qp(params)}`, { auth: true }),
+    docs: () => picadsRequest('/v3/picads/docs', { auth: true }),
+    extensions: () => picadsRequest('/v3/picads/extensions', { auth: true }),
+    uploadExtension: (formData) => picadsUpload('/v3/picads/extensions', formData),
+    removeExtension: (id) =>
+      picadsRequest(`/v3/picads/extensions/${id}`, { method: 'DELETE', auth: true }),
   },
 }

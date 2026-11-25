@@ -257,6 +257,18 @@ label.b-btn {
   line-height: 1.55;
 }
 
+@media (max-width: 768px) {
+  .b-input,
+  .b-textarea {
+    font-size: 16px;
+    touch-action: manipulation;
+  }
+
+  .b-textarea--mono {
+    font-size: 16px;
+  }
+}
+
 .b-textarea--mono {
   font-family: ui-monospace, "SF Mono", Menlo, monospace;
   font-size: 13.5px;
