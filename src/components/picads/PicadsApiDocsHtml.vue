@@ -39,7 +39,10 @@
     <p>Trả <code>updateAvailable</code>, <code>latestVersion</code>, <code>release.downloadUrl</code> khi có bản mới.</p>
 
     <h3>Bản mới nhất</h3>
-    <pre><code>GET {{ apiBase }}/v3/picads/extensions/latest</code></pre>
+    <p>Trả <code>hasRelease</code>, <code>latestVersion</code>, <code>release</code> (file, download URL).</p>
+    <pre><code>GET {{ apiBase }}/v3/picads/extensions/latest
+GET {{ apiBase }}/v3/picads/latest
+GET {{ apiBase }}/v3/picads/extensions?latest=1</code></pre>
 
     <h3>Tải file</h3>
     <table>
